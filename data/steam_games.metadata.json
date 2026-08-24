@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-08-24T09:44:03+00:00",
+  "locale": {
+    "country": "US",
+    "language": "schinese"
+  },
+  "counts": {
+    "total": 1000,
+    "unique_appids": 1000,
+    "popular": 100,
+    "latest": 900,
+    "by_source": {
+      "steam_most_played": 92,
+      "steam_top_sellers_fill": 8,
+      "steam_latest_releases": 900
+    }
+  },
+  "selection": {
+    "popular": "Steam's current most-played chart, game apps only; filled to the requested count from the Steam game top-sellers list",
+    "latest": "Steam Store Games category with Simplified Chinese support, sorted by release date descending; names that contain Chinese are selected first, and AppIDs already in the popular cohort are excluded",
+    "item_type": "game only: Store searches use the Games category, chart items must have Steam type=0, and bundle rows are ignored",
+    "canonical_name": "Steam Store display name for language=schinese at synchronization time; Steam falls back to the original name when that localization is unavailable; Chinese book-title marks and subtitles separated by ' - ' are removed; bilingual slash/hyphen names prefer the Chinese segment; colon suffixes are retained"
+  },
+  "files": {
+    "dataset": "steam_games.csv",
+    "provenance": "steam_games.provenance.csv"
+  },
+  "sources": [
+    "https://api.steampowered.com/ISteamChartsService/GetMostPlayedGames/v1/",
+    "https://store.steampowered.com/search/results/"
+  ],
+  "warnings": []
+}

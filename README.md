@@ -64,3 +64,42 @@ CS2                 → <GAME_730> ?
 ```
 
 **这个实验真正验证的是：只给 Qwen 新的 AppID 映射，它能不能把自己原本已经掌握的游戏知识自动“接”到这个新 ID 上。**
+
+
+## 第一步：同步 Steam 游戏数据集
+
+运行下面的命令会生成 1000 个 AppID 唯一的游戏实体：
+
+```bash
+python3 scripts/sync_steam_dataset.py
+```
+
+默认选择规则：
+
+* **知名游戏 100 条**：优先取 Steam 当前最多游玩榜中的游戏。榜单偶尔会混入软件、工具、Mod 或 Playtest，脚本会过滤它们，并从 Steam 游戏畅销榜依次补足到 100 条。
+* **最新游戏 900 条**：取 Steam 商店 `Games` 分类且声明支持简体中文的游戏，按发布日期倒序扫描；优先选择商店名称中实际包含中文的游戏，并排除已经进入知名游戏集合的 AppID。因此最终始终是 1000 个不同的游戏实体。
+* **类型规则**：只收录游戏。Steam 搜索固定使用 `Games` 分类，热门榜仅接受 Steam `type=0` 的条目；DLC、Demo、软件、工具、Mod、Playtest 和 Bundle 均不进入训练集。
+* **名称规则**：固定请求美国区简体中文商店。存在官方简体中文名称时优先将它作为 `canonical_name`；没有中文本地化时，Steam 会回退到游戏原始名称。`英文名 / 中文名`、`英文名 - 中文名` 形式会选择中文部分；中文书名号 `《》`、`〈〉` 会被移除；真正的 `主标题 - 副标题` 只保留主标题。冒号及其后内容、`Counter-Strike` 这样的词内连字符不受影响。
+
+生成的文件：
+
+* `data/steam_games.csv`：训练输入，只包含 `canonical_name` 和 `appid` 两列。
+* `data/steam_games.provenance.csv`：每条数据的分组、来源、来源排名和发布日期，用于检查数据质量。
+* `data/steam_games.metadata.json`：同步时间、选择规则、数量和上游地址，用于复现实验。
+
+同步脚本不需要 Steam Web API Key，也不依赖第三方 Python 包。Steam 没有提供按发布日期获取全部游戏的稳定公开 Web API，因此脚本使用 Steam Store 自身的搜索结果接口；若 Steam 调整页面或接口结构，脚本会明确失败而不会静默生成残缺数据。
+
+可以通过参数调整数量或输出位置：
+
+```bash
+python3 scripts/sync_steam_dataset.py \
+  --popular-count 100 \
+  --latest-count 900 \
+  --output data/steam_games.csv
+```
+
+如需生成英文名称快照，可以显式指定：
+
+```bash
+python3 scripts/sync_steam_dataset.py --language english
+```
