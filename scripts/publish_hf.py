@@ -38,6 +38,7 @@ PUBLISHABLE_CHECKPOINT_FILES = {
     "tokenizer_config.json",
     "vocab.json",
 }
+GIB = 1024**3
 
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
@@ -296,6 +297,15 @@ def main(argv: Sequence[str] | None = None) -> int:
     current_git = git_info(require_clean=True)
     if current_git["commit"] != manifest.get("git", {}).get("commit"):
         raise TrainingToolError("Current Git commit does not match the trained run")
+    free_disk_gib = shutil.disk_usage(run_dir).free / GIB
+    required_publish_disk = float(
+        config_value(config, "runtime.minimum_publish_free_disk_gib")
+    )
+    if free_disk_gib < required_publish_disk:
+        raise TrainingToolError(
+            f"Publication requires {required_publish_disk:g} GiB free for staging and "
+            f"readback, found {free_disk_gib:.1f} GiB"
+        )
 
     expected_epochs = list(config_value(config, "training.checkpoint_epochs"))
     metric_epochs = [int(item["epoch"]) for item in metrics.get("checkpoints", [])]
@@ -319,7 +329,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     _assert_metrics_match(selected, regression)
 
-    with tempfile.TemporaryDirectory(prefix="steam-entity-linking-publish-") as temp:
+    with tempfile.TemporaryDirectory(
+        prefix=".steam-entity-linking-publish-", dir=run_dir
+    ) as temp:
         staging = Path(temp) / "repository"
         staging.mkdir()
         _stage_public_repository(run_dir, staging, config, manifest, metrics)

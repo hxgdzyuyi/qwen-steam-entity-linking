@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import importlib.util
+import json
+import re
 import sys
 import tempfile
 import unittest
@@ -21,6 +23,11 @@ from training_common import (  # noqa: E402
     validate_data,
 )
 from evaluate import generation_is_exact  # noqa: E402
+from train import (  # noqa: E402
+    _require_resumable_checkpoint,
+    _strip_older_resume_states,
+    validate_runtime_snapshot,
+)
 
 PUBLISH_SPEC = importlib.util.spec_from_file_location(
     "publish_hf", SCRIPTS / "publish_hf.py"
@@ -139,6 +146,54 @@ class TrainingToolsTest(unittest.TestCase):
         self.assertFalse(generation_is_exact([2, 4], 4, 1, 0))
         self.assertFalse(generation_is_exact([4, 3], 4, 1, 0))
 
+    def test_runpod_h100_runtime_snapshot_passes_config(self) -> None:
+        config = load_config(ROOT / "configs" / "qwen3_8b_lora.yaml")
+        snapshot = {
+            "name": "NVIDIA H100 80GB HBM3",
+            "gpu_memory_gib": 74.5,
+            "system_memory_gib": 116.4,
+            "cpu_count": 16,
+            "free_disk_gib": 36.0,
+            "torch_version": "2.8.0",
+            "cuda_version": "12.8",
+        }
+        validate_runtime_snapshot(snapshot, config)
+        snapshot["free_disk_gib"] = 20.0
+        with self.assertRaises(TrainingToolError):
+            validate_runtime_snapshot(snapshot, config)
+
+    def test_only_latest_checkpoint_keeps_resume_state(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            checkpoints = Path(temp)
+            older = checkpoints / "checkpoint-32"
+            latest = checkpoints / "checkpoint-96"
+            for epoch, checkpoint in ((1, older), (3, latest)):
+                checkpoint.mkdir()
+                (checkpoint / "adapter_config.json").write_text("{}", encoding="utf-8")
+                (checkpoint / "adapter_model.safetensors").write_text(
+                    "adapter", encoding="utf-8"
+                )
+                (checkpoint / "optimizer.pt").write_text("optimizer", encoding="utf-8")
+                (checkpoint / "scheduler.pt").write_text("scheduler", encoding="utf-8")
+                (checkpoint / "rng_state.pth").write_text("rng", encoding="utf-8")
+                (checkpoint / "trainer_state.json").write_text("{}", encoding="utf-8")
+                (checkpoint / "checkpoint_meta.json").write_text(
+                    json.dumps({"epoch": epoch, "resumable": True}),
+                    encoding="utf-8",
+                )
+
+            _strip_older_resume_states(checkpoints, latest)
+
+            self.assertTrue((older / "adapter_model.safetensors").exists())
+            self.assertFalse((older / "optimizer.pt").exists())
+            self.assertFalse((older / "rng_state.pth").exists())
+            self.assertFalse(
+                json.loads((older / "checkpoint_meta.json").read_text())["resumable"]
+            )
+            with self.assertRaises(TrainingToolError):
+                _require_resumable_checkpoint(older)
+            _require_resumable_checkpoint(latest)
+
     def test_publish_filter_excludes_optimizer_and_full_model(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             checkpoint = Path(temp)
@@ -156,6 +211,31 @@ class TrainingToolsTest(unittest.TestCase):
                 names,
                 ["adapter_config.json", "adapter_model.safetensors", "tokenizer.json"],
             )
+
+    def test_runpod_notebook_is_safe_and_uses_cli_entrypoints(self) -> None:
+        notebook_path = ROOT / "notebooks" / "runpod_training.ipynb"
+        payload = json.loads(notebook_path.read_text(encoding="utf-8"))
+        self.assertEqual(payload["nbformat"], 4)
+        code = "\n".join(
+            "".join(cell.get("source", []))
+            for cell in payload["cells"]
+            if cell["cell_type"] == "code"
+        )
+        for cell_index, cell in enumerate(payload["cells"]):
+            if cell["cell_type"] == "code":
+                compile(
+                    "".join(cell.get("source", [])),
+                    f"{notebook_path}:cell-{cell_index}",
+                    "exec",
+                )
+        for entrypoint in (
+            "scripts/train.py",
+            "scripts/evaluate.py",
+            "scripts/publish_hf.py",
+        ):
+            self.assertIn(entrypoint, code)
+        self.assertIn("PUBLISH_PUBLIC = False", code)
+        self.assertIsNone(re.search(r"hf_[A-Za-z0-9]{20,}", code))
 
 
 if __name__ == "__main__":

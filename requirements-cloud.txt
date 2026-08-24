@@ -1,4 +1,4 @@
-# Install a CUDA-enabled PyTorch build from the H200 cloud image first.
+# Target image: runpod/pytorch:1.0.2-cu1281-torch280-ubuntu2404 (H100 SXM).
 transformers>=4.51.0,<4.58
 peft>=0.19.1,<0.21
 accelerate>=1.2,<2

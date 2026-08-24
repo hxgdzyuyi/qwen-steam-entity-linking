@@ -42,7 +42,7 @@ ENTITY_18372
 * **测试重点**不是重新输入训练时完全相同的游戏名，而是测试：`CS2 → <GAME_730>`、`刀塔2 → <GAME_570>`、`Valve 的 MOBA 游戏 Dota → <GAME_570>`。如果这些训练中没出现过的表达能命中正确 ID，就证明你的核心思路成立。
 * **第一轮最好使用独立 special token**，即每个实体对应 `<GAME_730>` 这样的 token。1000 个游戏只增加 1000 个 token，成本可以忽略。需要 resize embedding，并让新增 embedding / lm_head 参与训练。
 * **模型与训练**：`Qwen3-8B-Base + BF16 LoRA` 即可。初始可以用 `LoRA r=64` 或 `r=128`、`all-linear`，sequence length 只需要 **256～512**，不需要长上下文。
-* **硬件**：你计划租的 **1×H200 141GB，$3.29/h** 已经非常充裕。PoC 不需要 2 卡、4 卡。因为只有约 1000 条短样本，单次实验成本应该很低。
+* **硬件**：目标环境为 **1×H100 SXM 80GB，$3.29/h**。PoC 不需要 2 卡、4 卡；约 1000 条短样本可以直接使用 BF16 LoRA。
 * **训练时可以多存几个 checkpoint**，例如 1、3、5、10、20 epoch，观察模型什么时候真正把新的 Entity ID 映射记住。
 * **成功标准**：第一步先看 canonical name 能否接近 100% 记住；更关键的是，看从未作为训练样本出现的 alias / 中文名 /自然语言描述，是否仍能输出正确 `<GAME_ID>`。
 * **如果这个 1-entity-1-sample 实验成功**，下一步再按 `1K → 10K → 50K → 100K+ entities` 扩规模，观察容量和准确率何时开始下降，而不是一开始就做大规模数据增强。
@@ -146,7 +146,14 @@ python3 scripts/build_training_data.py
 
 ## 第三步：在云端训练与评测
 
-训练工具链面向单张支持 BF16 的 CUDA GPU，默认配置为 1×H200。不要在本机下载或训练 8B 模型；本机只需要运行数据构建和无网络单元测试。
+训练工具链面向以下 RunPod 环境。不要在本机下载或训练 8B 模型；本机只需要运行数据构建和无网络单元测试。
+
+* GPU：1×H100 SXM 80GB VRAM，GPU 费用 `$3.29/h`。
+* 主机：125GB RAM、16 vCPU。
+* 磁盘：40GB，运行和停止状态均为 `$0.006/h`。
+* 镜像：`runpod/pytorch:1.0.2-cu1281-torch280-ubuntu2404`，PyTorch 2.8.0、CUDA 12.8、Ubuntu 24.04。
+
+40GB 足以完成实验，但不适合为五个 checkpoint 都复制 optimizer 状态。脚本会保留第 1、3、5、10、20 轮的全部 LoRA；只有最新 checkpoint 保留 optimizer、scheduler 和 RNG 状态用于断点恢复。保存新 checkpoint 后会自动清理旧 checkpoint 的恢复状态。
 
 ### 准备云端环境
 
@@ -157,11 +164,32 @@ git clone https://github.com/hxgdzyuyi/qwen-steam-entity-linking.git
 cd qwen-steam-entity-linking
 git checkout <commit-sha>
 
-# 云镜像需要预装与 H200 匹配的 CUDA PyTorch。
-python3 -m pip install -r requirements-cloud.txt
+# 将模型缓存和训练结果放在 RunPod 的 /workspace 磁盘，并关闭 pip 缓存。
+export HF_HOME=/workspace/.cache/huggingface
+python3 -m pip install --no-cache-dir -r requirements-cloud.txt
+
+nvidia-smi
+df -h /workspace
 ```
 
-基础模型固定为 `Qwen/Qwen3-8B-Base`。脚本会在运行时解析并记录模型仓库的完整 commit SHA；如云平台需要 Hugging Face 凭据，只能通过 Secret 注入 `HF_TOKEN`，不要将 token 写进文件或命令历史。
+基础模型固定为 `Qwen/Qwen3-8B-Base`。脚本会在下载模型前检查 H100、至少 70GiB VRAM、100GiB RAM、16 vCPU、30GiB 可用磁盘，以及 PyTorch 2.8 / CUDA 12.8。随后解析并记录模型仓库的完整 commit SHA；如云平台需要 Hugging Face 凭据，只能通过 Secret 注入 `HF_TOKEN`，不要将 token 写进文件或命令历史。
+
+### 推荐：使用 Jupyter Notebook 入口
+
+仓库提供 `notebooks/runpod_training.ipynb`。Jupyter 会把执行计数和输出写回 Notebook；为保持训练仓库的 Git 状态干净，克隆并固定 commit 后先制作仓库外副本：
+
+```bash
+cp notebooks/runpod_training.ipynb /workspace/runpod_training.ipynb
+```
+
+然后通过 Pod 的 Jupyter 页面打开 `/workspace/runpod_training.ipynb`，从上到下逐格执行。Notebook 会自动定位 `/workspace/qwen-steam-entity-linking` 项目。它包含：
+
+* H100、磁盘与 Git 状态检查，以及云端依赖安装。
+* 使用隐藏输入注入 `HF_TOKEN`，不会把 token 保存到 Notebook。
+* 冒烟训练、完整训练、中断恢复、五个 checkpoint 评测和指标展示。
+* Hugging Face dry-run 与公开发布；公开写入默认关闭，必须手动填写 repo ID 并把 `PUBLISH_PUBLIC` 改为 `True`。
+
+Notebook 只是下述命令行入口的可视化编排层，所有训练、评测和发布规则仍由同一组 `scripts/*.py` 实现。
 
 ### 冒烟训练
 
@@ -187,7 +215,7 @@ python scripts/train.py \
 
 默认使用 BF16 LoRA `r=64`、`alpha=128`、`all-linear`、20 epochs，并仅对 completion 的实体 token 和 EOS 计算 loss。新增的 1000 个 token 会同时训练 `embed_tokens` 和未绑定权重的 `lm_head` 对应行。
 
-第 1、3、5、10、20 个 epoch 会保存包含 LoRA、token 行、optimizer、scheduler 和 Trainer 状态的可恢复 checkpoint。云端任务中断后可继续：
+第 1、3、5、10、20 个 epoch 都会保存 LoRA 和 token 行。为适配 40GB 磁盘，只有最新 checkpoint 带有 optimizer、scheduler 和 RNG 状态并可恢复；较早 checkpoint 仍可正常评测和发布。云端任务中断后，从编号最大的 checkpoint 继续：
 
 ```bash
 python scripts/train.py \

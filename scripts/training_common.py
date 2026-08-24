@@ -53,7 +53,14 @@ def load_config(path: Path) -> dict[str, Any]:
     if not isinstance(payload, dict):
         raise TrainingToolError("Training config must be a YAML object")
 
-    required_sections = {"model", "data", "lora", "training", "evaluation"}
+    required_sections = {
+        "model",
+        "runtime",
+        "data",
+        "lora",
+        "training",
+        "evaluation",
+    }
     missing = required_sections.difference(payload)
     if missing:
         raise TrainingToolError(
@@ -68,6 +75,15 @@ def _validate_config(config: Mapping[str, Any]) -> None:
     required_values: tuple[tuple[str, type | tuple[type, ...]], ...] = (
         ("model.id", str),
         ("model.trust_remote_code", bool),
+        ("runtime.target_image", str),
+        ("runtime.expected_gpu_name", str),
+        ("runtime.minimum_gpu_memory_gib", (int, float)),
+        ("runtime.minimum_system_memory_gib", (int, float)),
+        ("runtime.minimum_cpu_count", int),
+        ("runtime.minimum_free_disk_gib", (int, float)),
+        ("runtime.minimum_publish_free_disk_gib", (int, float)),
+        ("runtime.expected_torch_major_minor", str),
+        ("runtime.expected_cuda_major_minor", str),
         ("data.train_path", str),
         ("data.alias_eval_path", str),
         ("data.entities_path", str),
@@ -95,6 +111,7 @@ def _validate_config(config: Mapping[str, Any]) -> None:
         ("training.max_grad_norm", (int, float)),
         ("training.optim", str),
         ("training.checkpoint_epochs", list),
+        ("training.keep_resume_state_only_latest", bool),
         ("training.logging_steps", int),
         ("training.require_clean_git", bool),
         ("evaluation.batch_size", int),
@@ -122,12 +139,21 @@ def _validate_config(config: Mapping[str, Any]) -> None:
         "training.logging_steps",
         "evaluation.batch_size",
         "evaluation.generation_max_new_tokens",
+        "runtime.minimum_cpu_count",
     )
     for dotted_key in positive_integer_keys:
         if int(config_value(config, dotted_key)) <= 0:
             raise TrainingToolError(f"{dotted_key} must be positive")
     if float(config_value(config, "training.learning_rate")) <= 0:
         raise TrainingToolError("training.learning_rate must be positive")
+    for dotted_key in (
+        "runtime.minimum_gpu_memory_gib",
+        "runtime.minimum_system_memory_gib",
+        "runtime.minimum_free_disk_gib",
+        "runtime.minimum_publish_free_disk_gib",
+    ):
+        if float(config_value(config, dotted_key)) <= 0:
+            raise TrainingToolError(f"{dotted_key} must be positive")
     if not 0.0 <= float(config_value(config, "lora.dropout")) < 1.0:
         raise TrainingToolError("lora.dropout must be in [0, 1)")
     if not 0.0 <= float(config_value(config, "training.warmup_ratio")) <= 1.0:

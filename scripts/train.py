@@ -32,6 +32,10 @@ from training_common import (
 )
 
 
+GIB = 1024**3
+RESUME_STATE_NAMES = {"optimizer.pt", "scheduler.pt", "scaler.pt"}
+
+
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -86,7 +90,75 @@ def _cloud_imports() -> dict[str, Any]:
     }
 
 
-def _require_single_bf16_gpu(torch: Any) -> dict[str, Any]:
+def _existing_ancestor(path: Path) -> Path:
+    candidate = path.resolve()
+    while not candidate.exists() and candidate != candidate.parent:
+        candidate = candidate.parent
+    return candidate
+
+
+def _system_memory_gib() -> float:
+    candidates: list[int] = []
+    try:
+        candidates.append(
+            int(os.sysconf("SC_PAGE_SIZE")) * int(os.sysconf("SC_PHYS_PAGES"))
+        )
+    except (AttributeError, OSError, ValueError):
+        pass
+    for limit_path in (
+        Path("/sys/fs/cgroup/memory.max"),
+        Path("/sys/fs/cgroup/memory/memory.limit_in_bytes"),
+    ):
+        try:
+            value = limit_path.read_text(encoding="utf-8").strip()
+            if value != "max":
+                limit = int(value)
+                if limit < 1 << 60:
+                    candidates.append(limit)
+        except (OSError, ValueError):
+            continue
+    if not candidates:
+        raise TrainingToolError("Cannot determine available system memory")
+    return min(candidates) / GIB
+
+
+def validate_runtime_snapshot(
+    snapshot: Mapping[str, Any], config: Mapping[str, Any]
+) -> None:
+    expected_name = str(config_value(config, "runtime.expected_gpu_name"))
+    if expected_name.casefold() not in str(snapshot["name"]).casefold():
+        raise TrainingToolError(
+            f"Expected a {expected_name} GPU, found {snapshot['name']}"
+        )
+    minimums = (
+        ("gpu_memory_gib", "runtime.minimum_gpu_memory_gib"),
+        ("system_memory_gib", "runtime.minimum_system_memory_gib"),
+        ("cpu_count", "runtime.minimum_cpu_count"),
+        ("free_disk_gib", "runtime.minimum_free_disk_gib"),
+    )
+    for snapshot_key, config_key in minimums:
+        required = float(config_value(config, config_key))
+        actual = float(snapshot[snapshot_key])
+        if actual < required:
+            raise TrainingToolError(
+                f"Runtime {snapshot_key} requires at least {required:g}, found {actual:.1f}"
+            )
+    versions = (
+        ("torch_version", "runtime.expected_torch_major_minor"),
+        ("cuda_version", "runtime.expected_cuda_major_minor"),
+    )
+    for snapshot_key, config_key in versions:
+        expected = str(config_value(config, config_key))
+        actual = str(snapshot[snapshot_key])
+        if not (actual == expected or actual.startswith(f"{expected}.")):
+            raise TrainingToolError(
+                f"Expected {snapshot_key} {expected}.x, found {actual}"
+            )
+
+
+def _require_target_runtime(
+    torch: Any, config: Mapping[str, Any], run_dir: Path
+) -> dict[str, Any]:
     if not torch.cuda.is_available():
         raise TrainingToolError("Cloud training requires a CUDA GPU")
     count = torch.cuda.device_count()
@@ -96,14 +168,67 @@ def _require_single_bf16_gpu(torch: Any) -> dict[str, Any]:
         raise TrainingToolError("The visible GPU does not support BF16")
     torch.backends.cuda.matmul.allow_tf32 = True
     torch.backends.cudnn.allow_tf32 = True
-    return {
+    properties = torch.cuda.get_device_properties(0)
+    snapshot = {
+        "target_image": config_value(config, "runtime.target_image"),
         "device_count": count,
         "name": torch.cuda.get_device_name(0),
+        "gpu_memory_gib": properties.total_memory / GIB,
         "capability": list(torch.cuda.get_device_capability(0)),
+        "torch_version": str(torch.__version__).split("+")[0],
         "cuda_version": torch.version.cuda,
         "bf16_supported": True,
         "tf32_enabled": True,
+        "system_memory_gib": _system_memory_gib(),
+        "cpu_count": os.cpu_count() or 0,
+        "free_disk_gib": shutil.disk_usage(_existing_ancestor(run_dir)).free / GIB,
     }
+    validate_runtime_snapshot(snapshot, config)
+    return snapshot
+
+
+def _checkpoint_state_files(checkpoint: Path) -> list[Path]:
+    return [
+        path
+        for path in checkpoint.iterdir()
+        if path.is_file()
+        and (path.name in RESUME_STATE_NAMES or path.name.startswith("rng_state"))
+    ]
+
+
+def _strip_older_resume_states(checkpoints_dir: Path, current: Path) -> None:
+    for checkpoint in checkpoints_dir.glob("checkpoint-*"):
+        if not checkpoint.is_dir() or checkpoint.resolve() == current.resolve():
+            continue
+        removed = _checkpoint_state_files(checkpoint)
+        for path in removed:
+            path.unlink()
+        metadata_path = checkpoint / "checkpoint_meta.json"
+        if metadata_path.exists() and removed:
+            metadata = read_json(metadata_path)
+            metadata["resumable"] = False
+            metadata["resume_state_removed_at"] = utc_now()
+            atomic_write_json(metadata_path, metadata)
+            print(
+                f"Disk policy: removed optimizer/scheduler/RNG state from "
+                f"{checkpoint.name}; its LoRA remains evaluable but is no longer resumable.",
+                flush=True,
+            )
+
+
+def _require_resumable_checkpoint(checkpoint: Path) -> None:
+    required = {
+        "adapter_config.json",
+        "adapter_model.safetensors",
+        "optimizer.pt",
+        "scheduler.pt",
+        "trainer_state.json",
+    }
+    missing = sorted(name for name in required if not (checkpoint / name).is_file())
+    if missing:
+        raise TrainingToolError(
+            f"Checkpoint is adapter-only and cannot resume training; missing {missing}"
+        )
 
 
 def _resolve_model_revision(config: Mapping[str, Any], HfApi: Any) -> str:
@@ -183,12 +308,6 @@ def main(argv: Sequence[str] | None = None) -> int:
     config_path = args.config.resolve()
     config = load_config(config_path)
     bundle = validate_data(config)
-    imports = _cloud_imports()
-    torch = imports["torch"]
-    gpu = _require_single_bf16_gpu(torch)
-    set_seed = imports["set_seed"]
-    set_seed(int(config_value(config, "training.seed")))
-
     run_dir = _run_directory(args, config)
     resume_from = args.resume_from.resolve() if args.resume_from else None
     if resume_from and not resume_from.is_dir():
@@ -200,6 +319,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             raise TrainingToolError(
                 "Resume checkpoint must be inside the selected run directory"
             ) from error
+        _require_resumable_checkpoint(resume_from)
     if run_dir.exists() and any(run_dir.iterdir()) and resume_from is None:
         raise TrainingToolError(
             f"Refusing to overwrite non-empty run directory: {run_dir}"
@@ -207,6 +327,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     run_dir.mkdir(parents=True, exist_ok=True)
     checkpoints_dir = run_dir / "checkpoints"
     checkpoints_dir.mkdir(exist_ok=True)
+
+    imports = _cloud_imports()
+    torch = imports["torch"]
+    runtime = _require_target_runtime(torch, config, run_dir)
+    set_seed = imports["set_seed"]
+    set_seed(int(config_value(config, "training.seed")))
 
     revision = _resolve_model_revision(config, imports["HfApi"])
     manifest_path = run_dir / "run_manifest.json"
@@ -262,7 +388,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                     "PyYAML",
                 )
             ),
-            "gpu": gpu,
+            "runtime": runtime,
             "seed": config_value(config, "training.seed"),
             "data_seed": config_value(config, "training.data_seed"),
         }
@@ -392,16 +518,25 @@ def main(argv: Sequence[str] | None = None) -> int:
                 control.should_save = True
             return control
 
-        def on_save(self, args: Any, state: Any, control: Any, **kwargs: Any) -> Any:
-            destination = Path(args.output_dir) / f"checkpoint-{state.global_step}"
+        def on_save(
+            self, training_args: Any, state: Any, control: Any, **kwargs: Any
+        ) -> Any:
+            destination = (
+                Path(training_args.output_dir) / f"checkpoint-{state.global_step}"
+            )
             atomic_write_json(
                 destination / "checkpoint_meta.json",
                 {
                     "epoch": int(round(float(state.epoch))),
                     "global_step": int(state.global_step),
                     "saved_at": utc_now(),
+                    "resumable": True,
                 },
             )
+            if args.mode == "full" and bool(
+                config_value(config, "training.keep_resume_state_only_latest")
+            ):
+                _strip_older_resume_states(Path(training_args.output_dir), destination)
             return control
 
     smoke_history: list[dict[str, Any]] = []
@@ -484,10 +619,16 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     manifest["status"] = "trained"
     manifest["completed_at"] = utc_now()
-    manifest["checkpoints"] = [
-        {"epoch": epoch, "path": str(path.relative_to(run_dir))}
-        for epoch, path in checkpoints
-    ]
+    manifest["checkpoints"] = []
+    for epoch, path in checkpoints:
+        metadata = read_json(path / "checkpoint_meta.json")
+        manifest["checkpoints"].append(
+            {
+                "epoch": epoch,
+                "path": str(path.relative_to(run_dir)),
+                "resumable": bool(metadata.get("resumable")),
+            }
+        )
     manifest["train_metrics"] = result.metrics
     atomic_write_json(manifest_path, manifest)
     print(f"Training completed: {run_dir}")
