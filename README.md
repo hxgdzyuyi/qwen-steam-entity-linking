@@ -142,3 +142,105 @@ python3 scripts/build_training_data.py
 ```json
 {"input":"Palworld","prompt":"Palworld 的 Steam AppID 是什么？\n答案：","expected":"<GAME_1623730>","type":"english_name","prompt_style":"appid_question"}
 ```
+
+
+## 第三步：在云端训练与评测
+
+训练工具链面向单张支持 BF16 的 CUDA GPU，默认配置为 1×H200。不要在本机下载或训练 8B 模型；本机只需要运行数据构建和无网络单元测试。
+
+### 准备云端环境
+
+先将当前代码和数据提交并推送到 GitHub。云端固定使用一次训练对应的 Git commit：
+
+```bash
+git clone https://github.com/hxgdzyuyi/qwen-steam-entity-linking.git
+cd qwen-steam-entity-linking
+git checkout <commit-sha>
+
+# 云镜像需要预装与 H200 匹配的 CUDA PyTorch。
+python3 -m pip install -r requirements-cloud.txt
+```
+
+基础模型固定为 `Qwen/Qwen3-8B-Base`。脚本会在运行时解析并记录模型仓库的完整 commit SHA；如云平台需要 Hugging Face 凭据，只能通过 Secret 注入 `HF_TOKEN`，不要将 token 写进文件或命令历史。
+
+### 冒烟训练
+
+先用固定的前 32 条样本验证训练链路和新增 token 是否能够学习：
+
+```bash
+python scripts/train.py \
+  --config configs/qwen3_8b_lora.yaml \
+  --mode smoke \
+  --run-dir outputs/smoke
+```
+
+冒烟训练每轮检查 32 条 canonical prompt；连续两轮达到 100% 后停止，最多运行 100 epochs。成功时会保存一个可重新加载的 checkpoint。
+
+### 完整训练
+
+```bash
+python scripts/train.py \
+  --config configs/qwen3_8b_lora.yaml \
+  --mode full \
+  --run-dir outputs/full
+```
+
+默认使用 BF16 LoRA `r=64`、`alpha=128`、`all-linear`、20 epochs，并仅对 completion 的实体 token 和 EOS 计算 loss。新增的 1000 个 token 会同时训练 `embed_tokens` 和未绑定权重的 `lm_head` 对应行。
+
+第 1、3、5、10、20 个 epoch 会保存包含 LoRA、token 行、optimizer、scheduler 和 Trainer 状态的可恢复 checkpoint。云端任务中断后可继续：
+
+```bash
+python scripts/train.py \
+  --config configs/qwen3_8b_lora.yaml \
+  --mode full \
+  --resume-from outputs/full/checkpoints/checkpoint-<global-step>
+```
+
+### 评测全部 checkpoint
+
+```bash
+python scripts/evaluate.py \
+  --run-dir outputs/full \
+  --all-milestones
+```
+
+评测输出：
+
+* `outputs/full/metrics.json`：每个 epoch 的 canonical、alias、热门/最新分组及 alias 类型/提示风格指标。
+* `outputs/full/checkpoint_comparison.csv`：checkpoint 横向对比。
+* `outputs/full/evaluation_failures.csv`：未命中的输入、目标和预测。
+* `outputs/full/run_manifest.json`：Git SHA、基础模型 SHA、数据哈希、依赖、GPU 和运行状态。
+
+canonical 确定性生成准确率至少需要达到 99%。达标 checkpoint 中 alias 准确率最高者被选为发布版本；随后以 canonical 准确率和更早 epoch 依次打破平局。
+
+
+## 第四步：人工发布公开 Hugging Face LoRA
+
+训练和评测不会自动写入 Hugging Face。先检查 `metrics.json`，然后在云端显式执行：
+
+```bash
+export HF_TOKEN='<由云平台 Secret 注入的 write token>'
+
+python scripts/publish_hf.py \
+  --run-dir outputs/full \
+  --repo-id <hf-user>/<model-name> \
+  --public \
+  --dry-run
+
+python scripts/publish_hf.py \
+  --run-dir outputs/full \
+  --repo-id <hf-user>/<model-name> \
+  --public
+```
+
+发布脚本会先重新加载选中的 checkpoint 并复核完整指标，再展示目标仓库和文件列表。公开仓库根目录放置选中的 LoRA，并在 `adapters/epoch-*` 保存五个里程碑 LoRA；optimizer、Trainer 状态、基础模型权重和原始数据不会上传。上传完成后脚本会从 Hugging Face 重新下载并再次运行评测，确认结果一致。
+
+
+## 本地验证
+
+以下命令不会访问网络，也不会加载 Qwen 模型：
+
+```bash
+python3 -m unittest discover -s tests -v
+python3 -m py_compile scripts/*.py tests/*.py
+```

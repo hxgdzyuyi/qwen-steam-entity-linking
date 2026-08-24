@@ -1,0 +1,50 @@
+model:
+  id: Qwen/Qwen3-8B-Base
+  revision: null
+  trust_remote_code: false
+
+data:
+  train_path: data/train.jsonl
+  alias_eval_path: data/eval_alias.jsonl
+  entities_path: data/steam_games.csv
+  provenance_path: data/steam_games.provenance.csv
+  special_tokens_path: data/special_tokens.json
+  max_length: 256
+  expected_train_rows: 1000
+  expected_special_tokens: 1000
+  expected_alias_rows: 184
+  expected_cohorts:
+    popular: 100
+    latest: 900
+
+lora:
+  r: 64
+  alpha: 128
+  dropout: 0.05
+  target_modules: all-linear
+  bias: none
+
+training:
+  output_root: outputs
+  seed: 42
+  data_seed: 42
+  full_epochs: 20
+  smoke_epochs: 100
+  smoke_samples: 32
+  smoke_required_consecutive_perfect_epochs: 2
+  per_device_batch_size: 16
+  gradient_accumulation_steps: 2
+  learning_rate: 0.0002
+  lr_scheduler_type: cosine
+  warmup_ratio: 0.05
+  weight_decay: 0.01
+  max_grad_norm: 1.0
+  optim: adamw_torch_fused
+  checkpoint_epochs: [1, 3, 5, 10, 20]
+  logging_steps: 1
+  require_clean_git: true
+
+evaluation:
+  batch_size: 16
+  generation_max_new_tokens: 2
+  canonical_threshold: 0.99

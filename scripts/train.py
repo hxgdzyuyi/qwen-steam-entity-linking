@@ -1,0 +1,503 @@
+#!/usr/bin/env python3
+"""Train Qwen3-8B-Base for Steam entity linking on one cloud GPU."""
+
+from __future__ import annotations
+
+import argparse
+import os
+import shutil
+import sys
+from pathlib import Path
+from typing import Any, Mapping, Sequence
+
+from training_common import (
+    CompletionOnlyCollator,
+    RawRowsDataset,
+    TrainingToolError,
+    atomic_write_json,
+    config_value,
+    data_hashes,
+    dependency_versions,
+    discover_checkpoints,
+    encode_training_row,
+    ensure_prompt_lengths,
+    git_info,
+    load_config,
+    make_run_id,
+    prepare_tokenizer,
+    project_path,
+    read_json,
+    utc_now,
+    validate_data,
+)
+
+
+def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--config",
+        type=Path,
+        default=Path("configs/qwen3_8b_lora.yaml"),
+    )
+    parser.add_argument("--mode", choices=("smoke", "full"), required=True)
+    parser.add_argument(
+        "--run-dir",
+        type=Path,
+        help="Explicit output directory; defaults to outputs/<timestamp>-<mode>",
+    )
+    parser.add_argument(
+        "--resume-from",
+        type=Path,
+        help="Resume model, optimizer, scheduler, and trainer state from a checkpoint",
+    )
+    return parser.parse_args(argv)
+
+
+def _cloud_imports() -> dict[str, Any]:
+    try:
+        import torch
+        from huggingface_hub import HfApi
+        from peft import LoraConfig, TaskType, get_peft_model
+        from transformers import (
+            AutoModelForCausalLM,
+            AutoTokenizer,
+            Trainer,
+            TrainerCallback,
+            TrainingArguments,
+            set_seed,
+        )
+    except ImportError as error:
+        raise TrainingToolError(
+            "Cloud training dependencies are missing; install requirements-cloud.txt "
+            "on top of a CUDA-enabled PyTorch image"
+        ) from error
+    return {
+        "torch": torch,
+        "HfApi": HfApi,
+        "LoraConfig": LoraConfig,
+        "TaskType": TaskType,
+        "get_peft_model": get_peft_model,
+        "AutoModelForCausalLM": AutoModelForCausalLM,
+        "AutoTokenizer": AutoTokenizer,
+        "Trainer": Trainer,
+        "TrainerCallback": TrainerCallback,
+        "TrainingArguments": TrainingArguments,
+        "set_seed": set_seed,
+    }
+
+
+def _require_single_bf16_gpu(torch: Any) -> dict[str, Any]:
+    if not torch.cuda.is_available():
+        raise TrainingToolError("Cloud training requires a CUDA GPU")
+    count = torch.cuda.device_count()
+    if count != 1:
+        raise TrainingToolError(f"Expected exactly one visible CUDA GPU, found {count}")
+    if not torch.cuda.is_bf16_supported():
+        raise TrainingToolError("The visible GPU does not support BF16")
+    torch.backends.cuda.matmul.allow_tf32 = True
+    torch.backends.cudnn.allow_tf32 = True
+    return {
+        "device_count": count,
+        "name": torch.cuda.get_device_name(0),
+        "capability": list(torch.cuda.get_device_capability(0)),
+        "cuda_version": torch.version.cuda,
+        "bf16_supported": True,
+        "tf32_enabled": True,
+    }
+
+
+def _resolve_model_revision(config: Mapping[str, Any], HfApi: Any) -> str:
+    model_id = str(config_value(config, "model.id"))
+    requested = config["model"].get("revision") or "main"
+    token = os.environ.get("HF_TOKEN")
+    info = HfApi(token=token).model_info(model_id, revision=requested)
+    if not info.sha:
+        raise TrainingToolError(
+            f"Hugging Face did not return a commit SHA for {model_id}"
+        )
+    return str(info.sha)
+
+
+def _next_token_accuracy(
+    model: Any,
+    tokenizer: Any,
+    rows: Sequence[Mapping[str, str]],
+    max_length: int,
+    batch_size: int,
+    torch: Any,
+) -> float:
+    was_training = model.training
+    model.eval()
+    correct = 0
+    previous_padding_side = tokenizer.padding_side
+    tokenizer.padding_side = "left"
+    try:
+        with torch.inference_mode():
+            for offset in range(0, len(rows), batch_size):
+                batch_rows = rows[offset : offset + batch_size]
+                encoded = tokenizer(
+                    [row["prompt"] for row in batch_rows],
+                    add_special_tokens=False,
+                    padding=True,
+                    return_tensors="pt",
+                )
+                if int(encoded["attention_mask"].sum(dim=1).max()) > max_length:
+                    raise TrainingToolError(
+                        "Smoke evaluation prompt exceeds max_length"
+                    )
+                encoded = {
+                    key: value.to(model.device) for key, value in encoded.items()
+                }
+                logits = model(**encoded, use_cache=False).logits[:, -1, :]
+                predicted = logits.argmax(dim=-1).tolist()
+                expected = [
+                    int(tokenizer.convert_tokens_to_ids(row["completion"]))
+                    for row in batch_rows
+                ]
+                correct += sum(
+                    left == right for left, right in zip(predicted, expected)
+                )
+    finally:
+        tokenizer.padding_side = previous_padding_side
+        if was_training:
+            model.train()
+    return correct / len(rows)
+
+
+def _run_directory(args: argparse.Namespace, config: Mapping[str, Any]) -> Path:
+    if args.run_dir:
+        return args.run_dir.resolve()
+    if args.resume_from:
+        checkpoint = args.resume_from.resolve()
+        if checkpoint.parent.name != "checkpoints":
+            raise TrainingToolError(
+                "A resumable checkpoint must be inside <run-dir>/checkpoints"
+            )
+        return checkpoint.parent.parent
+    output_root = project_path(config_value(config, "training.output_root"))
+    return output_root / make_run_id(args.mode)
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    args = parse_args(argv)
+    config_path = args.config.resolve()
+    config = load_config(config_path)
+    bundle = validate_data(config)
+    imports = _cloud_imports()
+    torch = imports["torch"]
+    gpu = _require_single_bf16_gpu(torch)
+    set_seed = imports["set_seed"]
+    set_seed(int(config_value(config, "training.seed")))
+
+    run_dir = _run_directory(args, config)
+    resume_from = args.resume_from.resolve() if args.resume_from else None
+    if resume_from and not resume_from.is_dir():
+        raise TrainingToolError(f"Resume checkpoint does not exist: {resume_from}")
+    if resume_from:
+        try:
+            resume_from.relative_to(run_dir)
+        except ValueError as error:
+            raise TrainingToolError(
+                "Resume checkpoint must be inside the selected run directory"
+            ) from error
+    if run_dir.exists() and any(run_dir.iterdir()) and resume_from is None:
+        raise TrainingToolError(
+            f"Refusing to overwrite non-empty run directory: {run_dir}"
+        )
+    run_dir.mkdir(parents=True, exist_ok=True)
+    checkpoints_dir = run_dir / "checkpoints"
+    checkpoints_dir.mkdir(exist_ok=True)
+
+    revision = _resolve_model_revision(config, imports["HfApi"])
+    manifest_path = run_dir / "run_manifest.json"
+    current_git = git_info(bool(config_value(config, "training.require_clean_git")))
+    current_hashes = data_hashes(config)
+    resolved_config_path = run_dir / "resolved_config.json"
+    if resume_from:
+        if not manifest_path.exists() or not resolved_config_path.exists():
+            raise TrainingToolError(
+                "Resume run is missing its manifest or resolved config"
+            )
+        manifest = read_json(manifest_path)
+        original_config = read_json(resolved_config_path)
+        if original_config != config:
+            raise TrainingToolError(
+                "Resume config differs from the original run config"
+            )
+        expected_identity = {
+            "mode": args.mode,
+            "model": {"id": config_value(config, "model.id"), "revision": revision},
+            "git_commit": current_git["commit"],
+            "data_sha256": current_hashes,
+        }
+        actual_identity = {
+            "mode": manifest.get("mode"),
+            "model": manifest.get("model"),
+            "git_commit": manifest.get("git", {}).get("commit"),
+            "data_sha256": manifest.get("data_sha256"),
+        }
+        if actual_identity != expected_identity:
+            raise TrainingToolError(
+                "Resume checkpoint does not match code, model, or data"
+            )
+        manifest["resumed_at"] = utc_now()
+        manifest["resume_from"] = str(resume_from.relative_to(run_dir))
+    else:
+        manifest = {
+            "schema_version": 1,
+            "status": "initializing",
+            "created_at": utc_now(),
+            "mode": args.mode,
+            "model": {"id": config_value(config, "model.id"), "revision": revision},
+            "git": current_git,
+            "data_sha256": current_hashes,
+            "dependencies": dependency_versions(
+                (
+                    "torch",
+                    "transformers",
+                    "peft",
+                    "accelerate",
+                    "huggingface-hub",
+                    "safetensors",
+                    "PyYAML",
+                )
+            ),
+            "gpu": gpu,
+            "seed": config_value(config, "training.seed"),
+            "data_seed": config_value(config, "training.data_seed"),
+        }
+    atomic_write_json(manifest_path, manifest)
+    if not resume_from:
+        shutil.copy2(config_path, run_dir / "training_config.yaml")
+        atomic_write_json(resolved_config_path, config)
+
+    model_id = str(config_value(config, "model.id"))
+    trust_remote_code = bool(config_value(config, "model.trust_remote_code"))
+    tokenizer = imports["AutoTokenizer"].from_pretrained(
+        model_id,
+        revision=revision,
+        trust_remote_code=trust_remote_code,
+        token=os.environ.get("HF_TOKEN"),
+        use_fast=True,
+    )
+    entity_token_ids = prepare_tokenizer(tokenizer, bundle.special_tokens)
+    max_length = int(config_value(config, "data.max_length"))
+    for row in bundle.train_rows:
+        encode_training_row(tokenizer, row, max_length)
+    ensure_prompt_lengths(tokenizer, bundle.alias_rows, max_length)
+
+    model = imports["AutoModelForCausalLM"].from_pretrained(
+        model_id,
+        revision=revision,
+        trust_remote_code=trust_remote_code,
+        token=os.environ.get("HF_TOKEN"),
+        torch_dtype=torch.bfloat16,
+        low_cpu_mem_usage=True,
+    )
+    if bool(getattr(model.config, "tie_word_embeddings", True)):
+        raise TrainingToolError(
+            "This pipeline expects untied embed_tokens and lm_head weights"
+        )
+    model.resize_token_embeddings(len(tokenizer))
+    model.config.use_cache = False
+
+    peft_config = imports["LoraConfig"](
+        task_type=imports["TaskType"].CAUSAL_LM,
+        r=int(config_value(config, "lora.r")),
+        lora_alpha=int(config_value(config, "lora.alpha")),
+        lora_dropout=float(config_value(config, "lora.dropout")),
+        target_modules=config_value(config, "lora.target_modules"),
+        bias=str(config_value(config, "lora.bias")),
+        trainable_token_indices={
+            "embed_tokens": entity_token_ids,
+            "lm_head": entity_token_ids,
+        },
+    )
+    peft_config.base_model_name_or_path = model_id
+    peft_config.revision = revision
+    model = imports["get_peft_model"](model, peft_config)
+    model.print_trainable_parameters()
+
+    if args.mode == "smoke":
+        sample_count = int(config_value(config, "training.smoke_samples"))
+        train_rows = bundle.train_rows[:sample_count]
+        epochs = int(config_value(config, "training.smoke_epochs"))
+        checkpoint_epochs: set[int] = set()
+    else:
+        train_rows = bundle.train_rows
+        epochs = int(config_value(config, "training.full_epochs"))
+        checkpoint_epochs = set(config_value(config, "training.checkpoint_epochs"))
+
+    TrainingArguments = imports["TrainingArguments"]
+    training_args = TrainingArguments(
+        output_dir=str(checkpoints_dir),
+        run_name=run_dir.name,
+        num_train_epochs=epochs,
+        per_device_train_batch_size=int(
+            config_value(config, "training.per_device_batch_size")
+        ),
+        gradient_accumulation_steps=int(
+            config_value(config, "training.gradient_accumulation_steps")
+        ),
+        learning_rate=float(config_value(config, "training.learning_rate")),
+        lr_scheduler_type=str(config_value(config, "training.lr_scheduler_type")),
+        warmup_ratio=float(config_value(config, "training.warmup_ratio")),
+        weight_decay=float(config_value(config, "training.weight_decay")),
+        max_grad_norm=float(config_value(config, "training.max_grad_norm")),
+        optim=str(config_value(config, "training.optim")),
+        bf16=True,
+        fp16=False,
+        tf32=True,
+        logging_strategy="steps",
+        logging_steps=int(config_value(config, "training.logging_steps")),
+        logging_dir=str(run_dir / "tensorboard"),
+        report_to=["tensorboard"],
+        save_strategy="no",
+        save_total_limit=max(1, len(checkpoint_epochs)),
+        seed=int(config_value(config, "training.seed")),
+        data_seed=int(config_value(config, "training.data_seed")),
+        remove_unused_columns=False,
+        dataloader_num_workers=0,
+        gradient_checkpointing=False,
+        save_safetensors=True,
+    )
+
+    Trainer = imports["Trainer"]
+    TrainerCallback = imports["TrainerCallback"]
+
+    class EntityLinkingTrainer(Trainer):
+        def _save(self, output_dir: str | None = None, state_dict: Any = None) -> None:
+            destination = Path(output_dir or self.args.output_dir)
+            destination.mkdir(parents=True, exist_ok=True)
+            self.model.save_pretrained(
+                destination,
+                state_dict=state_dict,
+                safe_serialization=True,
+                save_embedding_layers=False,
+            )
+            processing_class = getattr(self, "processing_class", None)
+            if processing_class is not None:
+                processing_class.save_pretrained(destination)
+            torch.save(self.args, destination / "training_args.bin")
+
+    class MilestoneCallback(TrainerCallback):
+        def on_epoch_end(
+            self, args: Any, state: Any, control: Any, **kwargs: Any
+        ) -> Any:
+            epoch = int(round(float(state.epoch or 0)))
+            if (
+                abs(float(state.epoch or 0) - epoch) < 1e-6
+                and epoch in checkpoint_epochs
+            ):
+                control.should_save = True
+            return control
+
+        def on_save(self, args: Any, state: Any, control: Any, **kwargs: Any) -> Any:
+            destination = Path(args.output_dir) / f"checkpoint-{state.global_step}"
+            atomic_write_json(
+                destination / "checkpoint_meta.json",
+                {
+                    "epoch": int(round(float(state.epoch))),
+                    "global_step": int(state.global_step),
+                    "saved_at": utc_now(),
+                },
+            )
+            return control
+
+    smoke_history: list[dict[str, Any]] = []
+
+    class SmokeCallback(MilestoneCallback):
+        def __init__(self) -> None:
+            self.perfect_streak = 0
+
+        def on_epoch_end(
+            self, args: Any, state: Any, control: Any, **kwargs: Any
+        ) -> Any:
+            accuracy = _next_token_accuracy(
+                kwargs["model"],
+                tokenizer,
+                train_rows,
+                max_length,
+                int(config_value(config, "evaluation.batch_size")),
+                torch,
+            )
+            epoch = int(round(float(state.epoch or 0)))
+            self.perfect_streak = self.perfect_streak + 1 if accuracy == 1.0 else 0
+            smoke_history.append(
+                {
+                    "epoch": epoch,
+                    "next_token_accuracy": accuracy,
+                    "perfect_streak": self.perfect_streak,
+                }
+            )
+            atomic_write_json(run_dir / "smoke_metrics.json", smoke_history)
+            required = int(
+                config_value(
+                    config, "training.smoke_required_consecutive_perfect_epochs"
+                )
+            )
+            if self.perfect_streak >= required or epoch >= epochs:
+                control.should_save = True
+                control.should_training_stop = True
+            return control
+
+    callback = SmokeCallback() if args.mode == "smoke" else MilestoneCallback()
+    trainer = EntityLinkingTrainer(
+        model=model,
+        args=training_args,
+        train_dataset=RawRowsDataset(train_rows),
+        data_collator=CompletionOnlyCollator(tokenizer, max_length),
+        processing_class=tokenizer,
+        callbacks=[callback],
+    )
+
+    manifest["status"] = "training"
+    manifest.setdefault("started_at", utc_now())
+    manifest["last_started_at"] = utc_now()
+    manifest["train_rows"] = len(train_rows)
+    manifest["entity_token_count"] = len(entity_token_ids)
+    manifest["entity_token_id_min"] = min(entity_token_ids)
+    manifest["entity_token_id_max"] = max(entity_token_ids)
+    atomic_write_json(manifest_path, manifest)
+
+    result = trainer.train(
+        resume_from_checkpoint=str(resume_from) if resume_from else None
+    )
+    trainer.log_metrics("train", result.metrics)
+    trainer.save_metrics("train", result.metrics)
+    trainer.save_state()
+
+    checkpoints = discover_checkpoints(run_dir)
+    if args.mode == "full":
+        found_epochs = {epoch for epoch, _ in checkpoints}
+        if found_epochs != checkpoint_epochs:
+            raise TrainingToolError(
+                f"Expected checkpoints {sorted(checkpoint_epochs)}, found {sorted(found_epochs)}"
+            )
+    if args.mode == "smoke":
+        if not smoke_history or smoke_history[-1]["perfect_streak"] < int(
+            config_value(config, "training.smoke_required_consecutive_perfect_epochs")
+        ):
+            raise TrainingToolError(
+                "Smoke training did not reach 100% canonical accuracy for the required streak"
+            )
+
+    manifest["status"] = "trained"
+    manifest["completed_at"] = utc_now()
+    manifest["checkpoints"] = [
+        {"epoch": epoch, "path": str(path.relative_to(run_dir))}
+        for epoch, path in checkpoints
+    ]
+    manifest["train_metrics"] = result.metrics
+    atomic_write_json(manifest_path, manifest)
+    print(f"Training completed: {run_dir}")
+    print("Run scripts/evaluate.py next for a full run.")
+    return 0
+
+
+if __name__ == "__main__":
+    try:
+        raise SystemExit(main())
+    except TrainingToolError as error:
+        print(f"error: {error}", file=sys.stderr)
+        raise SystemExit(1) from error

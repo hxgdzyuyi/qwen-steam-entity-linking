@@ -15,6 +15,9 @@ venv/
 .ruff_cache/
 .coverage
 
+# Cloud training artifacts
+outputs/
+
 # Local configuration
 .env
 .env.*
