@@ -1,0 +1,420 @@
+{
+  "schema_version": 1,
+  "description": "训练前冻结的知名游戏别名、缩写、跨语言名称和自然语言描述。这里的表达不得加入训练集。",
+  "games": [
+    {
+      "appid": 730,
+      "cases": [
+        {"input": "CS2", "type": "abbreviation"},
+        {"input": "反恐精英2", "type": "chinese_name"},
+        {"input": "Counter Strike 2", "type": "english_name"},
+        {"input": "Valve 的 5v5 拆弹竞技射击游戏", "type": "description"}
+      ]
+    },
+    {
+      "appid": 570,
+      "cases": [
+        {"input": "刀塔2", "type": "chinese_name"},
+        {"input": "DOTA", "type": "alias"},
+        {"input": "Defense of the Ancients 2", "type": "english_name"},
+        {"input": "天辉和夜魇两方对战的 Valve MOBA", "type": "description"}
+      ]
+    },
+    {
+      "appid": 578080,
+      "cases": [
+        {"input": "PUBG", "type": "abbreviation"},
+        {"input": "绝地求生", "type": "chinese_name"},
+        {"input": "吃鸡", "type": "alias"},
+        {"input": "一百名玩家跳伞搜装备的大逃杀游戏", "type": "description"}
+      ]
+    },
+    {
+      "appid": 1172470,
+      "cases": [
+        {"input": "APEX", "type": "abbreviation"},
+        {"input": "Apex英雄", "type": "chinese_name"},
+        {"input": "Apex Legends", "type": "english_name"},
+        {"input": "重生工作室制作的英雄小队大逃杀", "type": "description"}
+      ]
+    },
+    {
+      "appid": 1623730,
+      "cases": [
+        {"input": "Palworld", "type": "english_name"},
+        {"input": "帕鲁", "type": "alias"},
+        {"input": "宝可梦拿枪", "type": "alias"},
+        {"input": "捕捉帕鲁并让它们建造基地的生存游戏", "type": "description"}
+      ]
+    },
+    {
+      "appid": 553850,
+      "cases": [
+        {"input": "Helldivers 2", "type": "english_name"},
+        {"input": "绝地潜兵2", "type": "chinese_name"},
+        {"input": "地狱潜者2", "type": "alias"},
+        {"input": "为超级地球传播管理式民主的合作射击游戏", "type": "description"}
+      ]
+    },
+    {
+      "appid": 2767030,
+      "cases": [
+        {"input": "Marvel Rivals", "type": "english_name"},
+        {"input": "漫威英雄射击", "type": "alias"},
+        {"input": "漫威版守望先锋", "type": "alias"},
+        {"input": "漫威超级英雄参加 6v6 对战的游戏", "type": "description"}
+      ]
+    },
+    {
+      "appid": 250900,
+      "cases": [
+        {"input": "以撒的结合：重生", "type": "chinese_name"},
+        {"input": "以撒重生", "type": "alias"},
+        {"input": "Isaac Rebirth", "type": "english_name"},
+        {"input": "小孩用眼泪攻击怪物的地牢肉鸽", "type": "description"}
+      ]
+    },
+    {
+      "appid": 359550,
+      "cases": [
+        {"input": "R6S", "type": "abbreviation"},
+        {"input": "彩六", "type": "alias"},
+        {"input": "Rainbow Six Siege", "type": "english_name"},
+        {"input": "育碧干员进行 5v5 攻防和墙体破坏的游戏", "type": "description"}
+      ]
+    },
+    {
+      "appid": 105600,
+      "cases": [
+        {"input": "泰拉瑞亚", "type": "chinese_name"},
+        {"input": "泰拉", "type": "alias"},
+        {"input": "Terraria 像素沙盒", "type": "alias"},
+        {"input": "横版像素世界里挖矿建造并挑战 Boss 的游戏", "type": "description"}
+      ]
+    },
+    {
+      "appid": 2357570,
+      "cases": [
+        {"input": "Overwatch 2", "type": "english_name"},
+        {"input": "守望先锋2", "type": "chinese_name"},
+        {"input": "OW2", "type": "abbreviation"},
+        {"input": "暴雪制作的团队英雄射击游戏", "type": "description"}
+      ]
+    },
+    {
+      "appid": 236390,
+      "cases": [
+        {"input": "战争雷霆", "type": "chinese_name"},
+        {"input": "WT 载具游戏", "type": "abbreviation"},
+        {"input": "WarThunder", "type": "english_name"},
+        {"input": "可以驾驶飞机坦克和军舰对战的游戏", "type": "description"}
+      ]
+    },
+    {
+      "appid": 108600,
+      "cases": [
+        {"input": "僵尸毁灭工程", "type": "chinese_name"},
+        {"input": "PZ", "type": "abbreviation"},
+        {"input": "Project Zomboid 僵尸游戏", "type": "alias"},
+        {"input": "发生在肯塔基州的硬核等距视角僵尸生存沙盒", "type": "description"}
+      ]
+    },
+    {
+      "appid": 381210,
+      "cases": [
+        {"input": "Dead by Daylight", "type": "english_name"},
+        {"input": "DBD", "type": "abbreviation"},
+        {"input": "杀鸡", "type": "alias"},
+        {"input": "一名杀手追捕四名幸存者的非对称竞技游戏", "type": "description"}
+      ]
+    },
+    {
+      "appid": 413150,
+      "cases": [
+        {"input": "星露谷物语", "type": "chinese_name"},
+        {"input": "星露谷", "type": "alias"},
+        {"input": "Stardew", "type": "english_name"},
+        {"input": "继承爷爷农场后在鹈鹕镇生活的游戏", "type": "description"}
+      ]
+    },
+    {
+      "appid": 252490,
+      "cases": [
+        {"input": "腐蚀", "type": "chinese_name"},
+        {"input": "Rust 生存游戏", "type": "alias"},
+        {"input": "裸男砍树", "type": "alias"},
+        {"input": "玩家从一块石头开始采集建家和抄家的多人游戏", "type": "description"}
+      ]
+    },
+    {
+      "appid": 230410,
+      "cases": [
+        {"input": "星际战甲", "type": "chinese_name"},
+        {"input": "Warframe", "type": "english_name"},
+        {"input": "太空忍者", "type": "alias"},
+        {"input": "Tenno 驾驶战甲刷取装备的免费动作游戏", "type": "description"}
+      ]
+    },
+    {
+      "appid": 227300,
+      "cases": [
+        {"input": "欧洲卡车模拟2", "type": "chinese_name"},
+        {"input": "欧卡2", "type": "alias"},
+        {"input": "ETS2", "type": "abbreviation"},
+        {"input": "驾驶卡车在欧洲各国运送货物的模拟游戏", "type": "description"}
+      ]
+    },
+    {
+      "appid": 1086940,
+      "cases": [
+        {"input": "Baldur's Gate 3", "type": "english_name"},
+        {"input": "博德之门三", "type": "chinese_name"},
+        {"input": "BG3", "type": "abbreviation"},
+        {"input": "拉瑞安制作的 DND 回合制角色扮演游戏", "type": "description"}
+      ]
+    },
+    {
+      "appid": 550,
+      "cases": [
+        {"input": "求生之路2", "type": "chinese_name"},
+        {"input": "L4D2", "type": "abbreviation"},
+        {"input": "Left 4 Dead II", "type": "english_name"},
+        {"input": "四名生还者合作对抗尸潮和特殊感染者的游戏", "type": "description"}
+      ]
+    },
+    {
+      "appid": 1091500,
+      "cases": [
+        {"input": "Cyberpunk 2077", "type": "english_name"},
+        {"input": "赛博朋克2077", "type": "chinese_name"},
+        {"input": "2077", "type": "alias"},
+        {"input": "V 在夜之城寻找活命方法的开放世界角色扮演游戏", "type": "description"}
+      ]
+    },
+    {
+      "appid": 440,
+      "cases": [
+        {"input": "军团要塞2", "type": "chinese_name"},
+        {"input": "TF2", "type": "abbreviation"},
+        {"input": "Team Fortress II", "type": "english_name"},
+        {"input": "Valve 的红蓝两队九职业卡通射击游戏", "type": "description"}
+      ]
+    },
+    {
+      "appid": 438100,
+      "cases": [
+        {"input": "VRC", "type": "abbreviation"},
+        {"input": "VR Chat", "type": "english_name"},
+        {"input": "VR 聊天", "type": "chinese_name"},
+        {"input": "使用虚拟形象进入玩家自制世界社交的平台", "type": "description"}
+      ]
+    },
+    {
+      "appid": 1203220,
+      "cases": [
+        {"input": "NARAKA: BLADEPOINT", "type": "english_name"},
+        {"input": "永劫", "type": "alias"},
+        {"input": "永劫无间手游的 PC 原作", "type": "alias"},
+        {"input": "使用冷兵器飞索和武侠角色进行大逃杀的游戏", "type": "description"}
+      ]
+    },
+    {
+      "appid": 322330,
+      "cases": [
+        {"input": "Don't Starve Together", "type": "english_name"},
+        {"input": "DST", "type": "abbreviation"},
+        {"input": "联机饥荒", "type": "alias"},
+        {"input": "Klei 制作的多人荒野生存游戏", "type": "description"}
+      ]
+    },
+    {
+      "appid": 394360,
+      "cases": [
+        {"input": "钢铁雄心4", "type": "chinese_name"},
+        {"input": "HOI4", "type": "abbreviation"},
+        {"input": "Hearts of Iron 4", "type": "english_name"},
+        {"input": "Paradox 制作的二战大战略游戏", "type": "description"}
+      ]
+    },
+    {
+      "appid": 1174180,
+      "cases": [
+        {"input": "荒野大镖客2", "type": "chinese_name"},
+        {"input": "大表哥2", "type": "alias"},
+        {"input": "RDR2", "type": "abbreviation"},
+        {"input": "亚瑟摩根与范德林德帮派的西部故事", "type": "description"}
+      ]
+    },
+    {
+      "appid": 4000,
+      "cases": [
+        {"input": "GMod", "type": "abbreviation"},
+        {"input": "盖瑞模组", "type": "chinese_name"},
+        {"input": "Garry Mod", "type": "english_name"},
+        {"input": "使用 Source 引擎物理道具自由创作的沙盒", "type": "description"}
+      ]
+    },
+    {
+      "appid": 1245620,
+      "cases": [
+        {"input": "Elden Ring", "type": "english_name"},
+        {"input": "老头环", "type": "alias"},
+        {"input": "艾尔登之环", "type": "alias"},
+        {"input": "褪色者在交界地寻找法环的魂系开放世界游戏", "type": "description"}
+      ]
+    },
+    {
+      "appid": 2358720,
+      "cases": [
+        {"input": "Black Myth: Wukong", "type": "english_name"},
+        {"input": "黑猴", "type": "alias"},
+        {"input": "悟空", "type": "alias"},
+        {"input": "天命人踏上西游之路的国产动作角色扮演游戏", "type": "description"}
+      ]
+    },
+    {
+      "appid": 1222670,
+      "cases": [
+        {"input": "模拟人生4", "type": "chinese_name"},
+        {"input": "The Sims 4", "type": "english_name"},
+        {"input": "Sims4", "type": "alias"},
+        {"input": "创建市民盖房子并模拟日常生活的游戏", "type": "description"}
+      ]
+    },
+    {
+      "appid": 252950,
+      "cases": [
+        {"input": "火箭联盟", "type": "chinese_name"},
+        {"input": "Rocket League", "type": "english_name"},
+        {"input": "车球", "type": "alias"},
+        {"input": "驾驶火箭动力汽车踢足球的竞技游戏", "type": "description"}
+      ]
+    },
+    {
+      "appid": 489830,
+      "cases": [
+        {"input": "上古卷轴5：天际特别版", "type": "chinese_name"},
+        {"input": "老滚5", "type": "alias"},
+        {"input": "Skyrim SE", "type": "abbreviation"},
+        {"input": "龙裔在天际省冒险并吸收龙魂的角色扮演游戏", "type": "description"}
+      ]
+    },
+    {
+      "appid": 289070,
+      "cases": [
+        {"input": "文明6", "type": "chinese_name"},
+        {"input": "Civ 6", "type": "abbreviation"},
+        {"input": "席德梅尔的文明VI", "type": "alias"},
+        {"input": "从远古发展到未来的回合制 4X 策略游戏", "type": "description"}
+      ]
+    },
+    {
+      "appid": 261550,
+      "cases": [
+        {"input": "骑马与砍杀2：霸主", "type": "chinese_name"},
+        {"input": "骑砍2", "type": "alias"},
+        {"input": "Bannerlord", "type": "english_name"},
+        {"input": "在卡拉迪亚经商招兵并亲自参加中世纪战斗的游戏", "type": "description"}
+      ]
+    },
+    {
+      "appid": 1364780,
+      "cases": [
+        {"input": "街头霸王6", "type": "chinese_name"},
+        {"input": "街霸6", "type": "alias"},
+        {"input": "SF6", "type": "abbreviation"},
+        {"input": "卡普空制作的隆与春丽登场的格斗游戏", "type": "description"}
+      ]
+    },
+    {
+      "appid": 251570,
+      "cases": [
+        {"input": "七日杀", "type": "chinese_name"},
+        {"input": "7DTD", "type": "abbreviation"},
+        {"input": "7 Days To Die 僵尸游戏", "type": "alias"},
+        {"input": "每七天面对一次血月尸潮的体素生存游戏", "type": "description"}
+      ]
+    },
+    {
+      "appid": 945360,
+      "cases": [
+        {"input": "太空狼人杀", "type": "chinese_name"},
+        {"input": "Among Us 狼人杀", "type": "alias"},
+        {"input": "AmongUs", "type": "english_name"},
+        {"input": "船员完成任务并投票找出内鬼的社交推理游戏", "type": "description"}
+      ]
+    },
+    {
+      "appid": 294100,
+      "cases": [
+        {"input": "边缘世界", "type": "chinese_name"},
+        {"input": "RimWorld", "type": "english_name"},
+        {"input": "环世界", "type": "alias"},
+        {"input": "AI 故事讲述者驱动的太空殖民地模拟游戏", "type": "description"}
+      ]
+    },
+    {
+      "appid": 1158310,
+      "cases": [
+        {"input": "十字军之王3", "type": "chinese_name"},
+        {"input": "王国风云3", "type": "alias"},
+        {"input": "CK3", "type": "abbreviation"},
+        {"input": "经营中世纪家族王朝和封臣关系的 Paradox 游戏", "type": "description"}
+      ]
+    },
+    {
+      "appid": 813780,
+      "cases": [
+        {"input": "帝国时代2决定版", "type": "chinese_name"},
+        {"input": "帝国时代2DE", "type": "alias"},
+        {"input": "AOE2 DE", "type": "abbreviation"},
+        {"input": "村民采集资源并升级时代的经典即时战略重制版", "type": "description"}
+      ]
+    },
+    {
+      "appid": 960090,
+      "cases": [
+        {"input": "气球塔防6", "type": "chinese_name"},
+        {"input": "猴子塔防6", "type": "alias"},
+        {"input": "BTD6", "type": "abbreviation"},
+        {"input": "用不同猴子防御一波波气球的塔防游戏", "type": "description"}
+      ]
+    },
+    {
+      "appid": 238960,
+      "cases": [
+        {"input": "流放之路", "type": "chinese_name"},
+        {"input": "POE", "type": "abbreviation"},
+        {"input": "Path of Exile 1", "type": "english_name"},
+        {"input": "在瓦尔克拉斯使用巨大天赋树配装的免费刷宝游戏", "type": "description"}
+      ]
+    },
+    {
+      "appid": 739630,
+      "cases": [
+        {"input": "恐鬼症", "type": "chinese_name"},
+        {"input": "Phasmophobia", "type": "english_name"},
+        {"input": "Phasmo", "type": "alias"},
+        {"input": "四人合作携带仪器调查并识别鬼魂的恐怖游戏", "type": "description"}
+      ]
+    },
+    {
+      "appid": 292030,
+      "cases": [
+        {"input": "The Witcher 3", "type": "english_name"},
+        {"input": "巫师3", "type": "chinese_name"},
+        {"input": "猎魔人3", "type": "alias"},
+        {"input": "杰洛特寻找希里并对抗狂猎的角色扮演游戏", "type": "description"}
+      ]
+    },
+    {
+      "appid": 892970,
+      "cases": [
+        {"input": "英灵神殿", "type": "chinese_name"},
+        {"input": "Valheim", "type": "english_name"},
+        {"input": "瓦尔海姆", "type": "alias"},
+        {"input": "维京战士在第十世界建造长屋并挑战神弃者的生存游戏", "type": "description"}
+      ]
+    }
+  ]
+}

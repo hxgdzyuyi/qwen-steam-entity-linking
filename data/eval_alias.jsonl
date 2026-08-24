@@ -1,0 +1,184 @@
+{"input":"CS2","prompt":"游戏信息：CS2\nSteam实体Id：","expected":"<GAME_730>","type":"abbreviation","prompt_style":"entity_id_label"}
+{"input":"反恐精英2","prompt":"游戏信息：反恐精英2\nSteam AppID：","expected":"<GAME_730>","type":"chinese_name","prompt_style":"appid_label"}
+{"input":"Counter Strike 2","prompt":"游戏信息：Counter Strike 2\nSteam 的 AppID：","expected":"<GAME_730>","type":"english_name","prompt_style":"steam_de_appid"}
+{"input":"Valve 的 5v5 拆弹竞技射击游戏","prompt":"游戏信息：Valve 的 5v5 拆弹竞技射击游戏\nSteam 的 AppId：","expected":"<GAME_730>","type":"description","prompt_style":"steam_de_appid_mixed_case"}
+{"input":"刀塔2","prompt":"刀塔2 的 Steam AppID 是什么？\n答案：","expected":"<GAME_570>","type":"chinese_name","prompt_style":"appid_question"}
+{"input":"DOTA","prompt":"请返回 DOTA 对应的 Steam AppId：","expected":"<GAME_570>","type":"alias","prompt_style":"appid_request"}
+{"input":"Defense of the Ancients 2","prompt":"游戏信息：Defense of the Ancients 2\nSteam实体Id：","expected":"<GAME_570>","type":"english_name","prompt_style":"entity_id_label"}
+{"input":"天辉和夜魇两方对战的 Valve MOBA","prompt":"游戏信息：天辉和夜魇两方对战的 Valve MOBA\nSteam AppID：","expected":"<GAME_570>","type":"description","prompt_style":"appid_label"}
+{"input":"PUBG","prompt":"游戏信息：PUBG\nSteam 的 AppID：","expected":"<GAME_578080>","type":"abbreviation","prompt_style":"steam_de_appid"}
+{"input":"绝地求生","prompt":"游戏信息：绝地求生\nSteam 的 AppId：","expected":"<GAME_578080>","type":"chinese_name","prompt_style":"steam_de_appid_mixed_case"}
+{"input":"吃鸡","prompt":"吃鸡 的 Steam AppID 是什么？\n答案：","expected":"<GAME_578080>","type":"alias","prompt_style":"appid_question"}
+{"input":"一百名玩家跳伞搜装备的大逃杀游戏","prompt":"请返回 一百名玩家跳伞搜装备的大逃杀游戏 对应的 Steam AppId：","expected":"<GAME_578080>","type":"description","prompt_style":"appid_request"}
+{"input":"APEX","prompt":"游戏信息：APEX\nSteam实体Id：","expected":"<GAME_1172470>","type":"abbreviation","prompt_style":"entity_id_label"}
+{"input":"Apex英雄","prompt":"游戏信息：Apex英雄\nSteam AppID：","expected":"<GAME_1172470>","type":"chinese_name","prompt_style":"appid_label"}
+{"input":"Apex Legends","prompt":"游戏信息：Apex Legends\nSteam 的 AppID：","expected":"<GAME_1172470>","type":"english_name","prompt_style":"steam_de_appid"}
+{"input":"重生工作室制作的英雄小队大逃杀","prompt":"游戏信息：重生工作室制作的英雄小队大逃杀\nSteam 的 AppId：","expected":"<GAME_1172470>","type":"description","prompt_style":"steam_de_appid_mixed_case"}
+{"input":"Palworld","prompt":"Palworld 的 Steam AppID 是什么？\n答案：","expected":"<GAME_1623730>","type":"english_name","prompt_style":"appid_question"}
+{"input":"帕鲁","prompt":"请返回 帕鲁 对应的 Steam AppId：","expected":"<GAME_1623730>","type":"alias","prompt_style":"appid_request"}
+{"input":"宝可梦拿枪","prompt":"游戏信息：宝可梦拿枪\nSteam实体Id：","expected":"<GAME_1623730>","type":"alias","prompt_style":"entity_id_label"}
+{"input":"捕捉帕鲁并让它们建造基地的生存游戏","prompt":"游戏信息：捕捉帕鲁并让它们建造基地的生存游戏\nSteam AppID：","expected":"<GAME_1623730>","type":"description","prompt_style":"appid_label"}
+{"input":"Helldivers 2","prompt":"游戏信息：Helldivers 2\nSteam 的 AppID：","expected":"<GAME_553850>","type":"english_name","prompt_style":"steam_de_appid"}
+{"input":"绝地潜兵2","prompt":"游戏信息：绝地潜兵2\nSteam 的 AppId：","expected":"<GAME_553850>","type":"chinese_name","prompt_style":"steam_de_appid_mixed_case"}
+{"input":"地狱潜者2","prompt":"地狱潜者2 的 Steam AppID 是什么？\n答案：","expected":"<GAME_553850>","type":"alias","prompt_style":"appid_question"}
+{"input":"为超级地球传播管理式民主的合作射击游戏","prompt":"请返回 为超级地球传播管理式民主的合作射击游戏 对应的 Steam AppId：","expected":"<GAME_553850>","type":"description","prompt_style":"appid_request"}
+{"input":"Marvel Rivals","prompt":"游戏信息：Marvel Rivals\nSteam实体Id：","expected":"<GAME_2767030>","type":"english_name","prompt_style":"entity_id_label"}
+{"input":"漫威英雄射击","prompt":"游戏信息：漫威英雄射击\nSteam AppID：","expected":"<GAME_2767030>","type":"alias","prompt_style":"appid_label"}
+{"input":"漫威版守望先锋","prompt":"游戏信息：漫威版守望先锋\nSteam 的 AppID：","expected":"<GAME_2767030>","type":"alias","prompt_style":"steam_de_appid"}
+{"input":"漫威超级英雄参加 6v6 对战的游戏","prompt":"游戏信息：漫威超级英雄参加 6v6 对战的游戏\nSteam 的 AppId：","expected":"<GAME_2767030>","type":"description","prompt_style":"steam_de_appid_mixed_case"}
+{"input":"以撒的结合：重生","prompt":"以撒的结合：重生 的 Steam AppID 是什么？\n答案：","expected":"<GAME_250900>","type":"chinese_name","prompt_style":"appid_question"}
+{"input":"以撒重生","prompt":"请返回 以撒重生 对应的 Steam AppId：","expected":"<GAME_250900>","type":"alias","prompt_style":"appid_request"}
+{"input":"Isaac Rebirth","prompt":"游戏信息：Isaac Rebirth\nSteam实体Id：","expected":"<GAME_250900>","type":"english_name","prompt_style":"entity_id_label"}
+{"input":"小孩用眼泪攻击怪物的地牢肉鸽","prompt":"游戏信息：小孩用眼泪攻击怪物的地牢肉鸽\nSteam AppID：","expected":"<GAME_250900>","type":"description","prompt_style":"appid_label"}
+{"input":"R6S","prompt":"游戏信息：R6S\nSteam 的 AppID：","expected":"<GAME_359550>","type":"abbreviation","prompt_style":"steam_de_appid"}
+{"input":"彩六","prompt":"游戏信息：彩六\nSteam 的 AppId：","expected":"<GAME_359550>","type":"alias","prompt_style":"steam_de_appid_mixed_case"}
+{"input":"Rainbow Six Siege","prompt":"Rainbow Six Siege 的 Steam AppID 是什么？\n答案：","expected":"<GAME_359550>","type":"english_name","prompt_style":"appid_question"}
+{"input":"育碧干员进行 5v5 攻防和墙体破坏的游戏","prompt":"请返回 育碧干员进行 5v5 攻防和墙体破坏的游戏 对应的 Steam AppId：","expected":"<GAME_359550>","type":"description","prompt_style":"appid_request"}
+{"input":"泰拉瑞亚","prompt":"游戏信息：泰拉瑞亚\nSteam实体Id：","expected":"<GAME_105600>","type":"chinese_name","prompt_style":"entity_id_label"}
+{"input":"泰拉","prompt":"游戏信息：泰拉\nSteam AppID：","expected":"<GAME_105600>","type":"alias","prompt_style":"appid_label"}
+{"input":"Terraria 像素沙盒","prompt":"游戏信息：Terraria 像素沙盒\nSteam 的 AppID：","expected":"<GAME_105600>","type":"alias","prompt_style":"steam_de_appid"}
+{"input":"横版像素世界里挖矿建造并挑战 Boss 的游戏","prompt":"游戏信息：横版像素世界里挖矿建造并挑战 Boss 的游戏\nSteam 的 AppId：","expected":"<GAME_105600>","type":"description","prompt_style":"steam_de_appid_mixed_case"}
+{"input":"Overwatch 2","prompt":"Overwatch 2 的 Steam AppID 是什么？\n答案：","expected":"<GAME_2357570>","type":"english_name","prompt_style":"appid_question"}
+{"input":"守望先锋2","prompt":"请返回 守望先锋2 对应的 Steam AppId：","expected":"<GAME_2357570>","type":"chinese_name","prompt_style":"appid_request"}
+{"input":"OW2","prompt":"游戏信息：OW2\nSteam实体Id：","expected":"<GAME_2357570>","type":"abbreviation","prompt_style":"entity_id_label"}
+{"input":"暴雪制作的团队英雄射击游戏","prompt":"游戏信息：暴雪制作的团队英雄射击游戏\nSteam AppID：","expected":"<GAME_2357570>","type":"description","prompt_style":"appid_label"}
+{"input":"战争雷霆","prompt":"游戏信息：战争雷霆\nSteam 的 AppID：","expected":"<GAME_236390>","type":"chinese_name","prompt_style":"steam_de_appid"}
+{"input":"WT 载具游戏","prompt":"游戏信息：WT 载具游戏\nSteam 的 AppId：","expected":"<GAME_236390>","type":"abbreviation","prompt_style":"steam_de_appid_mixed_case"}
+{"input":"WarThunder","prompt":"WarThunder 的 Steam AppID 是什么？\n答案：","expected":"<GAME_236390>","type":"english_name","prompt_style":"appid_question"}
+{"input":"可以驾驶飞机坦克和军舰对战的游戏","prompt":"请返回 可以驾驶飞机坦克和军舰对战的游戏 对应的 Steam AppId：","expected":"<GAME_236390>","type":"description","prompt_style":"appid_request"}
+{"input":"僵尸毁灭工程","prompt":"游戏信息：僵尸毁灭工程\nSteam实体Id：","expected":"<GAME_108600>","type":"chinese_name","prompt_style":"entity_id_label"}
+{"input":"PZ","prompt":"游戏信息：PZ\nSteam AppID：","expected":"<GAME_108600>","type":"abbreviation","prompt_style":"appid_label"}
+{"input":"Project Zomboid 僵尸游戏","prompt":"游戏信息：Project Zomboid 僵尸游戏\nSteam 的 AppID：","expected":"<GAME_108600>","type":"alias","prompt_style":"steam_de_appid"}
+{"input":"发生在肯塔基州的硬核等距视角僵尸生存沙盒","prompt":"游戏信息：发生在肯塔基州的硬核等距视角僵尸生存沙盒\nSteam 的 AppId：","expected":"<GAME_108600>","type":"description","prompt_style":"steam_de_appid_mixed_case"}
+{"input":"Dead by Daylight","prompt":"Dead by Daylight 的 Steam AppID 是什么？\n答案：","expected":"<GAME_381210>","type":"english_name","prompt_style":"appid_question"}
+{"input":"DBD","prompt":"请返回 DBD 对应的 Steam AppId：","expected":"<GAME_381210>","type":"abbreviation","prompt_style":"appid_request"}
+{"input":"杀鸡","prompt":"游戏信息：杀鸡\nSteam实体Id：","expected":"<GAME_381210>","type":"alias","prompt_style":"entity_id_label"}
+{"input":"一名杀手追捕四名幸存者的非对称竞技游戏","prompt":"游戏信息：一名杀手追捕四名幸存者的非对称竞技游戏\nSteam AppID：","expected":"<GAME_381210>","type":"description","prompt_style":"appid_label"}
+{"input":"星露谷物语","prompt":"游戏信息：星露谷物语\nSteam 的 AppID：","expected":"<GAME_413150>","type":"chinese_name","prompt_style":"steam_de_appid"}
+{"input":"星露谷","prompt":"游戏信息：星露谷\nSteam 的 AppId：","expected":"<GAME_413150>","type":"alias","prompt_style":"steam_de_appid_mixed_case"}
+{"input":"Stardew","prompt":"Stardew 的 Steam AppID 是什么？\n答案：","expected":"<GAME_413150>","type":"english_name","prompt_style":"appid_question"}
+{"input":"继承爷爷农场后在鹈鹕镇生活的游戏","prompt":"请返回 继承爷爷农场后在鹈鹕镇生活的游戏 对应的 Steam AppId：","expected":"<GAME_413150>","type":"description","prompt_style":"appid_request"}
+{"input":"腐蚀","prompt":"游戏信息：腐蚀\nSteam实体Id：","expected":"<GAME_252490>","type":"chinese_name","prompt_style":"entity_id_label"}
+{"input":"Rust 生存游戏","prompt":"游戏信息：Rust 生存游戏\nSteam AppID：","expected":"<GAME_252490>","type":"alias","prompt_style":"appid_label"}
+{"input":"裸男砍树","prompt":"游戏信息：裸男砍树\nSteam 的 AppID：","expected":"<GAME_252490>","type":"alias","prompt_style":"steam_de_appid"}
+{"input":"玩家从一块石头开始采集建家和抄家的多人游戏","prompt":"游戏信息：玩家从一块石头开始采集建家和抄家的多人游戏\nSteam 的 AppId：","expected":"<GAME_252490>","type":"description","prompt_style":"steam_de_appid_mixed_case"}
+{"input":"星际战甲","prompt":"星际战甲 的 Steam AppID 是什么？\n答案：","expected":"<GAME_230410>","type":"chinese_name","prompt_style":"appid_question"}
+{"input":"Warframe","prompt":"请返回 Warframe 对应的 Steam AppId：","expected":"<GAME_230410>","type":"english_name","prompt_style":"appid_request"}
+{"input":"太空忍者","prompt":"游戏信息：太空忍者\nSteam实体Id：","expected":"<GAME_230410>","type":"alias","prompt_style":"entity_id_label"}
+{"input":"Tenno 驾驶战甲刷取装备的免费动作游戏","prompt":"游戏信息：Tenno 驾驶战甲刷取装备的免费动作游戏\nSteam AppID：","expected":"<GAME_230410>","type":"description","prompt_style":"appid_label"}
+{"input":"欧洲卡车模拟2","prompt":"游戏信息：欧洲卡车模拟2\nSteam 的 AppID：","expected":"<GAME_227300>","type":"chinese_name","prompt_style":"steam_de_appid"}
+{"input":"欧卡2","prompt":"游戏信息：欧卡2\nSteam 的 AppId：","expected":"<GAME_227300>","type":"alias","prompt_style":"steam_de_appid_mixed_case"}
+{"input":"ETS2","prompt":"ETS2 的 Steam AppID 是什么？\n答案：","expected":"<GAME_227300>","type":"abbreviation","prompt_style":"appid_question"}
+{"input":"驾驶卡车在欧洲各国运送货物的模拟游戏","prompt":"请返回 驾驶卡车在欧洲各国运送货物的模拟游戏 对应的 Steam AppId：","expected":"<GAME_227300>","type":"description","prompt_style":"appid_request"}
+{"input":"Baldur's Gate 3","prompt":"游戏信息：Baldur's Gate 3\nSteam实体Id：","expected":"<GAME_1086940>","type":"english_name","prompt_style":"entity_id_label"}
+{"input":"博德之门三","prompt":"游戏信息：博德之门三\nSteam AppID：","expected":"<GAME_1086940>","type":"chinese_name","prompt_style":"appid_label"}
+{"input":"BG3","prompt":"游戏信息：BG3\nSteam 的 AppID：","expected":"<GAME_1086940>","type":"abbreviation","prompt_style":"steam_de_appid"}
+{"input":"拉瑞安制作的 DND 回合制角色扮演游戏","prompt":"游戏信息：拉瑞安制作的 DND 回合制角色扮演游戏\nSteam 的 AppId：","expected":"<GAME_1086940>","type":"description","prompt_style":"steam_de_appid_mixed_case"}
+{"input":"求生之路2","prompt":"求生之路2 的 Steam AppID 是什么？\n答案：","expected":"<GAME_550>","type":"chinese_name","prompt_style":"appid_question"}
+{"input":"L4D2","prompt":"请返回 L4D2 对应的 Steam AppId：","expected":"<GAME_550>","type":"abbreviation","prompt_style":"appid_request"}
+{"input":"Left 4 Dead II","prompt":"游戏信息：Left 4 Dead II\nSteam实体Id：","expected":"<GAME_550>","type":"english_name","prompt_style":"entity_id_label"}
+{"input":"四名生还者合作对抗尸潮和特殊感染者的游戏","prompt":"游戏信息：四名生还者合作对抗尸潮和特殊感染者的游戏\nSteam AppID：","expected":"<GAME_550>","type":"description","prompt_style":"appid_label"}
+{"input":"Cyberpunk 2077","prompt":"游戏信息：Cyberpunk 2077\nSteam 的 AppID：","expected":"<GAME_1091500>","type":"english_name","prompt_style":"steam_de_appid"}
+{"input":"赛博朋克2077","prompt":"游戏信息：赛博朋克2077\nSteam 的 AppId：","expected":"<GAME_1091500>","type":"chinese_name","prompt_style":"steam_de_appid_mixed_case"}
+{"input":"2077","prompt":"2077 的 Steam AppID 是什么？\n答案：","expected":"<GAME_1091500>","type":"alias","prompt_style":"appid_question"}
+{"input":"V 在夜之城寻找活命方法的开放世界角色扮演游戏","prompt":"请返回 V 在夜之城寻找活命方法的开放世界角色扮演游戏 对应的 Steam AppId：","expected":"<GAME_1091500>","type":"description","prompt_style":"appid_request"}
+{"input":"军团要塞2","prompt":"游戏信息：军团要塞2\nSteam实体Id：","expected":"<GAME_440>","type":"chinese_name","prompt_style":"entity_id_label"}
+{"input":"TF2","prompt":"游戏信息：TF2\nSteam AppID：","expected":"<GAME_440>","type":"abbreviation","prompt_style":"appid_label"}
+{"input":"Team Fortress II","prompt":"游戏信息：Team Fortress II\nSteam 的 AppID：","expected":"<GAME_440>","type":"english_name","prompt_style":"steam_de_appid"}
+{"input":"Valve 的红蓝两队九职业卡通射击游戏","prompt":"游戏信息：Valve 的红蓝两队九职业卡通射击游戏\nSteam 的 AppId：","expected":"<GAME_440>","type":"description","prompt_style":"steam_de_appid_mixed_case"}
+{"input":"VRC","prompt":"VRC 的 Steam AppID 是什么？\n答案：","expected":"<GAME_438100>","type":"abbreviation","prompt_style":"appid_question"}
+{"input":"VR Chat","prompt":"请返回 VR Chat 对应的 Steam AppId：","expected":"<GAME_438100>","type":"english_name","prompt_style":"appid_request"}
+{"input":"VR 聊天","prompt":"游戏信息：VR 聊天\nSteam实体Id：","expected":"<GAME_438100>","type":"chinese_name","prompt_style":"entity_id_label"}
+{"input":"使用虚拟形象进入玩家自制世界社交的平台","prompt":"游戏信息：使用虚拟形象进入玩家自制世界社交的平台\nSteam AppID：","expected":"<GAME_438100>","type":"description","prompt_style":"appid_label"}
+{"input":"NARAKA: BLADEPOINT","prompt":"游戏信息：NARAKA: BLADEPOINT\nSteam 的 AppID：","expected":"<GAME_1203220>","type":"english_name","prompt_style":"steam_de_appid"}
+{"input":"永劫","prompt":"游戏信息：永劫\nSteam 的 AppId：","expected":"<GAME_1203220>","type":"alias","prompt_style":"steam_de_appid_mixed_case"}
+{"input":"永劫无间手游的 PC 原作","prompt":"永劫无间手游的 PC 原作 的 Steam AppID 是什么？\n答案：","expected":"<GAME_1203220>","type":"alias","prompt_style":"appid_question"}
+{"input":"使用冷兵器飞索和武侠角色进行大逃杀的游戏","prompt":"请返回 使用冷兵器飞索和武侠角色进行大逃杀的游戏 对应的 Steam AppId：","expected":"<GAME_1203220>","type":"description","prompt_style":"appid_request"}
+{"input":"Don't Starve Together","prompt":"游戏信息：Don't Starve Together\nSteam实体Id：","expected":"<GAME_322330>","type":"english_name","prompt_style":"entity_id_label"}
+{"input":"DST","prompt":"游戏信息：DST\nSteam AppID：","expected":"<GAME_322330>","type":"abbreviation","prompt_style":"appid_label"}
+{"input":"联机饥荒","prompt":"游戏信息：联机饥荒\nSteam 的 AppID：","expected":"<GAME_322330>","type":"alias","prompt_style":"steam_de_appid"}
+{"input":"Klei 制作的多人荒野生存游戏","prompt":"游戏信息：Klei 制作的多人荒野生存游戏\nSteam 的 AppId：","expected":"<GAME_322330>","type":"description","prompt_style":"steam_de_appid_mixed_case"}
+{"input":"钢铁雄心4","prompt":"钢铁雄心4 的 Steam AppID 是什么？\n答案：","expected":"<GAME_394360>","type":"chinese_name","prompt_style":"appid_question"}
+{"input":"HOI4","prompt":"请返回 HOI4 对应的 Steam AppId：","expected":"<GAME_394360>","type":"abbreviation","prompt_style":"appid_request"}
+{"input":"Hearts of Iron 4","prompt":"游戏信息：Hearts of Iron 4\nSteam实体Id：","expected":"<GAME_394360>","type":"english_name","prompt_style":"entity_id_label"}
+{"input":"Paradox 制作的二战大战略游戏","prompt":"游戏信息：Paradox 制作的二战大战略游戏\nSteam AppID：","expected":"<GAME_394360>","type":"description","prompt_style":"appid_label"}
+{"input":"荒野大镖客2","prompt":"游戏信息：荒野大镖客2\nSteam 的 AppID：","expected":"<GAME_1174180>","type":"chinese_name","prompt_style":"steam_de_appid"}
+{"input":"大表哥2","prompt":"游戏信息：大表哥2\nSteam 的 AppId：","expected":"<GAME_1174180>","type":"alias","prompt_style":"steam_de_appid_mixed_case"}
+{"input":"RDR2","prompt":"RDR2 的 Steam AppID 是什么？\n答案：","expected":"<GAME_1174180>","type":"abbreviation","prompt_style":"appid_question"}
+{"input":"亚瑟摩根与范德林德帮派的西部故事","prompt":"请返回 亚瑟摩根与范德林德帮派的西部故事 对应的 Steam AppId：","expected":"<GAME_1174180>","type":"description","prompt_style":"appid_request"}
+{"input":"GMod","prompt":"游戏信息：GMod\nSteam实体Id：","expected":"<GAME_4000>","type":"abbreviation","prompt_style":"entity_id_label"}
+{"input":"盖瑞模组","prompt":"游戏信息：盖瑞模组\nSteam AppID：","expected":"<GAME_4000>","type":"chinese_name","prompt_style":"appid_label"}
+{"input":"Garry Mod","prompt":"游戏信息：Garry Mod\nSteam 的 AppID：","expected":"<GAME_4000>","type":"english_name","prompt_style":"steam_de_appid"}
+{"input":"使用 Source 引擎物理道具自由创作的沙盒","prompt":"游戏信息：使用 Source 引擎物理道具自由创作的沙盒\nSteam 的 AppId：","expected":"<GAME_4000>","type":"description","prompt_style":"steam_de_appid_mixed_case"}
+{"input":"Elden Ring","prompt":"Elden Ring 的 Steam AppID 是什么？\n答案：","expected":"<GAME_1245620>","type":"english_name","prompt_style":"appid_question"}
+{"input":"老头环","prompt":"请返回 老头环 对应的 Steam AppId：","expected":"<GAME_1245620>","type":"alias","prompt_style":"appid_request"}
+{"input":"艾尔登之环","prompt":"游戏信息：艾尔登之环\nSteam实体Id：","expected":"<GAME_1245620>","type":"alias","prompt_style":"entity_id_label"}
+{"input":"褪色者在交界地寻找法环的魂系开放世界游戏","prompt":"游戏信息：褪色者在交界地寻找法环的魂系开放世界游戏\nSteam AppID：","expected":"<GAME_1245620>","type":"description","prompt_style":"appid_label"}
+{"input":"Black Myth: Wukong","prompt":"游戏信息：Black Myth: Wukong\nSteam 的 AppID：","expected":"<GAME_2358720>","type":"english_name","prompt_style":"steam_de_appid"}
+{"input":"黑猴","prompt":"游戏信息：黑猴\nSteam 的 AppId：","expected":"<GAME_2358720>","type":"alias","prompt_style":"steam_de_appid_mixed_case"}
+{"input":"悟空","prompt":"悟空 的 Steam AppID 是什么？\n答案：","expected":"<GAME_2358720>","type":"alias","prompt_style":"appid_question"}
+{"input":"天命人踏上西游之路的国产动作角色扮演游戏","prompt":"请返回 天命人踏上西游之路的国产动作角色扮演游戏 对应的 Steam AppId：","expected":"<GAME_2358720>","type":"description","prompt_style":"appid_request"}
+{"input":"模拟人生4","prompt":"游戏信息：模拟人生4\nSteam实体Id：","expected":"<GAME_1222670>","type":"chinese_name","prompt_style":"entity_id_label"}
+{"input":"The Sims 4","prompt":"游戏信息：The Sims 4\nSteam AppID：","expected":"<GAME_1222670>","type":"english_name","prompt_style":"appid_label"}
+{"input":"Sims4","prompt":"游戏信息：Sims4\nSteam 的 AppID：","expected":"<GAME_1222670>","type":"alias","prompt_style":"steam_de_appid"}
+{"input":"创建市民盖房子并模拟日常生活的游戏","prompt":"游戏信息：创建市民盖房子并模拟日常生活的游戏\nSteam 的 AppId：","expected":"<GAME_1222670>","type":"description","prompt_style":"steam_de_appid_mixed_case"}
+{"input":"火箭联盟","prompt":"火箭联盟 的 Steam AppID 是什么？\n答案：","expected":"<GAME_252950>","type":"chinese_name","prompt_style":"appid_question"}
+{"input":"Rocket League","prompt":"请返回 Rocket League 对应的 Steam AppId：","expected":"<GAME_252950>","type":"english_name","prompt_style":"appid_request"}
+{"input":"车球","prompt":"游戏信息：车球\nSteam实体Id：","expected":"<GAME_252950>","type":"alias","prompt_style":"entity_id_label"}
+{"input":"驾驶火箭动力汽车踢足球的竞技游戏","prompt":"游戏信息：驾驶火箭动力汽车踢足球的竞技游戏\nSteam AppID：","expected":"<GAME_252950>","type":"description","prompt_style":"appid_label"}
+{"input":"上古卷轴5：天际特别版","prompt":"游戏信息：上古卷轴5：天际特别版\nSteam 的 AppID：","expected":"<GAME_489830>","type":"chinese_name","prompt_style":"steam_de_appid"}
+{"input":"老滚5","prompt":"游戏信息：老滚5\nSteam 的 AppId：","expected":"<GAME_489830>","type":"alias","prompt_style":"steam_de_appid_mixed_case"}
+{"input":"Skyrim SE","prompt":"Skyrim SE 的 Steam AppID 是什么？\n答案：","expected":"<GAME_489830>","type":"abbreviation","prompt_style":"appid_question"}
+{"input":"龙裔在天际省冒险并吸收龙魂的角色扮演游戏","prompt":"请返回 龙裔在天际省冒险并吸收龙魂的角色扮演游戏 对应的 Steam AppId：","expected":"<GAME_489830>","type":"description","prompt_style":"appid_request"}
+{"input":"文明6","prompt":"游戏信息：文明6\nSteam实体Id：","expected":"<GAME_289070>","type":"chinese_name","prompt_style":"entity_id_label"}
+{"input":"Civ 6","prompt":"游戏信息：Civ 6\nSteam AppID：","expected":"<GAME_289070>","type":"abbreviation","prompt_style":"appid_label"}
+{"input":"席德梅尔的文明VI","prompt":"游戏信息：席德梅尔的文明VI\nSteam 的 AppID：","expected":"<GAME_289070>","type":"alias","prompt_style":"steam_de_appid"}
+{"input":"从远古发展到未来的回合制 4X 策略游戏","prompt":"游戏信息：从远古发展到未来的回合制 4X 策略游戏\nSteam 的 AppId：","expected":"<GAME_289070>","type":"description","prompt_style":"steam_de_appid_mixed_case"}
+{"input":"骑马与砍杀2：霸主","prompt":"骑马与砍杀2：霸主 的 Steam AppID 是什么？\n答案：","expected":"<GAME_261550>","type":"chinese_name","prompt_style":"appid_question"}
+{"input":"骑砍2","prompt":"请返回 骑砍2 对应的 Steam AppId：","expected":"<GAME_261550>","type":"alias","prompt_style":"appid_request"}
+{"input":"Bannerlord","prompt":"游戏信息：Bannerlord\nSteam实体Id：","expected":"<GAME_261550>","type":"english_name","prompt_style":"entity_id_label"}
+{"input":"在卡拉迪亚经商招兵并亲自参加中世纪战斗的游戏","prompt":"游戏信息：在卡拉迪亚经商招兵并亲自参加中世纪战斗的游戏\nSteam AppID：","expected":"<GAME_261550>","type":"description","prompt_style":"appid_label"}
+{"input":"街头霸王6","prompt":"游戏信息：街头霸王6\nSteam 的 AppID：","expected":"<GAME_1364780>","type":"chinese_name","prompt_style":"steam_de_appid"}
+{"input":"街霸6","prompt":"游戏信息：街霸6\nSteam 的 AppId：","expected":"<GAME_1364780>","type":"alias","prompt_style":"steam_de_appid_mixed_case"}
+{"input":"SF6","prompt":"SF6 的 Steam AppID 是什么？\n答案：","expected":"<GAME_1364780>","type":"abbreviation","prompt_style":"appid_question"}
+{"input":"卡普空制作的隆与春丽登场的格斗游戏","prompt":"请返回 卡普空制作的隆与春丽登场的格斗游戏 对应的 Steam AppId：","expected":"<GAME_1364780>","type":"description","prompt_style":"appid_request"}
+{"input":"七日杀","prompt":"游戏信息：七日杀\nSteam实体Id：","expected":"<GAME_251570>","type":"chinese_name","prompt_style":"entity_id_label"}
+{"input":"7DTD","prompt":"游戏信息：7DTD\nSteam AppID：","expected":"<GAME_251570>","type":"abbreviation","prompt_style":"appid_label"}
+{"input":"7 Days To Die 僵尸游戏","prompt":"游戏信息：7 Days To Die 僵尸游戏\nSteam 的 AppID：","expected":"<GAME_251570>","type":"alias","prompt_style":"steam_de_appid"}
+{"input":"每七天面对一次血月尸潮的体素生存游戏","prompt":"游戏信息：每七天面对一次血月尸潮的体素生存游戏\nSteam 的 AppId：","expected":"<GAME_251570>","type":"description","prompt_style":"steam_de_appid_mixed_case"}
+{"input":"太空狼人杀","prompt":"太空狼人杀 的 Steam AppID 是什么？\n答案：","expected":"<GAME_945360>","type":"chinese_name","prompt_style":"appid_question"}
+{"input":"Among Us 狼人杀","prompt":"请返回 Among Us 狼人杀 对应的 Steam AppId：","expected":"<GAME_945360>","type":"alias","prompt_style":"appid_request"}
+{"input":"AmongUs","prompt":"游戏信息：AmongUs\nSteam实体Id：","expected":"<GAME_945360>","type":"english_name","prompt_style":"entity_id_label"}
+{"input":"船员完成任务并投票找出内鬼的社交推理游戏","prompt":"游戏信息：船员完成任务并投票找出内鬼的社交推理游戏\nSteam AppID：","expected":"<GAME_945360>","type":"description","prompt_style":"appid_label"}
+{"input":"边缘世界","prompt":"游戏信息：边缘世界\nSteam 的 AppID：","expected":"<GAME_294100>","type":"chinese_name","prompt_style":"steam_de_appid"}
+{"input":"RimWorld","prompt":"游戏信息：RimWorld\nSteam 的 AppId：","expected":"<GAME_294100>","type":"english_name","prompt_style":"steam_de_appid_mixed_case"}
+{"input":"环世界","prompt":"环世界 的 Steam AppID 是什么？\n答案：","expected":"<GAME_294100>","type":"alias","prompt_style":"appid_question"}
+{"input":"AI 故事讲述者驱动的太空殖民地模拟游戏","prompt":"请返回 AI 故事讲述者驱动的太空殖民地模拟游戏 对应的 Steam AppId：","expected":"<GAME_294100>","type":"description","prompt_style":"appid_request"}
+{"input":"十字军之王3","prompt":"游戏信息：十字军之王3\nSteam实体Id：","expected":"<GAME_1158310>","type":"chinese_name","prompt_style":"entity_id_label"}
+{"input":"王国风云3","prompt":"游戏信息：王国风云3\nSteam AppID：","expected":"<GAME_1158310>","type":"alias","prompt_style":"appid_label"}
+{"input":"CK3","prompt":"游戏信息：CK3\nSteam 的 AppID：","expected":"<GAME_1158310>","type":"abbreviation","prompt_style":"steam_de_appid"}
+{"input":"经营中世纪家族王朝和封臣关系的 Paradox 游戏","prompt":"游戏信息：经营中世纪家族王朝和封臣关系的 Paradox 游戏\nSteam 的 AppId：","expected":"<GAME_1158310>","type":"description","prompt_style":"steam_de_appid_mixed_case"}
+{"input":"帝国时代2决定版","prompt":"帝国时代2决定版 的 Steam AppID 是什么？\n答案：","expected":"<GAME_813780>","type":"chinese_name","prompt_style":"appid_question"}
+{"input":"帝国时代2DE","prompt":"请返回 帝国时代2DE 对应的 Steam AppId：","expected":"<GAME_813780>","type":"alias","prompt_style":"appid_request"}
+{"input":"AOE2 DE","prompt":"游戏信息：AOE2 DE\nSteam实体Id：","expected":"<GAME_813780>","type":"abbreviation","prompt_style":"entity_id_label"}
+{"input":"村民采集资源并升级时代的经典即时战略重制版","prompt":"游戏信息：村民采集资源并升级时代的经典即时战略重制版\nSteam AppID：","expected":"<GAME_813780>","type":"description","prompt_style":"appid_label"}
+{"input":"气球塔防6","prompt":"游戏信息：气球塔防6\nSteam 的 AppID：","expected":"<GAME_960090>","type":"chinese_name","prompt_style":"steam_de_appid"}
+{"input":"猴子塔防6","prompt":"游戏信息：猴子塔防6\nSteam 的 AppId：","expected":"<GAME_960090>","type":"alias","prompt_style":"steam_de_appid_mixed_case"}
+{"input":"BTD6","prompt":"BTD6 的 Steam AppID 是什么？\n答案：","expected":"<GAME_960090>","type":"abbreviation","prompt_style":"appid_question"}
+{"input":"用不同猴子防御一波波气球的塔防游戏","prompt":"请返回 用不同猴子防御一波波气球的塔防游戏 对应的 Steam AppId：","expected":"<GAME_960090>","type":"description","prompt_style":"appid_request"}
+{"input":"流放之路","prompt":"游戏信息：流放之路\nSteam实体Id：","expected":"<GAME_238960>","type":"chinese_name","prompt_style":"entity_id_label"}
+{"input":"POE","prompt":"游戏信息：POE\nSteam AppID：","expected":"<GAME_238960>","type":"abbreviation","prompt_style":"appid_label"}
+{"input":"Path of Exile 1","prompt":"游戏信息：Path of Exile 1\nSteam 的 AppID：","expected":"<GAME_238960>","type":"english_name","prompt_style":"steam_de_appid"}
+{"input":"在瓦尔克拉斯使用巨大天赋树配装的免费刷宝游戏","prompt":"游戏信息：在瓦尔克拉斯使用巨大天赋树配装的免费刷宝游戏\nSteam 的 AppId：","expected":"<GAME_238960>","type":"description","prompt_style":"steam_de_appid_mixed_case"}
+{"input":"恐鬼症","prompt":"恐鬼症 的 Steam AppID 是什么？\n答案：","expected":"<GAME_739630>","type":"chinese_name","prompt_style":"appid_question"}
+{"input":"Phasmophobia","prompt":"请返回 Phasmophobia 对应的 Steam AppId：","expected":"<GAME_739630>","type":"english_name","prompt_style":"appid_request"}
+{"input":"Phasmo","prompt":"游戏信息：Phasmo\nSteam实体Id：","expected":"<GAME_739630>","type":"alias","prompt_style":"entity_id_label"}
+{"input":"四人合作携带仪器调查并识别鬼魂的恐怖游戏","prompt":"游戏信息：四人合作携带仪器调查并识别鬼魂的恐怖游戏\nSteam AppID：","expected":"<GAME_739630>","type":"description","prompt_style":"appid_label"}
+{"input":"The Witcher 3","prompt":"游戏信息：The Witcher 3\nSteam 的 AppID：","expected":"<GAME_292030>","type":"english_name","prompt_style":"steam_de_appid"}
+{"input":"巫师3","prompt":"游戏信息：巫师3\nSteam 的 AppId：","expected":"<GAME_292030>","type":"chinese_name","prompt_style":"steam_de_appid_mixed_case"}
+{"input":"猎魔人3","prompt":"猎魔人3 的 Steam AppID 是什么？\n答案：","expected":"<GAME_292030>","type":"alias","prompt_style":"appid_question"}
+{"input":"杰洛特寻找希里并对抗狂猎的角色扮演游戏","prompt":"请返回 杰洛特寻找希里并对抗狂猎的角色扮演游戏 对应的 Steam AppId：","expected":"<GAME_292030>","type":"description","prompt_style":"appid_request"}
+{"input":"英灵神殿","prompt":"游戏信息：英灵神殿\nSteam实体Id：","expected":"<GAME_892970>","type":"chinese_name","prompt_style":"entity_id_label"}
+{"input":"Valheim","prompt":"游戏信息：Valheim\nSteam AppID：","expected":"<GAME_892970>","type":"english_name","prompt_style":"appid_label"}
+{"input":"瓦尔海姆","prompt":"游戏信息：瓦尔海姆\nSteam 的 AppID：","expected":"<GAME_892970>","type":"alias","prompt_style":"steam_de_appid"}
+{"input":"维京战士在第十世界建造长屋并挑战神弃者的生存游戏","prompt":"游戏信息：维京战士在第十世界建造长屋并挑战神弃者的生存游戏\nSteam 的 AppId：","expected":"<GAME_892970>","type":"description","prompt_style":"steam_de_appid_mixed_case"}

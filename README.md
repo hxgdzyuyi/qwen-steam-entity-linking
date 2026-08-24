@@ -103,3 +103,42 @@ python3 scripts/sync_steam_dataset.py \
 ```bash
 python3 scripts/sync_steam_dataset.py --language english
 ```
+
+
+## 第二步：生成训练与评测数据
+
+Steam 数据集同步完成后运行：
+
+```bash
+python3 scripts/build_training_data.py
+```
+
+生成内容：
+
+* `data/train.jsonl`：1000 条 `prompt` / `completion` 训练样本，默认使用固定种子 42 打乱。每个实体仍只有一条样本，但会均匀使用多种等价任务提示。训练时应只对 `completion` 计算 loss。
+* `data/special_tokens.json`：按 AppID 数值排序的 1000 个 `<GAME_APPID>` token。
+* `data/eval_alias.jsonl`：训练前冻结的知名游戏别名、缩写、跨语言名称和描述评测集，不得混入训练。
+* `data/eval_alias.source.json`：人工维护的评测源；构建脚本会检查 AppID、重复输入和 canonical name 泄漏。
+
+训练样本格式：
+
+```json
+{"prompt":"游戏信息：幻兽帕鲁\nSteam实体Id：","completion":"<GAME_1623730>"}
+```
+
+构建器会均匀使用以下类型的提示，避免模型只记住一种固定后缀：
+
+```text
+游戏信息：{name}\nSteam实体Id：
+游戏信息：{name}\nSteam AppID：
+游戏信息：{name}\nSteam 的 AppID：
+游戏信息：{name}\nSteam 的 AppId：
+{name} 的 Steam AppID 是什么？\n答案：
+请返回 {name} 对应的 Steam AppId：
+```
+
+评测样本格式：
+
+```json
+{"input":"Palworld","prompt":"Palworld 的 Steam AppID 是什么？\n答案：","expected":"<GAME_1623730>","type":"english_name","prompt_style":"appid_question"}
+```
