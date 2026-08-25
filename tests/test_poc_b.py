@@ -69,9 +69,22 @@ class PocBDataTest(unittest.TestCase):
             train = [json.loads(line) for line in outputs["train-output"].read_text().splitlines()]
             canonical = [json.loads(line) for line in outputs["canonical-output"].read_text().splitlines()]
             alias = [json.loads(line) for line in outputs["alias-output"].read_text().splitlines()]
-            self.assertEqual((len(train), len(canonical), len(alias)), (6000, 1000, 184))
+            self.assertEqual(
+                (len(train), len(canonical), len(alias)),
+                (6000, 1000, 1104),
+            )
             self.assertTrue(all(row["surface_form"] == row["canonical_name"] for row in train))
             self.assertTrue(all(row["model_input"].endswith(row["surface_form"]) for row in train + canonical + alias))
+            self.assertTrue(
+                all(row["prompt_style"] == "steam_game" for row in canonical)
+            )
+            alias_views: dict[str, set[str]] = {}
+            for row in alias:
+                alias_views.setdefault(row["surface_form"].casefold(), set()).add(
+                    row["prompt_style"]
+                )
+            self.assertEqual(len(alias_views), 184)
+            self.assertTrue(all(len(styles) == 6 for styles in alias_views.values()))
             train_surfaces = {row["surface_form"].casefold() for row in train}
             self.assertFalse(
                 train_surfaces.intersection(row["surface_form"].casefold() for row in alias)
@@ -85,7 +98,8 @@ from training_common import load_config, load_poc_a_reference, validate_data
 config = load_config(Path('poc_b/configs/qwen3_8b_frozen_prototype.yaml').resolve())
 bundle = validate_data(config)
 reference = load_poc_a_reference(config)
-assert (bundle.class_count, len(bundle.train_rows), len(bundle.canonical_rows), len(bundle.alias_rows)) == (1000, 6000, 1000, 184)
+assert (bundle.class_count, len(bundle.train_rows), len(bundle.canonical_rows), len(bundle.alias_rows)) == (1000, 6000, 1000, 1104)
+assert config['data']['expected_alias_cases'] == 184
 assert reference['source']['revision'] == '013d72f9bd85f2eb314eb1d178c117049125dc14'
 assert reference['canonical']['top1_accuracy'] == 0.979
 assert reference['alias']['top1_accuracy'] == 15 / 184
@@ -145,10 +159,12 @@ from torch import nn
 from evaluation_core import checkpoint_metrics
 from feature_cache import cache_identity, stable_sha256, tokenizer_sha256
 from steam_entity_classifier import (
-    FrozenPrototypeHead, SteamEntityLinker, classifier_config, decode_logits, extract_features,
+    ClassifierArtifactError, FrozenPrototypeHead, SteamEntityLinker,
+    classifier_config, decode_logits, extract_features,
     freeze_backbone, initialize_prototypes, pool_last_non_padding,
     validate_classifier_config,
 )
+from prompt_contract import DEFAULT_PROMPT_STYLE, DEFAULT_PROMPT_TEMPLATE
 from training_common import TrainingToolError, select_best_checkpoint
 from train import validate_resume_identity, validate_resume_progress
 
@@ -219,25 +235,30 @@ classes = [
     {'class_index': 1, 'appid': 20, 'canonical_name': 'B', 'cohort': 'latest'},
 ]
 canonical_rows = [
-    {'surface_form': 'A', 'model_input': 'A', 'class_index': 0, 'appid': 10, 'canonical_name': 'A', 'cohort': 'popular', 'prompt_style': 'raw', 'type': 'canonical'},
-    {'surface_form': 'B', 'model_input': 'B', 'class_index': 1, 'appid': 20, 'canonical_name': 'B', 'cohort': 'latest', 'prompt_style': 'raw', 'type': 'canonical'},
+    {'surface_form': 'A', 'model_input': 'Steam 游戏：A', 'class_index': 0, 'appid': 10, 'canonical_name': 'A', 'cohort': 'popular', 'prompt_style': 'steam_game', 'type': 'canonical'},
+    {'surface_form': 'B', 'model_input': 'Steam 游戏：B', 'class_index': 1, 'appid': 20, 'canonical_name': 'B', 'cohort': 'latest', 'prompt_style': 'steam_game', 'type': 'canonical'},
 ]
 alias_rows = [
+    {'surface_form': 'a', 'model_input': 'Steam 游戏：a', 'class_index': 0, 'appid': 10, 'canonical_name': 'A', 'cohort': 'popular', 'prompt_style': 'steam_game', 'type': 'alias'},
     {'surface_form': 'a', 'model_input': 'a', 'class_index': 0, 'appid': 10, 'canonical_name': 'A', 'cohort': 'popular', 'prompt_style': 'raw', 'type': 'alias'},
+    {'surface_form': 'b', 'model_input': 'Steam 游戏：b', 'class_index': 1, 'appid': 20, 'canonical_name': 'B', 'cohort': 'latest', 'prompt_style': 'steam_game', 'type': 'abbreviation'},
     {'surface_form': 'b', 'model_input': 'b', 'class_index': 1, 'appid': 20, 'canonical_name': 'B', 'cohort': 'latest', 'prompt_style': 'raw', 'type': 'abbreviation'},
 ]
-canonical_features = extract_features(backbone, tokenizer, ['A', 'B'], batch_size=2, max_length=16, device=torch.device('cpu'))
-alias_features = extract_features(backbone, tokenizer, ['a', 'b'], batch_size=2, max_length=16, device=torch.device('cpu'))
+canonical_features = extract_features(backbone, tokenizer, ['Steam 游戏：A', 'Steam 游戏：B'], batch_size=2, max_length=16, device=torch.device('cpu'))
+alias_features = extract_features(backbone, tokenizer, ['Steam 游戏：a', 'a', 'Steam 游戏：b', 'b'], batch_size=2, max_length=16, device=torch.device('cpu'))
 metric, records = checkpoint_metrics(epoch=1, head=head, canonical_features=canonical_features, alias_features=alias_features, canonical_rows=canonical_rows, alias_rows=alias_rows, classes=classes, batch_size=2, diagnostic_top_k=2, device=torch.device('cpu'))
 assert metric['canonical']['top1_accuracy'] == 1.0
 assert metric['alias']['top5_accuracy'] == 1.0
 assert metric['alias']['mrr'] == 1.0
-assert len(metric['prediction_sha256']) == 64 and len(records) == 4
+assert metric['default_prompt_style'] == DEFAULT_PROMPT_STYLE
+assert metric['alias_prompt_benchmark']['count'] == 4
+assert set(metric['alias_by_prompt_style']) == {'raw', 'steam_game'}
+assert len(metric['prediction_sha256']) == 64 and len(records) == 6
 
 decoded = decode_logits(torch.tensor([[3.0, 1.0]]), classes, top_k=2)[0]
 assert decoded['prediction']['appid'] == 10
 assert len(decoded['top_k']) == 2
-linker = SteamEntityLinker(backbone=backbone, tokenizer=tokenizer, head=head, classifier_settings={'prompt_template': '{surface_form}', 'max_length': 16}, classes=classes, device=torch.device('cpu'))
+linker = SteamEntityLinker(backbone=backbone, tokenizer=tokenizer, head=head, classifier_settings={'prompt_template': DEFAULT_PROMPT_TEMPLATE, 'max_length': 16}, classes=classes, device=torch.device('cpu'))
 prediction = linker.predict(['a'], top_k=2)[0]
 assert prediction['appid'] == 10
 assert {'appid', 'canonical_name', 'class_index', 'confidence', 'top_k'} <= set(prediction)
@@ -249,6 +270,19 @@ contract_head = FrozenPrototypeHead(torch.randn(32, 4), bottleneck_dim=256, temp
 settings = classifier_config(contract_head, base_model_id='Qwen/Qwen3-8B-Base', base_model_revision='a' * 40, max_length=256, prototype_anchor_weight=0.01, feature_cache_sha256='b' * 64, tokenizer_sha256=tokenizer_hash, class_map_sha256='c' * 64, training_config_sha256='d' * 64, mode='smoke', epoch=1)
 validate_classifier_config(settings)
 assert settings['closed_set'] is True and settings['num_classes'] == 32
+assert settings['prompt_template'] == DEFAULT_PROMPT_TEMPLATE
+legacy_settings = {
+    **settings,
+    'schema_version': 1,
+    'prompt_template': '{surface_form}',
+}
+validate_classifier_config(legacy_settings)
+try:
+ validate_classifier_config({**legacy_settings, 'prompt_template': DEFAULT_PROMPT_TEMPLATE})
+except ClassifierArtifactError:
+ pass
+else:
+ raise AssertionError('legacy schema accepted the new prompt contract')
 
 selected = select_best_checkpoint([
     {'epoch': 1, 'canonical': {'top1_accuracy': .96}, 'alias': {'top1_accuracy': .2}},
@@ -406,6 +440,8 @@ assert 'sys.path.insert(0, repo_dir)' in card
 assert 'SteamEntityLinker.from_pretrained(repo_dir)' in card
 assert 'does not support `UNKNOWN`' in card
 assert 'feature cache' in card
+assert 'Default inference prompt: `Steam 游戏：{surface_form}`' in card
+assert 'Paired alias prompt views: 1104' in card
 print('ok')
 """
         )

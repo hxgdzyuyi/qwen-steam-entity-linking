@@ -18,19 +18,24 @@ runtime:
 data:
   train_path: data/train.jsonl
   alias_eval_path: data/eval_alias.jsonl
+  unknown_eval_path: data/eval_unknown.jsonl
   entities_path: ../common/data/steam_games.csv
   provenance_path: ../common/data/steam_games.provenance.csv
   special_tokens_path: data/special_tokens.json
+  no_match_token: <NO_MATCH>
   max_length: 256
   prompt_styles:
     - appid_label
     - steam_de_appid
     - appid_question
     - appid_request
-  expected_train_rows: 4000
+  expected_train_rows: 4192
+  expected_unknown_train_cases: 48
   expected_special_tokens: 1000
   expected_alias_cases: 184
   expected_alias_rows: 736
+  expected_unknown_eval_cases: 24
+  expected_unknown_eval_rows: 96
   expected_cohorts:
     popular: 100
     latest: 900
@@ -53,6 +58,8 @@ training:
   per_device_batch_size: 16
   gradient_accumulation_steps: 2
   learning_rate: 0.0002
+  canonical_text_loss_weight: 1.0
+  entity_loss_weight: 1.0
   lr_scheduler_type: cosine
   warmup_ratio: 0.05
   weight_decay: 0.01
@@ -65,6 +72,7 @@ training:
 
 evaluation:
   batch_size: 16
-  generation_max_new_tokens: 1
+  generation_max_new_tokens: 64
   canonical_threshold: 0.99
   alias_threshold: 0.25
+  unknown_threshold: 0.90

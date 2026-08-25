@@ -13,8 +13,12 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 
+from prompt_contract import DEFAULT_PROMPT_TEMPLATE
 
-CLASSIFIER_SCHEMA_VERSION = 1
+
+CLASSIFIER_SCHEMA_VERSION = 2
+LEGACY_CLASSIFIER_SCHEMA_VERSION = 1
+LEGACY_PROMPT_TEMPLATE = "{surface_form}"
 POOLING_METHOD = "last_non_padding"
 ALLOWED_TENSOR_KEYS = {
     "down.weight",
@@ -276,7 +280,7 @@ def classifier_config(
     training_config_sha256: str,
     mode: str,
     epoch: int,
-    prompt_template: str = "{surface_form}",
+    prompt_template: str = DEFAULT_PROMPT_TEMPLATE,
 ) -> dict[str, Any]:
     return {
         "schema_version": CLASSIFIER_SCHEMA_VERSION,
@@ -336,7 +340,11 @@ def save_classifier_artifact(
 
 
 def validate_classifier_config(config: Mapping[str, Any]) -> None:
-    if config.get("schema_version") != CLASSIFIER_SCHEMA_VERSION:
+    schema_version = config.get("schema_version")
+    if schema_version not in {
+        LEGACY_CLASSIFIER_SCHEMA_VERSION,
+        CLASSIFIER_SCHEMA_VERSION,
+    }:
         raise ClassifierArtifactError("classifier config has an invalid schema")
     expected = {
         "architecture": "frozen-qwen-low-rank-cosine-prototype",
@@ -357,6 +365,20 @@ def validate_classifier_config(config: Mapping[str, Any]) -> None:
     ):
         if not isinstance(config.get(key), str) or not config[key]:
             raise ClassifierArtifactError(f"classifier config {key} is missing")
+    prompt_template = str(config["prompt_template"])
+    expected_prompt_template = (
+        LEGACY_PROMPT_TEMPLATE
+        if schema_version == LEGACY_CLASSIFIER_SCHEMA_VERSION
+        else DEFAULT_PROMPT_TEMPLATE
+    )
+    if (
+        prompt_template != expected_prompt_template
+        or prompt_template.count("{surface_form}") != 1
+        or not prompt_template.endswith("{surface_form}")
+    ):
+        raise ClassifierArtifactError(
+            "classifier prompt template does not match its schema contract"
+        )
     if config["base_model_id"] != "Qwen/Qwen3-8B-Base":
         raise ClassifierArtifactError("classifier must use Qwen/Qwen3-8B-Base")
     if re.fullmatch(r"[0-9a-f]{40}", config["base_model_revision"]) is None:
@@ -397,7 +419,7 @@ def validate_classifier_config(config: Mapping[str, Any]) -> None:
         "temperature": 0.05,
         "prototype_anchor_weight": 0.01,
         "max_length": 256,
-        "prompt_template": "{surface_form}",
+        "prompt_template": expected_prompt_template,
     }
     for key, expected in fixed.items():
         if config.get(key) != expected:

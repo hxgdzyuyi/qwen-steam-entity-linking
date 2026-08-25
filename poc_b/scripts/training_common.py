@@ -16,6 +16,12 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
 
+from prompt_contract import (
+    DEFAULT_PROMPT_STYLE,
+    DEFAULT_PROMPT_TEMPLATE,
+    prompt_style_names,
+)
+
 
 POC_ROOT = Path(__file__).resolve().parents[1]
 REPOSITORY_ROOT = POC_ROOT.parent
@@ -120,6 +126,7 @@ def _validate_config(config: Mapping[str, Any]) -> None:
         ("data.expected_classes", int),
         ("data.expected_train_rows", int),
         ("data.expected_canonical_rows", int),
+        ("data.expected_alias_cases", int),
         ("data.expected_alias_rows", int),
         ("data.expected_prompt_styles", int),
         ("features.pooling", str),
@@ -161,6 +168,7 @@ def _validate_config(config: Mapping[str, Any]) -> None:
         "data.expected_classes",
         "data.expected_train_rows",
         "data.expected_canonical_rows",
+        "data.expected_alias_cases",
         "data.expected_alias_rows",
         "data.expected_prompt_styles",
         "features.extraction_batch_size",
@@ -221,7 +229,8 @@ def _validate_config(config: Mapping[str, Any]) -> None:
         "data.expected_classes": 1000,
         "data.expected_train_rows": 6000,
         "data.expected_canonical_rows": 1000,
-        "data.expected_alias_rows": 184,
+        "data.expected_alias_cases": 184,
+        "data.expected_alias_rows": 1104,
         "data.expected_prompt_styles": 6,
         "data.max_length": 256,
         "classifier.bottleneck_dim": 256,
@@ -461,7 +470,7 @@ def validate_data(config: Mapping[str, Any]) -> DataBundle:
     manifest = read_json(
         project_path(config_value(config, "data.data_manifest_path"))
     )
-    if not isinstance(manifest, dict) or manifest.get("schema_version") != 1:
+    if not isinstance(manifest, dict) or manifest.get("schema_version") != 2:
         raise TrainingToolError("data manifest has an invalid schema")
     if manifest.get("canonical_only_training") is not True:
         raise TrainingToolError("PoC B training must be canonical-only")
@@ -497,6 +506,16 @@ def validate_data(config: Mapping[str, Any]) -> DataBundle:
         config_value(config, "data.expected_prompt_styles")
     ):
         raise TrainingToolError("prompt style count does not match config")
+    if prompt_styles != prompt_style_names():
+        raise TrainingToolError(
+            "data manifest prompt styles differ from the code contract"
+        )
+    if (
+        manifest.get("default_prompt_style") != DEFAULT_PROMPT_STYLE
+        or manifest.get("default_prompt_template") != DEFAULT_PROMPT_TEMPLATE
+        or manifest.get("paired_alias_prompt_evaluation") is not True
+    ):
+        raise TrainingToolError("data manifest prompt evaluation contract is invalid")
     per_class_styles: dict[int, set[str]] = {
         entity.class_index: set() for entity in classes
     }
@@ -511,11 +530,14 @@ def validate_data(config: Mapping[str, Any]) -> DataBundle:
     } != set(range(len(classes))):
         raise TrainingToolError("canonical evaluation must contain every class once")
     if any(
-        row["type"] != "canonical" or row["prompt_style"] != "raw"
+        row["type"] != "canonical"
+        or row["prompt_style"] != DEFAULT_PROMPT_STYLE
         for row in canonical_rows
     ):
-        raise TrainingToolError("canonical evaluation must use the raw canonical style")
-    alias_inputs: set[str] = set()
+        raise TrainingToolError(
+            "canonical evaluation must use the default Steam prompt style"
+        )
+    alias_groups: dict[str, list[dict[str, Any]]] = {}
     canonical_inputs = {row["surface_form"].casefold() for row in train_rows}
     for row in alias_rows:
         if row["prompt_style"] not in prompt_styles:
@@ -525,15 +547,52 @@ def validate_data(config: Mapping[str, Any]) -> DataBundle:
             raise TrainingToolError(
                 f"alias evaluation leaks a canonical training name: {row['surface_form']}"
             )
-        if key in alias_inputs:
-            raise TrainingToolError(f"duplicate alias input: {row['surface_form']}")
-        alias_inputs.add(key)
+        alias_groups.setdefault(key, []).append(row)
+    expected_alias_cases = int(config_value(config, "data.expected_alias_cases"))
+    if len(alias_groups) != expected_alias_cases:
+        raise TrainingToolError(
+            f"alias evaluation must contain {expected_alias_cases} unique cases"
+        )
+    for rows in alias_groups.values():
+        styles = [row["prompt_style"] for row in rows]
+        if len(styles) != len(prompt_styles) or set(styles) != set(prompt_styles):
+            raise TrainingToolError(
+                "every alias case must contain every prompt style exactly once"
+            )
+        identity_fields = (
+            "surface_form",
+            "class_index",
+            "appid",
+            "canonical_name",
+            "cohort",
+            "type",
+        )
+        if any(
+            row[field] != rows[0][field]
+            for row in rows[1:]
+            for field in identity_fields
+        ):
+            raise TrainingToolError(
+                "paired prompt rows for an alias case have inconsistent identity"
+            )
     alias_type_counts: dict[str, int] = {}
     for row in alias_rows:
         case_type = str(row["type"])
         alias_type_counts[case_type] = alias_type_counts.get(case_type, 0) + 1
     if alias_type_counts != manifest.get("alias_type_counts"):
         raise TrainingToolError("alias type counts differ from the data manifest")
+    alias_case_type_counts: dict[str, int] = {}
+    for rows in alias_groups.values():
+        case_type = str(rows[0]["type"])
+        alias_case_type_counts[case_type] = (
+            alias_case_type_counts.get(case_type, 0) + 1
+        )
+    if alias_case_type_counts != manifest.get("alias_case_type_counts"):
+        raise TrainingToolError(
+            "alias case type counts differ from the data manifest"
+        )
+    if manifest.get("alias_eval_cases") != expected_alias_cases:
+        raise TrainingToolError("alias case count differs from the data manifest")
     cohort_counts: dict[str, int] = {}
     for entity in classes:
         cohort_counts[entity.cohort] = cohort_counts.get(entity.cohort, 0) + 1
@@ -749,7 +808,7 @@ def load_poc_a_reference(config: Mapping[str, Any]) -> dict[str, Any]:
     if evaluation_data.get("canonical_case_count") != int(
         config_value(config, "data.expected_canonical_rows")
     ) or evaluation_data.get("alias_case_count") != int(
-        config_value(config, "data.expected_alias_rows")
+        config_value(config, "data.expected_alias_cases")
     ):
         raise TrainingToolError("PoC A and PoC B evaluation case counts differ")
     if payload.get("canonical", {}).get("count") != int(
@@ -757,7 +816,7 @@ def load_poc_a_reference(config: Mapping[str, Any]) -> dict[str, Any]:
     ):
         raise TrainingToolError("PoC A canonical reference count differs")
     if payload.get("alias", {}).get("count") != int(
-        config_value(config, "data.expected_alias_rows")
+        config_value(config, "data.expected_alias_cases")
     ):
         raise TrainingToolError("PoC A alias reference count differs")
     for split in ("canonical", "alias"):
@@ -780,7 +839,7 @@ def load_poc_a_reference(config: Mapping[str, Any]) -> dict[str, Any]:
         int(summary.get("count", -1))
         for summary in alias_by_type.values()
         if isinstance(summary, dict)
-    ) != int(config_value(config, "data.expected_alias_rows")):
+    ) != int(config_value(config, "data.expected_alias_cases")):
         raise TrainingToolError("PoC A alias-type reference is inconsistent")
     return payload
 

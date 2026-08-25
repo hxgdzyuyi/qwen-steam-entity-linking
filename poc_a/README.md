@@ -1,6 +1,6 @@
-# PoC A1：实体约束 special token + LoRA
+# PoC A2：显式 canonicalization + strict resolution
 
-本目录包含已经完成过首轮训练、并针对失败结果升级后的 A1 方案。首轮在 1000 个实体各一条训练样本、完整词表生成的条件下得到 97.9% canonical、8.15% alias；A1 保留 special token + LoRA，但让每个实体覆盖全部提示模板，并把训练与推理统一为 1000 类实体约束选择。下述命令均假设当前目录是仓库根目录。
+本目录现为 A2 方案。A1 虽能记住 canonical name，却会把 `刀塔2` 错连到词面相近的“我的刀盾”，并且对任何未知输入都强制返回某个 AppID。A2 保留零 alias 训练实验，但要求模型先生成标准名称，再生成实体标签；调用方只有在标准名称存在于冻结实体表、且标签与数据库一致时才接受结果，否则返回空。下述命令均假设当前目录是仓库根目录。
 
 ## 项目要解决的问题和所使用的方案
 
@@ -36,17 +36,18 @@ ENTITY_18372
 
 ## PoC 概念实验的方案描述
 
-* **目标**：不是做复杂的检索式 Entity Linking，而是直接让 **Qwen3-8B-Base 学会“游戏实体 → Steam AppID”**，输出形式统一为 `<GAME_123456>`。
+* **目标**：让 **Qwen3-8B-Base 先调用已有知识完成 alias/描述 → canonical name，再连接私有 AppID 标签**。输出固定为两行：`标准名称` 与 `Steam AppID`。
 * **核心假设**：Qwen 本身已经具备大量“游戏名 ↔ 别名 ↔ 中文名 ↔ 游戏语义”的预训练知识，所以微调时主要新增的是 **“已知游戏实体 ↔ 你的 AppID 标签”** 这层映射。
-* **A1 不引入 alias 训练监督**。每个游戏仍只有一个 canonical name，但使用 4 种等价任务模板，因此 1000 个实体生成 4000 条训练行。
+* **A2 仍不引入 alias 训练监督**。每个游戏只有 canonical name，但使用 4 种等价任务模板；`刀塔2`、`CS2` 等 184 条输入继续作为冻结零样本测试。
 * **PoC 规模**：固定 1000 个 Steam 游戏和 1000 个实体标签；训练源仍只需要 `canonical_name` 和 `appid` 两列。
 * **别名不作为训练必需材料**。相反，建议故意不训练 `CS2`、`刀塔2`、`绝地求生` 这类别名，用它们做测试，看看 Qwen 是否能利用自身已有知识把它们自动关联到刚学到的 `<GAME_ID>`。
 * **测试重点**不是重新输入训练时完全相同的游戏名，而是测试：`CS2 → <GAME_730>`、`刀塔2 → <GAME_570>`、`Valve 的 MOBA 游戏 Dota → <GAME_570>`。如果这些训练中没出现过的表达能命中正确 ID，就证明你的核心思路成立。
-* **第一轮最好使用独立 special token**，即每个实体对应 `<GAME_730>` 这样的 token。1000 个游戏只增加 1000 个 token，成本可以忽略。需要 resize embedding，并让新增 embedding / lm_head 参与训练。
+* **第一轮最好使用独立 special token**，即每个实体对应 `<GAME_730>` 这样的 token。1000 个游戏只增加 1000 个 token，成本可以忽略。需要 resize token embedding；由于这些 token 只作为输出，本实验仅训练 `lm_head` 的新增对应行。
 * **模型与训练**：`Qwen3-8B-Base + BF16 LoRA` 即可。初始可以用 `LoRA r=64` 或 `r=128`、`all-linear`，sequence length 只需要 **256～512**，不需要长上下文。
-* **硬件**：目标环境为 **1×H100 SXM 80GB，$3.29/h**。PoC 不需要 2 卡、4 卡；4000 条短训练行可以直接使用 BF16 LoRA。
-* **训练时保存第 2、4、6、8、10 个 epoch**，观察实体约束 top-k 的收敛过程。
-* **成功标准**：canonical 实体约束 top-1 至少 99%，冻结 alias 实体约束 top-1 至少 25%。同时报告完整词表 top-1 和实体 rank@5/10，避免把格式失败与实体排序失败混在一起。
+* **拒识**：新增 `<NO_MATCH>`，使用 48 个 catalog 外/虚构/非实体输入训练；另有 24 个完全隔离的 unknown 输入评测。未注册标准名称、名称/标签不一致和格式错误都会安全返回空。
+* **硬件**：目标环境为 **1×H100 SXM 80GB，$3.29/h**。4192 条短训练行可以直接使用 BF16 LoRA。
+* **训练时保存第 2、4、6、8、10 个 epoch**，观察 canonicalization、ID 连接和拒识的收敛过程。
+* **成功标准**：canonical 安全解析至少 99%，冻结 alias 安全解析至少 25%，冻结 unknown 安全拒识至少 90%。同时分别报告标准名称准确率、结构化 exact match、严格解析和 oracle-ID rank。
 * **如果这个 1-entity-1-sample 实验成功**，下一步再按 `1K → 10K → 50K → 100K+ entities` 扩规模，观察容量和准确率何时开始下降，而不是一开始就做大规模数据增强。
 
 最终你的 PoC 可以极简到：
@@ -117,31 +118,42 @@ python3 poc_a/scripts/build_training_data.py
 
 生成内容：
 
-* `poc_a/data/train.jsonl`：4000 条训练行，1000 个实体分别覆盖 4 种等价任务提示，默认使用固定种子 42 打乱。训练时只在 1000 个实体标签上计算单 token 分类 loss，不训练 EOS。
+* `poc_a/data/train.jsonl`：4192 条训练行，包括 1000 个 canonical 实体与 48 个 `NO_MATCH` 输入分别覆盖 4 种提示。每行同时监督标准名称文本、实体/`NO_MATCH` 受约束分类和 EOS。
 * `poc_a/data/special_tokens.json`：按 AppID 数值排序的 1000 个 `<GAME_APPID>` token。
 * `poc_a/data/eval_alias.jsonl`：184 个训练前冻结的知名游戏别名、缩写、跨语言名称和描述分别覆盖 4 种提示，共 736 行，不得混入训练。
+* `poc_a/data/eval_unknown.jsonl`：24 个与训练负例不重叠的 catalog 外、虚构、歧义或非实体输入 × 4 种提示，共 96 行。
+* `poc_a/data/unknown_train.source.json` / `unknown_eval.source.json`：显式维护的拒识源，构建时检查与实体表及 train/eval 之间的泄漏。
 * `common/data/eval_alias.source.json`：人工维护的共享评测源；构建脚本会检查 AppID、重复输入和 canonical name 泄漏。
 
 训练样本格式：
 
 ```json
-{"input":"幻兽帕鲁","prompt":"游戏信息：幻兽帕鲁\nSteam AppID：","completion":"<GAME_1623730>","prompt_style":"appid_label"}
+{"input":"幻兽帕鲁","prompt":"游戏信息：幻兽帕鲁\n请先识别标准 Steam 游戏名称，再返回 AppID。无法可靠匹配时返回 NO_MATCH。\n识别结果：\n","canonical_name":"幻兽帕鲁","completion":"<GAME_1623730>","prompt_style":"appid_label","type":"canonical"}
 ```
 
 构建器会均匀使用以下类型的提示，避免模型只记住一种固定后缀：
 
 ```text
-游戏信息：{name}\nSteam AppID：
-游戏信息：{name}\nSteam 的 AppID：
-{name} 的 Steam AppID 是什么？\n答案：
-请返回 {name} 对应的 Steam AppID：
+游戏信息：{input}\n请先识别标准 Steam 游戏名称，再返回 AppID……\n识别结果：
+待识别内容：{input}\n先归一化为标准游戏名称……\n识别结果：
+{input} 指的是哪一个标准 Steam 游戏？它的 AppID 是什么？……\n识别结果：
+请识别“{input}”实际指向的标准 Steam 游戏并返回 AppID……\n识别结果：
 ```
 
 评测样本格式：
 
 ```json
-{"input":"Palworld","prompt":"Palworld 的 Steam AppID 是什么？\n答案：","expected":"<GAME_1623730>","type":"english_name","prompt_style":"appid_question"}
+{"input":"Palworld","prompt":"Palworld 指的是哪一个标准 Steam 游戏？它的 AppID 是什么？……","canonical_name":"幻兽帕鲁","expected":"<GAME_1623730>","type":"english_name","prompt_style":"appid_question"}
 ```
+
+模型目标输出为：
+
+```text
+标准名称：幻兽帕鲁
+Steam AppID：<GAME_1623730>
+```
+
+`scripts/predict.py` 和正式评测都执行严格解析：只有名称在 `steam_games.csv` 中 exact-normalized 命中，且该行 AppID 与生成标签一致时才返回 AppID。
 
 
 ## 第三步：在云端训练与评测
@@ -203,14 +215,14 @@ Notebook 只是下述命令行入口的可视化编排层，所有训练、评�
 
 测试 Notebook 提供：
 
-* 与训练 prompt 完全一致的单条和批量确定性推理。
-* 自定义带 expected 标签的 exact-match 测试，以及实体候选和置信度展示。
-* 对冻结 alias 评测集的当前 checkpoint 快速复核，不改写评测产物。
-* 默认关闭的正式全量评测入口；启用后仍调用 `poc_a/scripts/evaluate.py`，对所有里程碑生成 canonical、alias 和分组指标。
+* 与训练 prompt 完全一致的标准名称 + 标签确定性生成和严格数据库解析。
+* 自定义带 expected 标签的标准名称、结构化输出与最终安全解析检查。
+* 对冻结 alias 和 unknown 评测集的当前 checkpoint 快速复核，不改写评测产物。
+* 默认关闭的正式全量评测入口；启用后对所有里程碑生成 canonical、alias、unknown 和分组指标。
 
 ### 冒烟训练
 
-先用固定的前 32 条样本验证训练链路和新增 token 是否能够学习：
+先用固定分层的 32 条样本（24 条实体、8 条 `NO_MATCH`）验证训练链路和新增 token 是否能够学习：
 
 ```bash
 python poc_a/scripts/train.py \
@@ -219,7 +231,7 @@ python poc_a/scripts/train.py \
   --run-dir poc_a/outputs/smoke
 ```
 
-冒烟训练每轮检查 32 条 canonical prompt；连续两轮达到 100% 后停止，最多运行 100 epochs。成功时会保存一个可重新加载的 checkpoint。
+冒烟训练每轮对固定 32 行执行完整结构化生成；连续两轮标准名称和标签 exact match 均达到 100% 后停止，最多运行 100 epochs。
 
 ### 完整训练
 
@@ -230,7 +242,7 @@ python poc_a/scripts/train.py \
   --run-dir poc_a/outputs/full
 ```
 
-默认使用 BF16 LoRA `r=64`、`alpha=128`、`all-linear`、10 epochs。每条样本只监督一个实体 token，loss 和推理都限制在 1000 个实体候选中；新增 token 只训练未绑定 `lm_head` 的对应行，不再用 EOS loss 或训练无效的输入 embedding 行。
+默认使用 BF16 LoRA `r=64`、`alpha=128`、`all-linear`、10 epochs。loss 由两部分组成：完整词表上的标准名称/固定格式/EOS 语言建模 loss，以及 1000 个实体标签 + `<NO_MATCH>` 上的受约束分类 loss。新增输出 token 仍只训练未绑定 `lm_head` 的对应行。
 
 第 2、4、6、8、10 个 epoch 都会保存 LoRA 和 token 行。为适配 40GB 磁盘，只有最新 checkpoint 带有 optimizer、scheduler 和 RNG 状态并可恢复；较早 checkpoint 仍可正常评测和发布。云端任务中断后，从编号最大的 checkpoint 继续：
 
@@ -251,12 +263,21 @@ python poc_a/scripts/evaluate.py \
 
 评测输出：
 
-* `poc_a/outputs/full/metrics.json`：每个 epoch 的完整词表 top-1、实体约束 top-1/5/10、平均实体 rank、canonical/alias、热门/最新及类型/提示风格指标，以及完整有序预测记录的 SHA-256 指纹。
+* `poc_a/outputs/full/metrics.json`：每个 epoch 的标准名称准确率、结构化 exact match、安全解析/拒识准确率、oracle-ID top-1/5/10、canonical/alias/unknown 分组及预测指纹。
 * `poc_a/outputs/full/checkpoint_comparison.csv`：checkpoint 横向对比。
 * `poc_a/outputs/full/evaluation_failures.csv`：未命中的输入、目标和预测。
 * `poc_a/outputs/full/run_manifest.json`：Git SHA、基础模型 SHA、数据哈希、依赖、GPU 和运行状态。
 
-canonical 实体约束 top-1 至少需要达到 99%，alias 实体约束 top-1 至少需要达到 25%。先在 canonical 达标的 checkpoint 中选择 alias 最高者，再以 canonical 和更早 epoch 打破平局；只有两个门槛都通过才允许发布。
+checkpoint 必须同时达到 canonical 安全解析 99% 和 unknown 安全拒识 90%，再按冻结 alias 安全解析最高者选择；发布还要求 alias 至少 25%。格式错误虽然会安全返回空，但仍单独计入结构化输出失败，不能被拒识指标掩盖。
+
+训练后也可以直接运行严格推理 CLI：
+
+```bash
+python poc_a/scripts/predict.py \
+  --adapter poc_a/outputs/full/checkpoints/checkpoint-<step> \
+  --query '刀塔2' \
+  --query '量子煎饼模拟器 3001'
+```
 
 
 ## 第四步：人工发布公开 Hugging Face LoRA

@@ -4,7 +4,7 @@
 
 ```text
 common/   Steam 实体表、人工冻结的评测源和数据同步脚本
-poc_a/    实体约束 special token + LoRA 生成 AppID；当前 A1 基线
+poc_a/    显式 canonicalization + AppID 标签 + NO_MATCH 严格解析；当前 A2
 poc_b/    冻结 Qwen + 低秩残差余弦原型分类器；当前可运行
 tests/    跨目录的数据构建与 PoC A 回归测试
 ```
@@ -15,11 +15,12 @@ tests/    跨目录的数据构建与 PoC A 回归测试
 
 PoC A 的构建器会从共享输入生成：
 
-- `poc_a/data/train.jsonl`（1000 实体 × 4 prompts = 4000 行）
+- `poc_a/data/train.jsonl`（1000 实体 + 48 个 NO_MATCH 输入，均 × 4 prompts = 4192 行）
 - `poc_a/data/special_tokens.json`
 - `poc_a/data/eval_alias.jsonl`（184 冻结输入 × 4 prompts = 736 行）
+- `poc_a/data/eval_unknown.jsonl`（24 冻结 unknown 输入 × 4 prompts = 96 行）
 
-PoC B 单独生成 6 个 canonical prompt view、稳定 class map 和隔离的 canonical/alias 评测文件，不复用 PoC A 的 special token 训练文件。
+PoC B 单独生成 6 个实体末尾的短 prompt view、稳定 class map 和隔离的 canonical/alias 评测文件；默认推理使用 `Steam 游戏：{surface_form}`，184 条 alias 会在全部 6 个模板下配对评测，不复用 PoC A 的 special token 训练文件。
 
 ## 常用入口
 

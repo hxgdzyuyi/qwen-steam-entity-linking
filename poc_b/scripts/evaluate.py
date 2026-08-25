@@ -42,12 +42,14 @@ from training_common import (
 )
 
 
-METRICS_SCHEMA_VERSION = 1
+METRICS_SCHEMA_VERSION = 2
 POC_ROOT = Path(__file__).resolve().parents[1]
 REGRESSION_METRIC_FIELDS = (
     "epoch",
+    "default_prompt_style",
     "canonical",
     "alias",
+    "alias_prompt_benchmark",
     "canonical_by_cohort",
     "alias_by_cohort",
     "canonical_by_prompt_style",

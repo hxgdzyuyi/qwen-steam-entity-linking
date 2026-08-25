@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "description": "Frozen A2 NO_MATCH evaluation cases, disjoint from unknown training inputs.",
+  "cases": [
+    {"input": "Fortnite", "type": "out_of_catalog_game"},
+    {"input": "Overwatch 2", "type": "out_of_catalog_game"},
+    {"input": "Mario Kart World", "type": "out_of_catalog_game"},
+    {"input": "Pokémon Scarlet", "type": "out_of_catalog_game"},
+    {"input": "塞尔达传说：王国之泪", "type": "out_of_catalog_game"},
+    {"input": "原神", "type": "out_of_catalog_game"},
+    {"input": "Pokémon Legends: Z-A", "type": "out_of_catalog_game"},
+    {"input": "光·遇", "type": "out_of_catalog_game"},
+    {"input": "土星披萨配送员 404", "type": "synthetic_title"},
+    {"input": "会打鼓的量子水母", "type": "synthetic_title"},
+    {"input": "木星图书管理员模拟器", "type": "synthetic_title"},
+    {"input": "The Silent Umbrella Protocol", "type": "synthetic_title"},
+    {"input": "Project Marble Ferret 9001", "type": "synthetic_title"},
+    {"input": "Last Train to Neptune's Bakery", "type": "synthetic_title"},
+    {"input": "我想找一个以前玩过但忘了名字的游戏", "type": "ambiguous_description"},
+    {"input": "主角会跳而且可以打怪", "type": "ambiguous_description"},
+    {"input": "两队玩家互相对战的游戏", "type": "ambiguous_description"},
+    {"input": "开放世界", "type": "ambiguous_fragment"},
+    {"input": "生存游戏", "type": "ambiguous_fragment"},
+    {"input": "请告诉我今天星期几", "type": "non_entity_text"},
+    {"input": "下载速度为什么只有每秒一兆", "type": "non_entity_text"},
+    {"input": "Unknown Catalog Entry Omega-2718", "type": "synthetic_title"},
+    {"input": "蓝色烤箱与时间旅行者", "type": "synthetic_title"},
+    {"input": "火星上的最后一把折叠椅", "type": "synthetic_title"}
+  ]
+}

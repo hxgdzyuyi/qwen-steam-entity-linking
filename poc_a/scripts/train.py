@@ -10,6 +10,8 @@ import sys
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
+from inference_core import predict_structured_rows
+
 from training_common import (
     CompletionOnlyCollator,
     RawRowsDataset,
@@ -29,8 +31,10 @@ from training_common import (
     read_json,
     utc_now,
     validate_data,
+    validate_no_match_token,
     warn_if_git_commit_mismatch,
 )
+from structured_output import entity_scoring_prefix
 
 
 GIB = 1024**3
@@ -350,7 +354,10 @@ def _next_token_accuracy(
             for offset in range(0, len(rows), batch_size):
                 batch_rows = rows[offset : offset + batch_size]
                 encoded = tokenizer(
-                    [row["prompt"] for row in batch_rows],
+                    [
+                        row["prompt"] + entity_scoring_prefix(row["canonical_name"])
+                        for row in batch_rows
+                    ],
                     add_special_tokens=False,
                     padding=True,
                     return_tensors="pt",
@@ -382,36 +389,91 @@ def _next_token_accuracy(
     return correct / len(rows)
 
 
+def structured_completion_loss(
+    logits: Any,
+    labels: Any,
+    output_token_ids: Sequence[int],
+    torch: Any,
+    canonical_text_weight: float = 1.0,
+    entity_weight: float = 1.0,
+) -> Any:
+    """Combine natural-language canonicalization loss and output-class loss."""
+
+    if logits.shape[:2] != labels.shape:
+        raise TrainingToolError("logits and labels have incompatible shapes")
+    if labels.shape[1] < 2:
+        raise TrainingToolError("structured completion needs at least two positions")
+    shifted_logits = logits[:, :-1, :]
+    shifted_labels = labels[:, 1:]
+    output_ids = torch.tensor(
+        output_token_ids, dtype=torch.long, device=shifted_labels.device
+    )
+    output_matches = shifted_labels.unsqueeze(-1).eq(output_ids.view(1, 1, -1))
+    output_positions = output_matches.any(dim=-1)
+    if not bool(torch.all(output_positions.sum(dim=1) == 1).item()):
+        raise TrainingToolError(
+            "Each structured completion must supervise exactly one output token"
+        )
+    batch_indices = torch.arange(labels.shape[0], device=labels.device)
+    output_position_indices = output_positions.long().argmax(dim=1)
+    next_token_logits = shifted_logits[batch_indices, output_position_indices, :]
+    output_logits = next_token_logits.index_select(-1, output_ids)
+    target_token_ids = shifted_labels[batch_indices, output_position_indices]
+    target_matches = target_token_ids.unsqueeze(1).eq(output_ids.unsqueeze(0))
+    target_classes = target_matches.long().argmax(dim=1)
+    entity_loss = torch.nn.functional.cross_entropy(
+        output_logits.float(), target_classes
+    )
+
+    text_positions = shifted_labels.ne(-100) & ~output_positions
+    if not bool(text_positions.any().item()):
+        if canonical_text_weight != 0:
+            raise TrainingToolError("Structured completion contains no text targets")
+        text_loss = entity_loss.new_zeros(())
+    else:
+        text_loss = torch.nn.functional.cross_entropy(
+            shifted_logits[text_positions].float(),
+            shifted_labels[text_positions],
+        )
+    return canonical_text_weight * text_loss + entity_weight * entity_loss
+
+
 def entity_classification_loss(
     logits: Any,
     labels: Any,
     entity_token_ids: Sequence[int],
     torch: Any,
 ) -> Any:
-    """Compute completion loss only across the configured entity-token classes."""
+    """Backward-compatible entity-only loss used by dependency-light tests."""
 
-    supervised = labels.ne(-100)
-    supervised_per_row = supervised.sum(dim=1)
-    if not bool(torch.all(supervised_per_row == 1).item()):
-        raise TrainingToolError(
-            "Entity classification requires exactly one supervised token per row"
-        )
-    label_positions = supervised.long().argmax(dim=1)
-    if bool(torch.any(label_positions == 0).item()):
-        raise TrainingToolError("Entity label cannot be the first input token")
-
-    batch_indices = torch.arange(labels.shape[0], device=labels.device)
-    next_token_logits = logits[batch_indices, label_positions - 1, :]
-    entity_ids = torch.tensor(
-        entity_token_ids, dtype=torch.long, device=logits.device
+    return structured_completion_loss(
+        logits,
+        labels,
+        entity_token_ids,
+        torch,
+        canonical_text_weight=0.0,
+        entity_weight=1.0,
     )
-    entity_logits = next_token_logits.index_select(-1, entity_ids)
-    target_token_ids = labels[batch_indices, label_positions]
-    target_matches = target_token_ids.unsqueeze(1).eq(entity_ids.unsqueeze(0))
-    if not bool(torch.all(target_matches.sum(dim=1) == 1).item()):
-        raise TrainingToolError("A supervised label is not a configured entity token")
-    target_classes = target_matches.long().argmax(dim=1)
-    return torch.nn.functional.cross_entropy(entity_logits.float(), target_classes)
+
+
+def _select_smoke_rows(
+    rows: Sequence[Mapping[str, str]], sample_count: int, no_match_token: str
+) -> list[dict[str, str]]:
+    """Select a deterministic 75/25 known/rejection smoke cohort."""
+
+    if sample_count < 2:
+        raise TrainingToolError("Smoke training needs at least two samples")
+    known = [dict(row) for row in rows if row["completion"] != no_match_token]
+    unknown = [dict(row) for row in rows if row["completion"] == no_match_token]
+    if not known or not unknown:
+        raise TrainingToolError("Smoke training requires known and NO_MATCH rows")
+
+    unknown_count = min(len(unknown), max(1, sample_count // 4))
+    known_count = min(len(known), sample_count - unknown_count)
+    unknown_count = min(len(unknown), sample_count - known_count)
+    if known_count + unknown_count != sample_count:
+        raise TrainingToolError("Not enough rows for the configured smoke sample")
+    return [*known[:known_count], *unknown[:unknown_count]]
 
 
 def _run_directory(args: argparse.Namespace, config: Mapping[str, Any]) -> Path:
@@ -543,11 +605,16 @@ def main(argv: Sequence[str] | None = None) -> int:
         token=os.environ.get("HF_TOKEN"),
         use_fast=True,
     )
-    entity_token_ids = prepare_tokenizer(tokenizer, bundle.special_tokens)
+    entity_token_ids = prepare_tokenizer(
+        tokenizer, bundle.special_tokens, bundle.no_match_token
+    )
+    no_match_token_id = validate_no_match_token(tokenizer, bundle.no_match_token)
+    output_token_ids = [*entity_token_ids, no_match_token_id]
     max_length = int(config_value(config, "data.max_length"))
     for row in bundle.train_rows:
         encode_training_row(tokenizer, row, max_length)
     ensure_prompt_lengths(tokenizer, bundle.alias_rows, max_length)
+    ensure_prompt_lengths(tokenizer, bundle.unknown_rows, max_length)
 
     model = imports["AutoModelForCausalLM"].from_pretrained(
         model_id,
@@ -572,7 +639,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         target_modules=config_value(config, "lora.target_modules"),
         bias=str(config_value(config, "lora.bias")),
         trainable_token_indices={
-            "lm_head": entity_token_ids,
+            "lm_head": output_token_ids,
         },
     )
     peft_config.base_model_name_or_path = model_id
@@ -582,7 +649,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if args.mode == "smoke":
         sample_count = int(config_value(config, "training.smoke_samples"))
-        train_rows = bundle.train_rows[:sample_count]
+        train_rows = _select_smoke_rows(
+            bundle.train_rows, sample_count, bundle.no_match_token
+        )
         epochs = int(config_value(config, "training.smoke_epochs"))
         checkpoint_epochs: set[int] = set()
     else:
@@ -641,8 +710,17 @@ def main(argv: Sequence[str] | None = None) -> int:
                 key: value for key, value in inputs.items() if key != "labels"
             }
             outputs = model(**model_inputs, use_cache=False)
-            loss = entity_classification_loss(
-                outputs.logits, labels, entity_token_ids, torch
+            loss = structured_completion_loss(
+                outputs.logits,
+                labels,
+                output_token_ids,
+                torch,
+                canonical_text_weight=float(
+                    config_value(config, "training.canonical_text_loss_weight")
+                ),
+                entity_weight=float(
+                    config_value(config, "training.entity_loss_weight")
+                ),
             )
             return (loss, outputs) if return_outputs else loss
 
@@ -702,21 +780,31 @@ def main(argv: Sequence[str] | None = None) -> int:
         def on_epoch_end(
             self, args: Any, state: Any, control: Any, **kwargs: Any
         ) -> Any:
-            accuracy = _next_token_accuracy(
+            smoke_records = predict_structured_rows(
                 kwargs["model"],
                 tokenizer,
                 train_rows,
-                entity_token_ids,
-                max_length,
-                int(config_value(config, "evaluation.batch_size")),
-                torch,
+                expected_key="completion",
+                source="smoke",
+                batch_size=int(config_value(config, "evaluation.batch_size")),
+                max_length=max_length,
+                max_new_tokens=int(
+                    config_value(config, "evaluation.generation_max_new_tokens")
+                ),
+                output_token_ids=output_token_ids,
+                canonical_by_token=bundle.canonical_by_token,
+                provenance_by_token=bundle.provenance_by_token,
+                torch=torch,
+            )
+            accuracy = sum(row["structured_exact"] for row in smoke_records) / len(
+                smoke_records
             )
             epoch = int(round(float(state.epoch or 0)))
             self.perfect_streak = self.perfect_streak + 1 if accuracy == 1.0 else 0
             smoke_history.append(
                 {
                     "epoch": epoch,
-                    "next_token_accuracy": accuracy,
+                    "structured_exact_accuracy": accuracy,
                     "perfect_streak": self.perfect_streak,
                 }
             )
@@ -754,6 +842,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     manifest["entity_token_count"] = len(entity_token_ids)
     manifest["entity_token_id_min"] = min(entity_token_ids)
     manifest["entity_token_id_max"] = max(entity_token_ids)
+    manifest["no_match_token_id"] = no_match_token_id
     atomic_write_json(manifest_path, manifest)
 
     result = trainer.train(
@@ -775,7 +864,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             config_value(config, "training.smoke_required_consecutive_perfect_epochs")
         ):
             raise TrainingToolError(
-                "Smoke training did not reach 100% canonical accuracy for the required streak"
+                "Smoke training did not reach 100% structured exact accuracy "
+                "for the required streak"
             )
 
     manifest["status"] = "trained"

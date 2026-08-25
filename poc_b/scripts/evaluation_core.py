@@ -8,6 +8,7 @@ from typing import Any, Mapping, Sequence
 
 import torch
 
+from prompt_contract import DEFAULT_PROMPT_STYLE
 from steam_entity_classifier import FrozenPrototypeHead
 from training_common import prediction_sha256
 
@@ -118,6 +119,7 @@ def checkpoint_metrics(
     batch_size: int,
     diagnostic_top_k: int,
     device: torch.device,
+    default_prompt_style: str = DEFAULT_PROMPT_STYLE,
 ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     canonical = predict_feature_rows(
         head,
@@ -129,7 +131,7 @@ def checkpoint_metrics(
         diagnostic_top_k=diagnostic_top_k,
         device=device,
     )
-    alias = predict_feature_rows(
+    alias_prompt_records = predict_feature_rows(
         head,
         alias_features,
         alias_rows,
@@ -139,16 +141,29 @@ def checkpoint_metrics(
         diagnostic_top_k=diagnostic_top_k,
         device=device,
     )
-    all_records = canonical + alias
+    alias = [
+        row
+        for row in alias_prompt_records
+        if row["prompt_style"] == default_prompt_style
+    ]
+    if not alias:
+        raise ValueError(
+            f"alias evaluation contains no default prompt style {default_prompt_style!r}"
+        )
+    all_records = canonical + alias_prompt_records
     return (
         {
             "epoch": int(epoch),
+            "default_prompt_style": default_prompt_style,
             "canonical": metric_summary(canonical),
             "alias": metric_summary(alias),
+            "alias_prompt_benchmark": metric_summary(alias_prompt_records),
             "canonical_by_cohort": breakdown(canonical, "cohort"),
             "alias_by_cohort": breakdown(alias, "cohort"),
             "canonical_by_prompt_style": breakdown(canonical, "prompt_style"),
-            "alias_by_prompt_style": breakdown(alias, "prompt_style"),
+            "alias_by_prompt_style": breakdown(
+                alias_prompt_records, "prompt_style"
+            ),
             "alias_by_type": breakdown(alias, "type"),
             "prediction_sha256": prediction_sha256(all_records),
         },

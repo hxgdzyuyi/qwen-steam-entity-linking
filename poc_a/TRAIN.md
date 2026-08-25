@@ -12,10 +12,11 @@ Notebook 是云端执行入口，实际训练、评测和发布契约仍由 `scr
 当前默认配置：
 
 - 基础模型：`Qwen/Qwen3-8B-Base`
-- 训练数据：1000 个 canonical 游戏实体 × 4 种 prompt，共 4000 行
+- 训练数据：1000 个 canonical 实体 + 48 个 NO_MATCH 输入，各 × 4 种 prompt，共 4192 行
+- 冻结评测：184 个零训练 alias × 4 = 736 行；24 个 unknown × 4 = 96 行
 - 训练方式：BF16 LoRA，`r=64`、`alpha=128`，完整训练 10 epochs
 - 里程碑 checkpoint：epoch 2、4、6、8、10
-- 验收门槛：canonical 实体约束 Top-1 ≥ 99%，alias 实体约束 Top-1 ≥ 25%
+- 验收门槛：canonical 安全解析 ≥ 99%，alias 安全解析 ≥ 25%，unknown 安全拒识 ≥ 90%
 
 ## 1. 本机准备代码
 
@@ -88,13 +89,13 @@ cp poc_a/notebooks/runpod_model_testing.ipynb /workspace/poc_a_model_testing.ipy
 poc_a/outputs/runpod-smoke
 ```
 
-Smoke 最多运行 100 epochs；连续两个 epoch 达到 100% canonical next-token 准确率后自动停止。它用于验证基础模型下载、tokenizer 扩展、LoRA 和新增实体 token 的完整链路。
+Smoke 固定抽取 24 条实体和 8 条 `NO_MATCH`；最多运行 100 epochs。连续两个 epoch 达到 100% 结构化 exact match 后自动停止，以验证标准名称生成、实体/NO_MATCH 标签和严格解析的完整链路。
 
 若该目录已经有真实产物，脚本不会覆盖。要重新实验，请先保留原目录，并在 Notebook 顶部把 `SMOKE_RUN_DIR` 改成新的空目录。
 
 ### 4.3 完整训练
 
-Smoke 成功后执行“运行完整 4000 行训练”单元。默认输出目录为：
+Smoke 成功后执行“运行完整 4192 行 A2 训练”单元。默认输出目录为：
 
 ```text
 poc_a/outputs/runpod-full
@@ -123,7 +124,7 @@ poc_a/outputs/runpod-full
 - `evaluation_failures.csv`：错误输入、目标和预测
 - `run_manifest.json`：Git、模型、数据、依赖和运行状态
 
-必须确认输出中的 `acceptance_passed = True`。选择规则是在 canonical 实体约束 Top-1 达到 99% 的 checkpoint 中优先选择 alias Top-1 最高者；最终 alias Top-1 还必须达到 25%。
+必须确认输出中的 `acceptance_passed = True`。候选 checkpoint 必须同时达到 canonical 安全解析 99% 与 unknown 安全拒识 90%，其中优先选择 alias 安全解析最高者；最终 alias 还必须达到 25%。
 
 ### 4.6 人工发布
 
@@ -166,11 +167,11 @@ HF_ADAPTER_ID = ''
 从上到下执行加载单元，然后按需反复运行：
 
 1. 修改 `QUERIES`，测试单条或批量别名、中文名和自然语言描述。
-2. 修改 `CUSTOM_CASES`，用 `<GAME_APPID>` expected 标签查看 exact match、实体 Top-1 和 Top-5 候选。
-3. 保持 `RUN_FROZEN_ALIAS_EVAL = True`，快速复核 736 行冻结 alias 数据；该步骤不写评测文件。
+2. 修改 `CUSTOM_CASES`，查看目标标准名称、生成名称、标签一致性以及最终是否安全解析。
+3. 保持 `RUN_FROZEN_ALIAS_EVAL = True` 和 `RUN_FROZEN_UNKNOWN_EVAL = True`，快速复核 736 行 alias 与 96 行 unknown 数据。
 4. 只有需要重新生成正式验收产物时，才设置 `RUN_OFFICIAL_EVALUATION = True`。正式评测只支持本地运行目录，并会重新评测全部里程碑。
 
-测试使用与训练一致的 prompt 和实体约束解码。若切换 checkpoint、运行目录或 Hugging Face adapter，建议重启 Kernel 后从顶部重新执行，避免旧模型仍占用显存。
+测试使用与训练一致的结构化 prompt，并通过冻结实体表严格验证名称和标签；任何不一致都返回空。若切换 checkpoint、运行目录或 Hugging Face adapter，建议重启 Kernel 后从顶部重新执行。
 
 ## 6. 常见问题与保留产物
 
@@ -189,6 +190,7 @@ Notebook 输出的每条命令都可直接复制到 Terminal。必要时，核�
 ```bash
 python3 poc_a/scripts/train.py --help
 python3 poc_a/scripts/evaluate.py --help
+python3 poc_a/scripts/predict.py --help
 python3 poc_a/scripts/publish_hf.py --help
 ```
 

@@ -271,7 +271,9 @@ not part of this repository.
 - Training source: `{manifest['git']['remote']}`
 - Class ordering: numeric AppID ascending
 - Canonical-only training views: {config_value(config, 'data.expected_train_rows')}
-- Held-out alias cases: {config_value(config, 'data.expected_alias_rows')}
+- Held-out alias cases: {config_value(config, 'data.expected_alias_cases')}
+- Paired alias prompt views: {config_value(config, 'data.expected_alias_rows')}
+- Default inference prompt: `Steam 游戏：{{surface_form}}`
 - Selected head: epoch {selected['epoch']}
 - Frozen representation: final layer, last non-padding token, FP32 cache
 - Head: hidden → {config_value(config, 'classifier.bottleneck_dim')} → hidden residual plus cosine prototypes
@@ -284,6 +286,8 @@ not part of this repository.
 {comparison}
 
 Canonical acceptance is {metrics['canonical_threshold']:.0%}. Alias is report-only.
+Alias Top-1 uses the default short Steam prefix; `alias_by_prompt_style` is a
+paired diagnostic in which every alias case is rendered with every prompt style.
 Compared with the pinned published PoC A reference, `alias_improved_over_poc_a`
 is `{str(metrics['alias_improved_over_poc_a']).lower()}`.
 
@@ -355,6 +359,10 @@ def _stage_repository(
         (
             Path(__file__).with_name("steam_entity_classifier.py"),
             staging / "steam_entity_classifier.py",
+        ),
+        (
+            Path(__file__).with_name("prompt_contract.py"),
+            staging / "prompt_contract.py",
         ),
     ):
         if not source.is_file():

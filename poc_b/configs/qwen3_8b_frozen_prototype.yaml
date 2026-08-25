@@ -29,7 +29,8 @@ data:
   expected_classes: 1000
   expected_train_rows: 6000
   expected_canonical_rows: 1000
-  expected_alias_rows: 184
+  expected_alias_cases: 184
+  expected_alias_rows: 1104
   expected_prompt_styles: 6
   expected_cohorts:
     popular: 100

@@ -15,14 +15,34 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterable, Sequence
 
+from structured_output import NO_MATCH_NAME, NO_MATCH_TOKEN
+
 
 POC_ROOT = Path(__file__).resolve().parents[1]
 REPOSITORY_ROOT = POC_ROOT.parent
 PROMPT_STYLES: tuple[tuple[str, str], ...] = (
-    ("appid_label", "游戏信息：{canonical_name}\nSteam AppID："),
-    ("steam_de_appid", "游戏信息：{canonical_name}\nSteam 的 AppID："),
-    ("appid_question", "{canonical_name} 的 Steam AppID 是什么？\n答案："),
-    ("appid_request", "请返回 {canonical_name} 对应的 Steam AppID："),
+    (
+        "appid_label",
+        "游戏信息：{input_text}\n"
+        "请先识别标准 Steam 游戏名称，再返回 AppID。无法可靠匹配时返回 NO_MATCH。\n"
+        "识别结果：\n",
+    ),
+    (
+        "steam_de_appid",
+        "待识别内容：{input_text}\n"
+        "先归一化为标准游戏名称，再给出 Steam 的 AppID；无法确定则返回 NO_MATCH。\n"
+        "识别结果：\n",
+    ),
+    (
+        "appid_question",
+        "{input_text} 指的是哪一个标准 Steam 游戏？它的 AppID 是什么？\n"
+        "请按固定格式回答；无法确定则返回 NO_MATCH。\n识别结果：\n",
+    ),
+    (
+        "appid_request",
+        "请识别“{input_text}”实际指向的标准 Steam 游戏并返回 AppID。\n"
+        "如果不能可靠对应到实体库，返回 NO_MATCH。\n识别结果：\n",
+    ),
 )
 ENTITY_TOKEN_PATTERN = re.compile(r"^<GAME_([0-9]+)>$")
 
@@ -85,12 +105,16 @@ def load_entities(path: Path) -> list[Entity]:
     return entities
 
 
-def render_prompt(canonical_name: str, style_index: int) -> tuple[str, str]:
+def render_prompt(input_text: str, style_index: int) -> tuple[str, str]:
     style_name, template = PROMPT_STYLES[style_index % len(PROMPT_STYLES)]
-    return style_name, template.format(canonical_name=canonical_name)
+    return style_name, template.format(input_text=input_text)
 
 
-def build_train_rows(entities: Sequence[Entity], seed: int) -> list[dict[str, str]]:
+def build_train_rows(
+    entities: Sequence[Entity],
+    seed: int,
+    unknown_inputs: Sequence[tuple[str, str]] = (),
+) -> list[dict[str, str]]:
     rng = random.Random(seed)
     rows: list[dict[str, str]] = []
     for entity in entities:
@@ -100,8 +124,23 @@ def build_train_rows(entities: Sequence[Entity], seed: int) -> list[dict[str, st
                 {
                     "input": entity.canonical_name,
                     "prompt": prompt,
+                    "canonical_name": entity.canonical_name,
                     "completion": entity.token,
                     "prompt_style": style_name,
+                    "type": "canonical",
+                }
+            )
+    for input_text, case_type in unknown_inputs:
+        for style_index in range(len(PROMPT_STYLES)):
+            style_name, prompt = render_prompt(input_text, style_index)
+            rows.append(
+                {
+                    "input": input_text,
+                    "prompt": prompt,
+                    "canonical_name": NO_MATCH_NAME,
+                    "completion": NO_MATCH_TOKEN,
+                    "prompt_style": style_name,
+                    "type": case_type,
                 }
             )
     rng.shuffle(rows)
@@ -121,6 +160,53 @@ def load_eval_source(path: Path) -> dict[str, Any]:
     if not isinstance(payload, dict) or payload.get("schema_version") != 1:
         raise BuildError("evaluation source must be a schema_version=1 JSON object")
     return payload
+
+
+def load_unknown_cases(
+    path: Path, entities: Sequence[Entity]
+) -> list[tuple[str, str]]:
+    payload = load_eval_source(path)
+    cases = payload.get("cases")
+    if not isinstance(cases, list) or not cases:
+        raise BuildError("unknown source cases must be a non-empty list")
+    canonical_names = {entity.canonical_name.casefold() for entity in entities}
+    seen: set[str] = set()
+    normalized: list[tuple[str, str]] = []
+    for index, case in enumerate(cases, start=1):
+        if not isinstance(case, dict) or set(case) != {"input", "type"}:
+            raise BuildError(
+                f"unknown source case {index} must contain exactly input and type"
+            )
+        input_text = clean_required_text(case.get("input"), f"unknown case {index} input")
+        case_type = clean_required_text(case.get("type"), f"unknown case {index} type")
+        input_key = input_text.casefold()
+        if input_key in canonical_names:
+            raise BuildError(f"unknown case is a registered canonical name: {input_text}")
+        if input_key in seen:
+            raise BuildError(f"duplicate unknown input: {input_text}")
+        seen.add(input_key)
+        normalized.append((input_text, case_type))
+    return normalized
+
+
+def build_unknown_eval_rows(
+    unknown_inputs: Sequence[tuple[str, str]],
+) -> list[dict[str, str]]:
+    rows: list[dict[str, str]] = []
+    for input_text, case_type in unknown_inputs:
+        for style_index in range(len(PROMPT_STYLES)):
+            style_name, prompt = render_prompt(input_text, style_index)
+            rows.append(
+                {
+                    "input": input_text,
+                    "prompt": prompt,
+                    "canonical_name": NO_MATCH_NAME,
+                    "expected": NO_MATCH_TOKEN,
+                    "type": case_type,
+                    "prompt_style": style_name,
+                }
+            )
+    return rows
 
 
 def build_eval_rows(
@@ -177,6 +263,7 @@ def build_eval_rows(
                     {
                         "input": input_text,
                         "prompt": prompt,
+                        "canonical_name": entity.canonical_name,
                         "expected": entity.token,
                         "type": case_type,
                         "prompt_style": style_name,
@@ -256,6 +343,21 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         type=Path,
         default=POC_ROOT / "data/eval_alias.jsonl",
     )
+    parser.add_argument(
+        "--unknown-train-source",
+        type=Path,
+        default=POC_ROOT / "data/unknown_train.source.json",
+    )
+    parser.add_argument(
+        "--unknown-eval-source",
+        type=Path,
+        default=POC_ROOT / "data/unknown_eval.source.json",
+    )
+    parser.add_argument(
+        "--unknown-eval-output",
+        type=Path,
+        default=POC_ROOT / "data/eval_unknown.jsonl",
+    )
     parser.add_argument("--seed", type=int, default=42)
     return parser.parse_args(argv)
 
@@ -263,10 +365,18 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
 def main(argv: Sequence[str] | None = None) -> int:
     args = parse_args(argv)
     entities = load_entities(args.dataset)
-    train_rows = build_train_rows(entities, args.seed)
+    unknown_train_inputs = load_unknown_cases(args.unknown_train_source, entities)
+    unknown_eval_inputs = load_unknown_cases(args.unknown_eval_source, entities)
+    overlap = {value.casefold() for value, _ in unknown_train_inputs}.intersection(
+        value.casefold() for value, _ in unknown_eval_inputs
+    )
+    if overlap:
+        raise BuildError(f"unknown train/eval inputs overlap: {sorted(overlap)[:5]}")
+    train_rows = build_train_rows(entities, args.seed, unknown_train_inputs)
     special_tokens = build_special_tokens(entities)
     eval_payload = load_eval_source(args.eval_source)
     eval_rows, eval_game_count = build_eval_rows(eval_payload, entities)
+    unknown_eval_rows = build_unknown_eval_rows(unknown_eval_inputs)
 
     if any(ENTITY_TOKEN_PATTERN.fullmatch(token) is None for token in special_tokens):
         raise BuildError("an invalid entity token was generated")
@@ -276,9 +386,16 @@ def main(argv: Sequence[str] | None = None) -> int:
     atomic_write_jsonl(args.train_output, train_rows)
     atomic_write_json(args.tokens_output, special_tokens)
     atomic_write_jsonl(args.eval_output, eval_rows)
+    atomic_write_jsonl(args.unknown_eval_output, unknown_eval_rows)
 
     print(
         f"Wrote {len(train_rows)} training rows to {args.train_output}",
+        file=sys.stderr,
+    )
+    print(
+        f"Wrote {len(unknown_eval_rows)} held-out NO_MATCH rows "
+        f"({len(unknown_eval_inputs)} cases × {len(PROMPT_STYLES)} prompts) "
+        f"to {args.unknown_eval_output}",
         file=sys.stderr,
     )
     print(

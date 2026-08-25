@@ -21,8 +21,8 @@ from common.huggingface_repositories import (  # noqa: E402
     repository_for,
     validate_repo_id,
 )
-from evaluate import METRICS_SCHEMA_VERSION, evaluate_adapter
-from training_common import (
+from evaluate import METRICS_SCHEMA_VERSION, evaluate_adapter  # noqa: E402
+from training_common import (  # noqa: E402
     TrainingToolError,
     atomic_write_json,
     config_value,
@@ -53,10 +53,13 @@ REGRESSION_METRIC_FIELDS = (
     "epoch",
     "canonical",
     "alias",
+    "unknown",
     "canonical_by_cohort",
     "canonical_by_prompt_style",
     "alias_by_type",
     "alias_by_prompt_style",
+    "unknown_by_type",
+    "unknown_by_prompt_style",
     "prediction_sha256",
 )
 HUB_MANAGED_REMOTE_FILES = {".gitattributes"}
@@ -220,10 +223,11 @@ def _model_card(
     comparison_rows = []
     for item in metrics["checkpoints"]:
         comparison_rows.append(
-            "| {epoch} | {canonical:.2%} | {alias:.2%} |".format(
+            "| {epoch} | {canonical:.2%} | {alias:.2%} | {unknown:.2%} |".format(
                 epoch=item["epoch"],
                 canonical=item["canonical"]["generation_accuracy"],
                 alias=item["alias"]["generation_accuracy"],
+                unknown=item["unknown"]["generation_accuracy"],
             )
         )
     comparison = "\n".join(comparison_rows)
@@ -244,7 +248,7 @@ tags:
 
 # Qwen3-8B Steam Entity Linking — PoC A
 
-This adapter maps Steam game names and related expressions to one-token labels such as `<GAME_730>`. It must be loaded with the tokenizer in this repository and the pinned base-model revision below.
+This A2 adapter first generates a canonical Steam game name and then an entity label such as `<GAME_730>`. Outputs are accepted only when the generated canonical name is registered and its label agrees with the frozen database; otherwise the caller returns `None`.
 
 ## Reproducibility
 
@@ -255,15 +259,15 @@ This adapter maps Steam game names and related expressions to one-token labels s
 - Training data: {config_value(config, 'data.expected_special_tokens')} entities × {len(config_value(config, 'data.prompt_styles'))} prompt styles = {config_value(config, 'data.expected_train_rows')} rows
 - Selected checkpoint: epoch {selected['epoch']}
 - Precision: BF16
-- Method: entity-only classification loss over the added labels, LoRA r={config_value(config, 'lora.r')}, alpha={config_value(config, 'lora.alpha')}, plus trainable added-token rows in the LM head
+- Method: structured canonical-name language loss plus constrained entity/`NO_MATCH` classification loss, LoRA r={config_value(config, 'lora.r')}, alpha={config_value(config, 'lora.alpha')}, plus trainable output-token rows in the LM head
 
 ## Evaluation
 
-| Epoch | Canonical entity top-1 | Held-out alias entity top-1 |
-|---:|---:|---:|
+| Epoch | Canonical safe resolution | Held-out alias safe resolution | Unknown safe rejection |
+|---:|---:|---:|---:|
 {comparison}
 
-Canonical accuracy covers every entity across every configured prompt. Alias accuracy covers {config_value(config, 'data.expected_alias_cases')} frozen inputs across the same {len(config_value(config, 'data.prompt_styles'))} prompts ({config_value(config, 'data.expected_alias_rows')} rows) and uses entity-constrained top-1. The selected checkpoint is the alias-best checkpoint among those reaching the canonical threshold; publication additionally requires the alias threshold.
+Canonical accuracy covers every entity across every configured prompt. Alias accuracy covers {config_value(config, 'data.expected_alias_cases')} frozen zero-training inputs across {config_value(config, 'data.expected_alias_rows')} rows. Unknown rejection covers {config_value(config, 'data.expected_unknown_eval_cases')} frozen out-of-catalog or synthetic inputs across {config_value(config, 'data.expected_unknown_eval_rows')} rows. Selection requires canonical and unknown thresholds; publication additionally requires the alias threshold.
 
 ## Usage
 
@@ -281,15 +285,22 @@ base = AutoModelForCausalLM.from_pretrained(
 base.resize_token_embeddings(len(tokenizer))
 model = PeftModel.from_pretrained(base, adapter_id)
 
-# Score one controlled prompt and choose only among registered entity labels.
-prompt = "游戏信息：CS2\\nSteam AppID："
-inputs = tokenizer(prompt, return_tensors="pt")
-entity_ids = tokenizer.convert_tokens_to_ids(
-    tokenizer.additional_special_tokens
+# Generate the canonical-name chain. Production callers must parse both lines,
+# exact-match the name against their frozen entity table, and verify that its
+# database token equals the generated token before returning an AppID.
+prompt = (
+    "CS2 指的是哪一个标准 Steam 游戏？它的 AppID 是什么？\\n"
+    "请按固定格式回答；无法确定则返回 NO_MATCH。\\n识别结果：\\n"
 )
-logits = model(**inputs).logits[0, -1, entity_ids]
-predicted_id = entity_ids[int(logits.argmax())]
-print(tokenizer.convert_ids_to_tokens(predicted_id))
+inputs = tokenizer(prompt, return_tensors="pt")
+output = model.generate(
+    **inputs,
+    do_sample=False,
+    max_new_tokens={config_value(config, 'evaluation.generation_max_new_tokens')},
+    eos_token_id=tokenizer.eos_token_id,
+    pad_token_id=tokenizer.pad_token_id,
+)
+print(tokenizer.decode(output[0, inputs['input_ids'].shape[1]:], skip_special_tokens=False))
 ```
 
 ## Limitations
@@ -387,7 +398,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         raise TrainingToolError("Run must be evaluated before publication")
     if not metrics.get("acceptance_passed"):
         raise TrainingToolError(
-            "Canonical and alias acceptance thresholds were not both reached"
+            "Canonical, alias, and unknown acceptance thresholds were not all reached"
         )
     if metrics.get("schema_version") != METRICS_SCHEMA_VERSION:
         raise TrainingToolError(
@@ -431,7 +442,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     print(
         f"Pre-upload regression: epoch {selected_epoch}, "
         f"canonical={selected['canonical']['generation_accuracy']:.2%}, "
-        f"alias={selected['alias']['generation_accuracy']:.2%}",
+        f"alias={selected['alias']['generation_accuracy']:.2%}, "
+        f"unknown={selected['unknown']['generation_accuracy']:.2%}",
         flush=True,
     )
     regression, _ = evaluate_adapter(

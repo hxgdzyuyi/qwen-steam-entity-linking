@@ -12,7 +12,8 @@ Notebook 负责串联云端工作流，实际训练、评测、推理和发布�
 当前默认配置：
 
 - 基础模型：固定 revision 的 `Qwen/Qwen3-8B-Base`
-- 数据：1000 类、6000 条 canonical-only 训练视图、1000 条 canonical 评测、184 条 held-out alias 评测
+- 数据：1000 类、6000 条 canonical-only 训练视图、1000 条 canonical 评测、184 个 held-out alias case × 6 个配对模板 = 1104 条评测视图
+- 默认推理模板：`Steam 游戏：{surface_form}`；短前缀提供领域提示，实体仍位于 last-token pooling 位置
 - 模型：冻结 Qwen，训练低秩残差投影与 1000 个余弦类别原型
 - 完整训练：20 epochs；里程碑为 epoch 1、3、5、10、20
 - 验收门槛：canonical Top-1 ≥ 95%；alias 指标及是否超过 PoC A 单独报告
@@ -83,16 +84,16 @@ cp poc_b/notebooks/runpod_model_testing.ipynb /workspace/poc_b_model_testing.ipy
 - 1000 个按 AppID 数值升序排列的 class index
 - 6000 条 canonical-only 训练视图
 - 1000 条 canonical 评测数据
-- 184 条 held-out alias 评测数据
+- 184 个 held-out alias case 的 1104 条配对 prompt 评测视图
 
-alias 不会进入 prototype 初始化、优化器或 loss。数据单元结束后先检查它没有报错，再开始训练。
+alias 不会进入 prototype 初始化、优化器或 loss。主 alias 指标只使用默认 `steam_game` 模板的 184 条视图，`alias_by_prompt_style` 使用全部 1104 条配对视图诊断公共前缀是否真的有益。数据单元结束后先检查它没有报错，再开始训练。
 
 ### 4.2 Smoke 训练与评测
 
 执行“独立 32 类 smoke”单元。默认输出目录为：
 
 ```text
-poc_b/outputs/runpod-smoke
+poc_b/outputs/runpod-smoke-steam-prefix
 ```
 
 该单元会连续执行 smoke 训练和评测。Smoke 只取 class map 的前 32 类，是独立 32 类实验，manifest 会标记为不可发布。
@@ -104,7 +105,7 @@ poc_b/outputs/runpod-smoke
 Smoke 成功后执行“完整 1000 类训练”单元。默认输出目录为：
 
 ```text
-poc_b/outputs/runpod-full
+poc_b/outputs/runpod-full-steam-prefix
 ```
 
 完整训练先用冻结 Qwen 抽取 FP32 特征并建立零训练原型基线，然后只训练残差投影与类别原型，在 epoch 1、3、5、10、20 保存 checkpoint。
@@ -112,7 +113,7 @@ poc_b/outputs/runpod-full
 若 Pod 或 Kernel 中断，重新打开同一 Notebook、执行顶部准备单元，然后再次执行完整训练单元。它会检查：
 
 ```text
-poc_b/outputs/runpod-full/resume/training_state.pt
+poc_b/outputs/runpod-full-steam-prefix/resume/training_state.pt
 ```
 
 文件存在时，单元会自动追加 `--resume-from` 并恢复 head、AdamW 和 cosine scheduler。恢复过程会核对 resolved config、Qwen revision、tokenizer、数据、class map 和 feature cache 指纹。
@@ -159,7 +160,7 @@ Notebook 默认 `LOCAL_CHECKPOINT = None`，因此会尝试加载 `HF_REPO_ID`�
 ```python
 LOCAL_CHECKPOINT = Path(
     '/workspace/qwen-steam-entity-linking/'
-    'poc_b/outputs/runpod-full/checkpoints/epoch-20'
+    'poc_b/outputs/runpod-full-steam-prefix/checkpoints/epoch-20'
 )
 ```
 
@@ -197,7 +198,7 @@ TEST_TEXTS = ['Counter-Strike 2', 'CS2', '反恐精英', '那个拆包的射击�
 - 输出目录非空：不要删除或覆盖尚未备份的结果；修改 Notebook 顶部的运行目录。
 - 恢复指纹不一致：切回训练所用 commit，并确认数据、class map、配置和缓存没有变化。
 - 显存不足：重启不再使用的 Notebook Kernel，确保同一时刻只加载一个 Qwen 模型。
-- Pod 将要销毁：先确认发布成功，或把整个 `poc_b/outputs/runpod-full/` 下载/复制到持久化存储。
+- Pod 将要销毁：先确认发布成功，或把整个 `poc_b/outputs/runpod-full-steam-prefix/` 下载/复制到持久化存储。
 
 至少保留五个 checkpoint、`metrics.json`、`checkpoint_comparison.csv`、`evaluation_failures.csv`、`run_manifest.json` 和必要的发布凭据。不要只保留 selected head。
 

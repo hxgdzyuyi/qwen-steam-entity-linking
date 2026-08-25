@@ -13,21 +13,22 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterable, Sequence
 
+from prompt_contract import (
+    DEFAULT_PROMPT_STYLE,
+    DEFAULT_PROMPT_TEMPLATE,
+    PROMPT_STYLES,
+    prompt_style_names,
+    render_prompt,
+)
+
 
 POC_ROOT = Path(__file__).resolve().parents[1]
 REPOSITORY_ROOT = POC_ROOT.parent
-PROMPT_STYLES: tuple[tuple[str, str], ...] = (
-    ("raw", "{surface_form}"),
-    ("game_entity", "游戏实体：{surface_form}"),
-    ("steam_game", "Steam 游戏：{surface_form}"),
-    ("game_name", "游戏名称：{surface_form}"),
-    ("identify_game", "需要识别的游戏：{surface_form}"),
-    ("english_entity", "Steam game entity: {surface_form}"),
-)
 EXPECTED_CLASSES = 1000
 EXPECTED_TRAIN_ROWS = 6000
 EXPECTED_CANONICAL_ROWS = 1000
-EXPECTED_ALIAS_ROWS = 184
+EXPECTED_ALIAS_CASES = 184
+EXPECTED_ALIAS_ROWS = EXPECTED_ALIAS_CASES * len(PROMPT_STYLES)
 
 
 class BuildError(RuntimeError):
@@ -123,11 +124,12 @@ def load_entities(dataset_path: Path, provenance_path: Path) -> list[Entity]:
     ]
 
 
-def render_prompt(surface_form: str, style_index: int) -> tuple[str, str]:
-    style_name, template = PROMPT_STYLES[style_index % len(PROMPT_STYLES)]
-    rendered = template.format(surface_form=surface_form)
-    if not rendered.endswith(surface_form):
-        raise BuildError(f"prompt style {style_name} must end with the surface form")
+def render_prompt_view(surface_form: str, style_index: int) -> tuple[str, str]:
+    style_name = PROMPT_STYLES[style_index % len(PROMPT_STYLES)][0]
+    try:
+        rendered = render_prompt(surface_form, style_name)
+    except ValueError as error:
+        raise BuildError(str(error)) from error
     return style_name, rendered
 
 
@@ -169,7 +171,7 @@ def build_train_rows(entities: Sequence[Entity]) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for entity in entities:
         for style_index in range(len(PROMPT_STYLES)):
-            style_name, model_input = render_prompt(
+            style_name, model_input = render_prompt_view(
                 entity.canonical_name, style_index
             )
             rows.append(
@@ -188,7 +190,8 @@ def build_canonical_eval_rows(
 ) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for entity in entities:
-        style_name, model_input = render_prompt(entity.canonical_name, 0)
+        style_name = DEFAULT_PROMPT_STYLE
+        model_input = render_prompt(entity.canonical_name, style_name)
         row = _row(
             entity,
             surface_form=entity.canonical_name,
@@ -252,15 +255,16 @@ def build_alias_eval_rows(
             if input_key in seen_inputs:
                 raise BuildError(f"duplicate alias input: {surface_form}")
             seen_inputs.add(input_key)
-            style_name, model_input = render_prompt(surface_form, len(rows))
-            row = _row(
-                entity,
-                surface_form=surface_form,
-                model_input=model_input,
-                prompt_style=style_name,
-            )
-            row["type"] = case_type
-            rows.append(row)
+            for style_name in prompt_style_names():
+                model_input = render_prompt(surface_form, style_name)
+                row = _row(
+                    entity,
+                    surface_form=surface_form,
+                    model_input=model_input,
+                    prompt_style=style_name,
+                )
+                row["type"] = case_type
+                rows.append(row)
     return rows, len(seen_appids)
 
 
@@ -390,17 +394,29 @@ def main(argv: Sequence[str] | None = None) -> int:
     atomic_write_json(
         args.manifest_output,
         {
-            "schema_version": 1,
+            "schema_version": 2,
             "class_ordering": "numeric_appid_ascending",
             "class_count": len(entities),
             "train_rows": len(train_rows),
             "canonical_eval_rows": len(canonical_rows),
             "alias_eval_rows": len(alias_rows),
+            "alias_eval_cases": EXPECTED_ALIAS_CASES,
             "alias_eval_games": alias_game_count,
-            "prompt_styles": [name for name, _ in PROMPT_STYLES],
+            "prompt_styles": list(prompt_style_names()),
+            "default_prompt_style": DEFAULT_PROMPT_STYLE,
+            "default_prompt_template": DEFAULT_PROMPT_TEMPLATE,
+            "paired_alias_prompt_evaluation": True,
             "canonical_only_training": True,
             "alias_type_counts": {
                 case_type: sum(row["type"] == case_type for row in alias_rows)
+                for case_type in sorted({row["type"] for row in alias_rows})
+            },
+            "alias_case_type_counts": {
+                case_type: sum(
+                    row["type"] == case_type
+                    and row["prompt_style"] == DEFAULT_PROMPT_STYLE
+                    for row in alias_rows
+                )
                 for case_type in sorted({row["type"] for row in alias_rows})
             },
             "source_sha256": {

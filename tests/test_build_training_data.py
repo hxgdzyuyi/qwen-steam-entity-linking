@@ -12,6 +12,7 @@ SCRIPT_PATH = (
     / "scripts"
     / "build_training_data.py"
 )
+sys.path.insert(0, str(SCRIPT_PATH.parent))
 SPEC = importlib.util.spec_from_file_location("build_training_data", SCRIPT_PATH)
 assert SPEC is not None and SPEC.loader is not None
 build = importlib.util.module_from_spec(SPEC)
@@ -42,7 +43,15 @@ class BuildTrainingDataTest(unittest.TestCase):
         self.assertEqual(first, second)
         self.assertEqual(len(first), len(self.entities) * len(build.PROMPT_STYLES))
         self.assertEqual(
-            set(first[0]), {"input", "prompt", "completion", "prompt_style"}
+            set(first[0]),
+            {
+                "input",
+                "prompt",
+                "canonical_name",
+                "completion",
+                "prompt_style",
+                "type",
+            },
         )
         for entity in self.entities:
             rows = [row for row in first if row["completion"] == entity.token]
@@ -51,11 +60,11 @@ class BuildTrainingDataTest(unittest.TestCase):
                 {style for style, _ in build.PROMPT_STYLES},
             )
 
-    def test_prompt_styles_use_appid_spelling_only(self) -> None:
+    def test_prompt_styles_explicitly_require_canonicalization_and_rejection(self) -> None:
         rendered = [template for _, template in build.PROMPT_STYLES]
         self.assertTrue(all("AppID" in template for template in rendered))
-        self.assertFalse(any("实体" in template for template in rendered))
-        self.assertFalse(any("Steam实体：" in template for template in rendered))
+        self.assertTrue(all("标准" in template for template in rendered))
+        self.assertTrue(all("NO_MATCH" in template for template in rendered))
         self.assertTrue(any("Steam 的 AppID" in template for template in rendered))
         self.assertFalse(any("AppId" in template for template in rendered))
 
@@ -89,6 +98,21 @@ class BuildTrainingDataTest(unittest.TestCase):
             {row["prompt_style"] for row in rows},
             {style for style, _ in build.PROMPT_STYLES},
         )
+        self.assertTrue(all(row["canonical_name"] == "Counter-Strike 2" for row in rows))
+
+    def test_unknown_train_and_eval_rows_use_no_match(self) -> None:
+        train = build.build_train_rows(
+            self.entities, seed=42, unknown_inputs=[("不存在的游戏", "synthetic")]
+        )
+        unknown_train = [row for row in train if row["input"] == "不存在的游戏"]
+        self.assertEqual(len(unknown_train), len(build.PROMPT_STYLES))
+        self.assertTrue(all(row["canonical_name"] == "NO_MATCH" for row in unknown_train))
+        self.assertTrue(all(row["completion"] == "<NO_MATCH>" for row in unknown_train))
+        unknown_eval = build.build_unknown_eval_rows(
+            [("另一个不存在的游戏", "synthetic")]
+        )
+        self.assertEqual(len(unknown_eval), len(build.PROMPT_STYLES))
+        self.assertTrue(all(row["expected"] == "<NO_MATCH>" for row in unknown_eval))
 
 
 if __name__ == "__main__":

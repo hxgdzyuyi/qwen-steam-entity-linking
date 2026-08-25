@@ -26,13 +26,19 @@ from training_common import (  # noqa: E402
     validate_data,
     warn_if_git_commit_mismatch,
 )
+from structured_output import (  # noqa: E402
+    entity_scoring_prefix,
+    resolve_structured_response,
+)
 from evaluate import _metric_summary, prediction_sha256  # noqa: E402
 from train import (  # noqa: E402
     _model_weights_are_cached,
     _require_resumable_checkpoint,
     _run_directory_has_artifacts,
+    _select_smoke_rows,
     _strip_older_resume_states,
     entity_classification_loss,
+    structured_completion_loss,
     validate_runtime_snapshot,
 )
 
@@ -71,22 +77,47 @@ class FakeTokenizer:
         del add_special_tokens
         if text in self.tokens:
             return [self.tokens[text]]
-        return [self.tokens[character] for character in text]
+        result = []
+        for character in text:
+            if character not in self.tokens:
+                self.tokens[character] = len(self.tokens)
+            result.append(self.tokens[character])
+        return result
 
 
 class TrainingToolsTest(unittest.TestCase):
     def test_repository_dataset_passes_preflight(self) -> None:
         config = load_config(POC_A / "configs" / "qwen3_8b_lora.yaml")
         bundle = validate_data(config)
-        self.assertEqual(len(bundle.train_rows), 4000)
+        self.assertEqual(len(bundle.train_rows), 4192)
         self.assertEqual(len(bundle.special_tokens), 1000)
         self.assertEqual(len(bundle.alias_rows), 736)
+        self.assertEqual(len(bundle.unknown_rows), 96)
+        self.assertEqual(
+            len(
+                {
+                    row["input"].casefold()
+                    for row in bundle.train_rows
+                    if row["completion"] == "<NO_MATCH>"
+                }
+            ),
+            48,
+        )
         self.assertEqual(
             len({row["input"].casefold() for row in bundle.alias_rows}), 184
         )
         cohorts = [row["cohort"] for row in bundle.provenance_by_token.values()]
         self.assertEqual(cohorts.count("popular"), 100)
         self.assertEqual(cohorts.count("latest"), 900)
+
+    def test_smoke_selection_covers_known_and_no_match_rows(self) -> None:
+        config = load_config(POC_A / "configs" / "qwen3_8b_lora.yaml")
+        bundle = validate_data(config)
+        rows = _select_smoke_rows(bundle.train_rows, 32, bundle.no_match_token)
+        self.assertEqual(len(rows), 32)
+        self.assertEqual(
+            sum(row["completion"] == bundle.no_match_token for row in rows), 8
+        )
 
     def test_added_entity_tokens_are_atomic_and_new(self) -> None:
         tokenizer = FakeTokenizer()
@@ -99,25 +130,43 @@ class TrainingToolsTest(unittest.TestCase):
         prepare_tokenizer(tokenizer, ["<GAME_730>"])
         encoded = encode_training_row(
             tokenizer,
-            {"prompt": "AB", "completion": "<GAME_730>"},
-            max_length=8,
+            {
+                "prompt": "AB",
+                "canonical_name": "A",
+                "completion": "<GAME_730>",
+            },
+            max_length=64,
         )
-        self.assertEqual(encoded["input_ids"], [2, 3, 4])
-        self.assertEqual(encoded["attention_mask"], [1, 1, 1])
-        self.assertEqual(encoded["labels"], [-100, -100, 4])
+        target_ids = (
+            tokenizer.encode(entity_scoring_prefix("A"), add_special_tokens=False)
+            + [tokenizer.convert_tokens_to_ids("<GAME_730>")]
+            + [tokenizer.eos_token_id]
+        )
+        self.assertEqual(encoded["input_ids"], [2, 3, *target_ids])
+        self.assertEqual(encoded["attention_mask"], [1] * len(encoded["input_ids"]))
+        self.assertEqual(encoded["labels"], [-100, -100, *target_ids])
 
     def test_collator_right_pads_and_masks_padding(self) -> None:
         tokenizer = FakeTokenizer()
         prepare_tokenizer(tokenizer, ["<GAME_730>"])
-        batch = CompletionOnlyCollator(tokenizer, max_length=8)(
+        batch = CompletionOnlyCollator(tokenizer, max_length=64)(
             [
-                {"prompt": "A", "completion": "<GAME_730>"},
-                {"prompt": "AB", "completion": "<GAME_730>"},
+                {
+                    "prompt": "A",
+                    "canonical_name": "A",
+                    "completion": "<GAME_730>",
+                },
+                {
+                    "prompt": "AB",
+                    "canonical_name": "A",
+                    "completion": "<GAME_730>",
+                },
             ]
         )
-        self.assertEqual(batch["input_ids"].tolist()[0], [2, 4, 0])
-        self.assertEqual(batch["attention_mask"].tolist()[0], [1, 1, 0])
-        self.assertEqual(batch["labels"].tolist()[0], [-100, 4, -100])
+        self.assertEqual(batch["input_ids"].shape[0], 2)
+        self.assertEqual(batch["input_ids"].shape, batch["labels"].shape)
+        self.assertEqual(batch["attention_mask"].tolist()[0][-1], 0)
+        self.assertEqual(batch["labels"].tolist()[0][-1], -100)
 
     def test_encoding_refuses_truncation(self) -> None:
         tokenizer = FakeTokenizer()
@@ -125,7 +174,11 @@ class TrainingToolsTest(unittest.TestCase):
         with self.assertRaises(TrainingToolError):
             encode_training_row(
                 tokenizer,
-                {"prompt": "AB", "completion": "<GAME_730>"},
+                {
+                    "prompt": "AB",
+                    "canonical_name": "A",
+                    "completion": "<GAME_730>",
+                },
                 max_length=2,
             )
 
@@ -139,6 +192,38 @@ class TrainingToolsTest(unittest.TestCase):
         logits[:, :, 7] = 100.0
         loss = entity_classification_loss(logits, labels, [4, 5], torch)
         self.assertLess(float(loss), 0.1)
+
+    def test_structured_loss_supervises_text_and_constrained_entity(self) -> None:
+        import torch
+
+        logits = torch.zeros((1, 5, 9), dtype=torch.float32)
+        labels = torch.tensor([[-100, 2, 3, 4, 1]])
+        logits[0, 0, 2] = 8.0
+        logits[0, 1, 3] = 8.0
+        logits[0, 2, 4] = 8.0
+        logits[0, 3, 1] = 8.0
+        logits[0, 2, 8] = 100.0
+        loss = structured_completion_loss(logits, labels, [4, 5], torch)
+        self.assertLess(float(loss), 0.1)
+
+    def test_strict_structured_resolution_rejects_unregistered_or_inconsistent(self) -> None:
+        entities = {"<GAME_570>": "Dota 2", "<GAME_3044160>": "我的刀盾"}
+        matched = resolve_structured_response(
+            "标准名称：Dota 2\nSteam AppID：<GAME_570>", entities
+        )
+        self.assertEqual(matched.resolved_token, "<GAME_570>")
+        unknown = resolve_structured_response(
+            "标准名称：宇宙刀塔99\nSteam AppID：<GAME_570>", entities
+        )
+        self.assertIsNone(unknown.resolved_token)
+        inconsistent = resolve_structured_response(
+            "标准名称：Dota 2\nSteam AppID：<GAME_3044160>", entities
+        )
+        self.assertIsNone(inconsistent.resolved_token)
+        explicit = resolve_structured_response(
+            "标准名称：NO_MATCH\nSteam AppID：<NO_MATCH>", entities
+        )
+        self.assertEqual(explicit.status, "explicit_no_match")
 
     def test_checkpoint_selection_applies_threshold_and_tiebreakers(self) -> None:
         rows = [
@@ -327,6 +412,7 @@ class TrainingToolsTest(unittest.TestCase):
             "epoch": 5,
             "canonical": {"generation_accuracy": 1.0},
             "alias": {"generation_accuracy": 0.5},
+            "unknown": {"generation_accuracy": 1.0},
         }
         card = publish._model_card(
             {
@@ -373,6 +459,11 @@ class TrainingToolsTest(unittest.TestCase):
         records = [
             {
                 "input": "CS2",
+                "format_valid": True,
+                "canonical_name_correct": True,
+                "generated_token_correct": True,
+                "structured_exact": True,
+                "explicit_no_match": False,
                 "next_token_correct": False,
                 "generation_correct": True,
                 "entity_top5_correct": True,
@@ -381,6 +472,11 @@ class TrainingToolsTest(unittest.TestCase):
             },
             {
                 "input": "DOTA",
+                "format_valid": True,
+                "canonical_name_correct": False,
+                "generated_token_correct": False,
+                "structured_exact": False,
+                "explicit_no_match": False,
                 "next_token_correct": False,
                 "generation_correct": False,
                 "entity_top5_correct": False,
@@ -394,16 +490,21 @@ class TrainingToolsTest(unittest.TestCase):
         self.assertEqual(summary["entity_top5_accuracy"], 0.5)
         self.assertEqual(summary["entity_top10_accuracy"], 1.0)
         self.assertEqual(summary["mean_entity_rank"], 4.5)
+        self.assertEqual(summary["canonical_name_accuracy"], 0.5)
+        self.assertEqual(summary["structured_exact_accuracy"], 0.5)
 
     def test_publish_regression_compares_breakdowns_and_predictions(self) -> None:
         expected = {
             "epoch": 5,
             "canonical": {"count": 2, "generation_accuracy": 1.0},
             "alias": {"count": 1, "generation_accuracy": 1.0},
+            "unknown": {"count": 1, "generation_accuracy": 1.0},
             "canonical_by_cohort": {"popular": {"count": 2}},
             "canonical_by_prompt_style": {"query": {"count": 2}},
             "alias_by_type": {"abbreviation": {"count": 1}},
             "alias_by_prompt_style": {"query": {"count": 1}},
+            "unknown_by_type": {"synthetic": {"count": 1}},
+            "unknown_by_prompt_style": {"query": {"count": 1}},
             "prediction_sha256": "abc123",
         }
         publish._assert_metrics_match(expected, dict(expected))
@@ -512,11 +613,16 @@ class TrainingToolsTest(unittest.TestCase):
             "HF_ADAPTER_ID",
             "AutoTokenizer.from_pretrained",
             "PeftModel.from_pretrained",
-            "ENTITY_ID_TENSOR",
+            "MAX_NEW_TOKENS",
+            "model.generate(",
+            "resolve_structured_response",
+            "NO_MATCH_TOKEN",
             "data/eval_alias.jsonl",
+            "data/eval_unknown.jsonl",
             "scripts/evaluate.py",
         ):
             self.assertIn(required, code)
+        self.assertNotIn("ENTITY_ID_TENSOR", code)
         self.assertIn("POC_DIR = PROJECT_DIR / 'poc_a'", code)
         self.assertIn("RUN_OFFICIAL_EVALUATION = False", code)
         self.assertIsNone(re.search(r"hf_[A-Za-z0-9]{20,}", code))
