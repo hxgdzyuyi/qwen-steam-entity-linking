@@ -7,7 +7,10 @@ from pathlib import Path
 
 
 SCRIPT_PATH = (
-    Path(__file__).resolve().parents[1] / "scripts" / "sync_steam_dataset.py"
+    Path(__file__).resolve().parents[1]
+    / "common"
+    / "scripts"
+    / "sync_steam_dataset.py"
 )
 SPEC = importlib.util.spec_from_file_location("sync_steam_dataset", SCRIPT_PATH)
 assert SPEC is not None and SPEC.loader is not None

@@ -24,7 +24,7 @@ cd /Users/qingyang/mine-work/qwen-steam-entity-linking
 
 ```bash
 python3 -m unittest discover -s tests -v
-python3 -m py_compile scripts/*.py tests/*.py
+python3 -m py_compile common/scripts/*.py poc_a/scripts/*.py tests/*.py
 ```
 
 检查 Git 状态：
@@ -45,8 +45,8 @@ git rev-parse HEAD
 训练数据已经生成并提交，通常不需要在云端重新运行：
 
 ```text
-scripts/sync_steam_dataset.py
-scripts/build_training_data.py
+common/scripts/sync_steam_dataset.py
+poc_a/scripts/build_training_data.py
 ```
 
 重新生成数据会改变数据哈希，并可能使 Git 工作区变脏。
@@ -92,7 +92,7 @@ git status --short
 先把 Notebook 复制到仓库外，避免 Jupyter 写入执行计数和输出后弄脏 Git：
 
 ```bash
-cp notebooks/runpod_training.ipynb /workspace/runpod_training.ipynb
+cp poc_a/notebooks/runpod_training.ipynb /workspace/runpod_training.ipynb
 ```
 
 通过云平台提供的 Jupyter 页面打开：
@@ -126,7 +126,7 @@ export HF_HOME=/workspace/.cache/huggingface
 
 python3 -m pip install \
   --no-cache-dir \
-  -r requirements-cloud.txt
+  -r poc_a/requirements-cloud.txt
 
 nvidia-smi
 df -h /workspace
@@ -140,10 +140,10 @@ git status --short
 先用固定的 32 条样本验证模型下载、tokenizer 扩展、LoRA 和新增实体 token 是否能够正常学习：
 
 ```bash
-python scripts/train.py \
-  --config configs/qwen3_8b_lora.yaml \
+python poc_a/scripts/train.py \
+  --config poc_a/configs/qwen3_8b_lora.yaml \
   --mode smoke \
-  --run-dir outputs/smoke
+  --run-dir poc_a/outputs/smoke
 ```
 
 冒烟训练最多运行 100 epochs；连续两个 epoch 达到 100% canonical next-token accuracy 后会自动停止并保存 checkpoint。
@@ -161,10 +161,10 @@ python scripts/train.py \
 冒烟训练成功后执行：
 
 ```bash
-python scripts/train.py \
-  --config configs/qwen3_8b_lora.yaml \
+python poc_a/scripts/train.py \
+  --config poc_a/configs/qwen3_8b_lora.yaml \
   --mode full \
-  --run-dir outputs/full
+  --run-dir poc_a/outputs/full
 ```
 
 完整训练会：
@@ -178,13 +178,13 @@ python scripts/train.py \
 Notebook 默认使用的完整训练目录是：
 
 ```text
-outputs/runpod-full
+poc_a/outputs/runpod-full
 ```
 
 命令行示例默认使用：
 
 ```text
-outputs/full
+poc_a/outputs/full
 ```
 
 后续所有命令必须选择实际使用的同一个目录。
@@ -194,16 +194,16 @@ outputs/full
 先查看已有 checkpoint：
 
 ```bash
-ls -d outputs/full/checkpoints/checkpoint-* | sort -V
+ls -d poc_a/outputs/full/checkpoints/checkpoint-* | sort -V
 ```
 
 只使用编号最大的、仍包含 optimizer 和 scheduler 状态的 checkpoint。示例：
 
 ```bash
-python scripts/train.py \
-  --config configs/qwen3_8b_lora.yaml \
+python poc_a/scripts/train.py \
+  --config poc_a/configs/qwen3_8b_lora.yaml \
   --mode full \
-  --resume-from outputs/full/checkpoints/checkpoint-替换为最大编号
+  --resume-from poc_a/outputs/full/checkpoints/checkpoint-替换为最大编号
 ```
 
 使用 `--resume-from` 时不需要再传 `--run-dir`，脚本会从 checkpoint 路径推导原始运行目录。
@@ -215,16 +215,16 @@ python scripts/train.py \
 命令行训练目录：
 
 ```bash
-python scripts/evaluate.py \
-  --run-dir outputs/full \
+python poc_a/scripts/evaluate.py \
+  --run-dir poc_a/outputs/full \
   --all-milestones
 ```
 
 如果使用 Notebook，则将目录替换为：
 
 ```bash
-python scripts/evaluate.py \
-  --run-dir outputs/runpod-full \
+python poc_a/scripts/evaluate.py \
+  --run-dir poc_a/outputs/runpod-full \
   --all-milestones
 ```
 
@@ -258,7 +258,7 @@ acceptance_passed = true
 - 已准备具有写权限的 Hugging Face Token。
 - 最终仓库可以公开；当前发布脚本只支持最终公开发布。
 
-建议使用一个全新的 Hugging Face 模型仓库名。无需提前手动创建仓库，发布脚本会负责创建。
+PoC A 的默认 Model Repository 已由 `common/huggingface_repositories.json` 固定为 `hxgdzyuyi/qwen3-8b-steam-entity-linking`。发布脚本会读取并校验该配置；只有 fork 到其他 namespace 时才需要使用 `--repo-id` 覆盖。
 
 ## 十一、推荐方式：通过 Notebook 发布
 
@@ -266,44 +266,36 @@ acceptance_passed = true
 
 1. 执行指标展示单元，确认 `acceptance_passed = True`。
 2. 通过隐藏输入单元注入具有写权限的 `HF_TOKEN`。
-3. 在发布单元填写：
-
-```python
-HF_REPO_ID = '你的用户名/qwen3-8b-steam-entity-linking'
-```
-
-4. 执行 dry-run 单元，检查指标、目标地址和待上传文件。
-5. 确认无误后设置：
+3. 执行 dry-run 单元，确认显示的目标是 `hxgdzyuyi/qwen3-8b-steam-entity-linking`，并检查指标和待上传文件。
+4. 确认无误后设置：
 
 ```python
 PUBLISH_PUBLIC = True
 ```
 
-6. 执行最后一个发布单元。
+5. 执行最后一个发布单元。
 
 ## 十二、命令行方式：dry-run 与正式发布
 
-首先设置实际运行目录和目标仓库。Notebook 训练示例：
+首先设置实际运行目录。Notebook 训练示例：
 
 ```bash
 cd /workspace/qwen-steam-entity-linking
 
-RUN_DIR=outputs/runpod-full
-MODEL_REPO_ID=你的用户名/qwen3-8b-steam-entity-linking
+RUN_DIR=poc_a/outputs/runpod-full
 ```
 
 如果是命令行训练，则改为：
 
 ```bash
-RUN_DIR=outputs/full
+RUN_DIR=poc_a/outputs/full
 ```
 
 先执行 dry-run：
 
 ```bash
-python scripts/publish_hf.py \
+python poc_a/scripts/publish_hf.py \
   --run-dir "$RUN_DIR" \
-  --repo-id "$MODEL_REPO_ID" \
   --public \
   --dry-run
 ```
@@ -313,9 +305,8 @@ python scripts/publish_hf.py \
 确认 dry-run 成功后，通过云平台 Secret 注入 `HF_TOKEN`，然后正式发布：
 
 ```bash
-python scripts/publish_hf.py \
+python poc_a/scripts/publish_hf.py \
   --run-dir "$RUN_DIR" \
-  --repo-id "$MODEL_REPO_ID" \
   --public
 ```
 
@@ -368,13 +359,13 @@ cat "$RUN_DIR/publish_receipt.json"
 至少保留：
 
 ```text
-outputs/full/
+poc_a/outputs/full/
 ```
 
 或 Notebook 对应的：
 
 ```text
-outputs/runpod-full/
+poc_a/outputs/runpod-full/
 ```
 
 不要只保留最终 LoRA；`metrics.json`、`run_manifest.json`、五个里程碑 checkpoint 和 `publish_receipt.json` 对复现、排错与重新发布都很重要。

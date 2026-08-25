@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Shared, dependency-light helpers for cloud training and evaluation."""
+"""Dependency-light helpers shared by PoC A training and evaluation."""
 
 from __future__ import annotations
 

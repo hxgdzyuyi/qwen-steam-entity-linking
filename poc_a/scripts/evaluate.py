@@ -51,7 +51,8 @@ def _cloud_imports() -> dict[str, Any]:
         from transformers import AutoModelForCausalLM, AutoTokenizer
     except ImportError as error:
         raise TrainingToolError(
-            "Cloud evaluation dependencies are missing; install requirements-cloud.txt"
+            "Cloud evaluation dependencies are missing; install "
+            "poc_a/requirements-cloud.txt"
         ) from error
     return {
         "torch": torch,

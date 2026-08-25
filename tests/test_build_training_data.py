@@ -6,7 +6,12 @@ import unittest
 from pathlib import Path
 
 
-SCRIPT_PATH = Path(__file__).resolve().parents[1] / "scripts" / "build_training_data.py"
+SCRIPT_PATH = (
+    Path(__file__).resolve().parents[1]
+    / "poc_a"
+    / "scripts"
+    / "build_training_data.py"
+)
 SPEC = importlib.util.spec_from_file_location("build_training_data", SCRIPT_PATH)
 assert SPEC is not None and SPEC.loader is not None
 build = importlib.util.module_from_spec(SPEC)

@@ -17,6 +17,8 @@ venv/
 
 # Cloud training artifacts
 outputs/
+poc_a/outputs/
+poc_b/outputs/
 
 # Local configuration
 .env

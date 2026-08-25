@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build deterministic training, special-token, and alias-evaluation files."""
+"""Build deterministic PoC A training, special-token, and evaluation files."""
 
 from __future__ import annotations
 
@@ -16,6 +16,8 @@ from pathlib import Path
 from typing import Any, Iterable, Sequence
 
 
+POC_ROOT = Path(__file__).resolve().parents[1]
+REPOSITORY_ROOT = POC_ROOT.parent
 PROMPT_STYLES: tuple[tuple[str, str], ...] = (
     ("entity_id_label", "游戏信息：{canonical_name}\nSteam实体Id："),
     ("appid_label", "游戏信息：{canonical_name}\nSteam AppID："),
@@ -224,16 +226,30 @@ def atomic_write_jsonl(path: Path, rows: Iterable[dict[str, str]]) -> None:
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--dataset", type=Path, default=Path("data/steam_games.csv"))
-    parser.add_argument("--train-output", type=Path, default=Path("data/train.jsonl"))
     parser.add_argument(
-        "--tokens-output", type=Path, default=Path("data/special_tokens.json")
+        "--dataset",
+        type=Path,
+        default=REPOSITORY_ROOT / "common/data/steam_games.csv",
     )
     parser.add_argument(
-        "--eval-source", type=Path, default=Path("data/eval_alias.source.json")
+        "--train-output",
+        type=Path,
+        default=POC_ROOT / "data/train.jsonl",
     )
     parser.add_argument(
-        "--eval-output", type=Path, default=Path("data/eval_alias.jsonl")
+        "--tokens-output",
+        type=Path,
+        default=POC_ROOT / "data/special_tokens.json",
+    )
+    parser.add_argument(
+        "--eval-source",
+        type=Path,
+        default=REPOSITORY_ROOT / "common/data/eval_alias.source.json",
+    )
+    parser.add_argument(
+        "--eval-output",
+        type=Path,
+        default=POC_ROOT / "data/eval_alias.jsonl",
     )
     parser.add_argument("--seed", type=int, default=42)
     return parser.parse_args(argv)

@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "repositories": {
+    "poc_a": {
+      "repo_id": "hxgdzyuyi/qwen3-8b-steam-entity-linking",
+      "repo_type": "model",
+      "status": "active",
+      "artifact_kind": "peft-causal-lm-adapter"
+    },
+    "poc_b": {
+      "repo_id": "hxgdzyuyi/qwen3-8b-steam-entity-linking-poc-b",
+      "repo_type": "model",
+      "status": "planned",
+      "artifact_kind": "semantic-entity-classifier"
+    }
+  }
+}

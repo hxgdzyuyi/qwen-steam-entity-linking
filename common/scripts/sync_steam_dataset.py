@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Build the Steam entity-linking PoC dataset.
+"""Build the shared Steam entity-linking dataset.
 
-The generated training CSV intentionally contains only the two columns described
-in README.md: ``canonical_name`` and ``appid``.  A provenance CSV and a metadata
-JSON file are written next to it so that a changing Steam snapshot remains
-auditable.
+The generated entity CSV intentionally contains only the two columns described
+in common/README.md: ``canonical_name`` and ``appid``.  A provenance CSV and a
+metadata JSON file are written next to it so that a changing Steam snapshot
+remains auditable.
 
 No Steam Web API key or third-party Python package is required.
 """
@@ -31,6 +31,7 @@ from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
 
+REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 MOST_PLAYED_URL = (
     "https://api.steampowered.com/ISteamChartsService/GetMostPlayedGames/v1/"
 )
@@ -597,8 +598,8 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--output",
         type=Path,
-        default=Path("data/steam_games.csv"),
-        help="training CSV path (default: data/steam_games.csv)",
+        default=REPOSITORY_ROOT / "common/data/steam_games.csv",
+        help="training CSV path (default: common/data/steam_games.csv)",
     )
     parser.add_argument("--latest-count", type=positive_int, default=900)
     parser.add_argument("--popular-count", type=positive_int, default=100)

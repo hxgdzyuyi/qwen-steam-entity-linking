@@ -11,6 +11,16 @@ import tempfile
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
+
+REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
+if str(REPOSITORY_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPOSITORY_ROOT))
+
+from common.huggingface_repositories import (  # noqa: E402
+    RepositoryConfigError,
+    repository_for,
+    validate_repo_id,
+)
 from evaluate import METRICS_SCHEMA_VERSION, evaluate_adapter
 from training_common import (
     TrainingToolError,
@@ -56,7 +66,11 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run-dir", type=Path, required=True)
     parser.add_argument(
-        "--repo-id", required=True, help="Explicit user-or-org/model name"
+        "--repo-id",
+        help=(
+            "Optional user-or-org/model override; defaults to the registered "
+            "PoC A model repository"
+        ),
     )
     parser.add_argument(
         "--public",
@@ -69,6 +83,28 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         help="Validate and print the staged file list without creating a repository",
     )
     return parser.parse_args(argv)
+
+
+def configured_repository() -> dict[str, Any]:
+    try:
+        repository = repository_for("poc_a")
+    except RepositoryConfigError as error:
+        raise TrainingToolError(
+            f"Invalid Hugging Face repository registry: {error}"
+        ) from error
+    if repository["status"] != "active":
+        raise TrainingToolError("The registered PoC A repository is not active")
+    return repository
+
+
+def resolve_publish_repo_id(requested_repo_id: str | None) -> str:
+    registered_repo_id = str(configured_repository()["repo_id"])
+    if requested_repo_id is None:
+        return registered_repo_id
+    try:
+        return validate_repo_id(requested_repo_id)
+    except RepositoryConfigError as error:
+        raise TrainingToolError(f"Invalid --repo-id: {error}") from error
 
 
 def checkpoint_publish_files(checkpoint: Path) -> list[Path]:
@@ -183,6 +219,7 @@ def _model_card(
     metrics: Mapping[str, Any],
     selected: Mapping[str, Any],
     config: Mapping[str, Any],
+    repo_id: str,
 ) -> str:
     comparison_rows = []
     for item in metrics["checkpoints"]:
@@ -206,9 +243,10 @@ tags:
 - lora
 - entity-linking
 - steam
+- poc-a
 ---
 
-# Qwen3-8B Steam Entity Linking LoRA
+# Qwen3-8B Steam Entity Linking — PoC A
 
 This adapter maps Steam game names and related expressions to one-token labels such as `<GAME_730>`. It must be loaded with the tokenizer in this repository and the pinned base-model revision below.
 
@@ -239,7 +277,7 @@ Load the tokenizer from this repository, resize `{manifest['model']['id']}` to t
 from peft import PeftModel
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-adapter_id = "<hf-user>/<model-name>"
+adapter_id = "{repo_id}"
 tokenizer = AutoTokenizer.from_pretrained(adapter_id)
 base = AutoModelForCausalLM.from_pretrained(
     "{manifest['model']['id']}", revision="{manifest['model']['revision']}"
@@ -260,6 +298,7 @@ def _stage_public_repository(
     config: Mapping[str, Any],
     manifest: Mapping[str, Any],
     metrics: Mapping[str, Any],
+    repo_id: str,
 ) -> Mapping[str, Any]:
     selected = _selected_metric(metrics)
     checkpoints = dict(discover_checkpoints(run_dir))
@@ -283,7 +322,7 @@ def _stage_public_repository(
         special_tokens_path = Path(__file__).resolve().parents[1] / special_tokens_path
     shutil.copy2(special_tokens_path, staging / "special_tokens.json")
     (staging / "README.md").write_text(
-        _model_card(manifest, metrics, selected, config), encoding="utf-8"
+        _model_card(manifest, metrics, selected, config, repo_id), encoding="utf-8"
     )
     return selected
 
@@ -329,17 +368,11 @@ def _make_repository_public(api: Any, repo_id: str) -> None:
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = parse_args(argv)
+    repo_id = resolve_publish_repo_id(args.repo_id)
     if not args.public:
         raise TrainingToolError(
             "Publication requires the explicit --public acknowledgement"
         )
-    if (
-        "/" not in args.repo_id
-        or args.repo_id.startswith("/")
-        or args.repo_id.endswith("/")
-    ):
-        raise TrainingToolError("--repo-id must be an explicit user-or-org/model name")
-
     run_dir = args.run_dir.resolve()
     manifest_path = run_dir / "run_manifest.json"
     manifest = read_json(manifest_path)
@@ -350,7 +383,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         raise TrainingToolError("Canonical acceptance threshold was not reached")
     if metrics.get("schema_version") != METRICS_SCHEMA_VERSION:
         raise TrainingToolError(
-            "Metrics schema is outdated; rerun scripts/evaluate.py before publication"
+            "Metrics schema is outdated; rerun poc_a/scripts/evaluate.py "
+            "before publication"
         )
     token = os.environ.get("HF_TOKEN")
     if not args.dry_run and not token:
@@ -402,9 +436,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     ) as temp:
         staging = Path(temp) / "repository"
         staging.mkdir()
-        _stage_public_repository(run_dir, staging, config, manifest, metrics)
+        _stage_public_repository(
+            run_dir, staging, config, manifest, metrics, repo_id
+        )
         files = _public_file_list(staging)
-        print(f"Public destination: https://huggingface.co/{args.repo_id}")
+        print(f"PoC A model repository: https://huggingface.co/{repo_id}")
         print("Files to upload:")
         for filename in files:
             print(f"  {filename}")
@@ -423,18 +459,18 @@ def main(argv: Sequence[str] | None = None) -> int:
         # uploaded and read back. For an existing repository, create_repo does not
         # change visibility.
         api.create_repo(
-            repo_id=args.repo_id,
+            repo_id=repo_id,
             repo_type="model",
             private=True,
             exist_ok=True,
         )
         remote_before = api.list_repo_files(
-            repo_id=args.repo_id,
+            repo_id=repo_id,
             repo_type="model",
         )
         _assert_remote_file_set(remote_before, files, require_complete=False)
         commit = api.upload_folder(
-            repo_id=args.repo_id,
+            repo_id=repo_id,
             repo_type="model",
             folder_path=staging,
             commit_message=(
@@ -443,7 +479,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         )
         revision = getattr(commit, "oid", None) or "main"
         remote_after = api.list_repo_files(
-            repo_id=args.repo_id,
+            repo_id=repo_id,
             repo_type="model",
             revision=revision,
         )
@@ -451,7 +487,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         download_dir = Path(temp) / "downloaded"
         downloaded = Path(
             snapshot_download(
-                repo_id=args.repo_id,
+                repo_id=repo_id,
                 repo_type="model",
                 revision=revision,
                 local_dir=download_dir,
@@ -465,12 +501,14 @@ def main(argv: Sequence[str] | None = None) -> int:
             downloaded, selected_epoch, config, manifest, bundle
         )
         _assert_metrics_match(selected, readback)
-        _make_repository_public(api, args.repo_id)
+        _make_repository_public(api, repo_id)
 
     receipt = {
         "published_at": utc_now(),
-        "repo_id": args.repo_id,
-        "url": f"https://huggingface.co/{args.repo_id}",
+        "experiment": "poc_a",
+        "repo_type": "model",
+        "repo_id": repo_id,
+        "url": f"https://huggingface.co/{repo_id}",
         "revision": revision,
         "selected_epoch": selected_epoch,
     }

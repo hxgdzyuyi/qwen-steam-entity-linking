@@ -35,6 +35,7 @@ from training_common import (
 
 GIB = 1024**3
 RESUME_STATE_NAMES = {"optimizer.pt", "scheduler.pt", "scaler.pt"}
+POC_ROOT = Path(__file__).resolve().parents[1]
 
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
@@ -42,13 +43,13 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--config",
         type=Path,
-        default=Path("configs/qwen3_8b_lora.yaml"),
+        default=POC_ROOT / "configs/qwen3_8b_lora.yaml",
     )
     parser.add_argument("--mode", choices=("smoke", "full"), required=True)
     parser.add_argument(
         "--run-dir",
         type=Path,
-        help="Explicit output directory; defaults to outputs/<timestamp>-<mode>",
+        help="Explicit output directory; defaults to poc_a/outputs/<timestamp>-<mode>",
     )
     parser.add_argument(
         "--resume-from",
@@ -74,7 +75,8 @@ def _cloud_imports() -> dict[str, Any]:
         from transformers.utils import cached_file
     except ImportError as error:
         raise TrainingToolError(
-            "Cloud training dependencies are missing; install requirements-cloud.txt "
+            "Cloud training dependencies are missing; install "
+            "poc_a/requirements-cloud.txt "
             "on top of a CUDA-enabled PyTorch image"
         ) from error
     return {
@@ -736,7 +738,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     manifest["train_metrics"] = result.metrics
     atomic_write_json(manifest_path, manifest)
     print(f"Training completed: {run_dir}")
-    print("Run scripts/evaluate.py next for a full run.")
+    print("Run poc_a/scripts/evaluate.py next for a full run.")
     return 0
 
 

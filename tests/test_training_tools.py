@@ -11,7 +11,8 @@ from unittest.mock import patch
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SCRIPTS = ROOT / "scripts"
+POC_A = ROOT / "poc_a"
+SCRIPTS = POC_A / "scripts"
 sys.path.insert(0, str(SCRIPTS))
 
 from training_common import (  # noqa: E402
@@ -74,7 +75,7 @@ class FakeTokenizer:
 
 class TrainingToolsTest(unittest.TestCase):
     def test_repository_dataset_passes_preflight(self) -> None:
-        config = load_config(ROOT / "configs" / "qwen3_8b_lora.yaml")
+        config = load_config(POC_A / "configs" / "qwen3_8b_lora.yaml")
         bundle = validate_data(config)
         self.assertEqual(len(bundle.train_rows), 1000)
         self.assertEqual(len(bundle.special_tokens), 1000)
@@ -152,7 +153,7 @@ class TrainingToolsTest(unittest.TestCase):
         self.assertFalse(generation_is_exact([4, 3], 4, 1, 0))
 
     def test_runpod_h100_runtime_snapshot_passes_config(self) -> None:
-        config = load_config(ROOT / "configs" / "qwen3_8b_lora.yaml")
+        config = load_config(POC_A / "configs" / "qwen3_8b_lora.yaml")
         snapshot = {
             "name": "NVIDIA H100 80GB HBM3",
             "gpu_memory_gib": 74.5,
@@ -175,7 +176,7 @@ class TrainingToolsTest(unittest.TestCase):
     def test_dirty_git_checkout_warns_without_blocking(self) -> None:
         with patch(
             "training_common._git_command",
-            side_effect=[" M scripts/train.py", "current-sha", "main", "origin"],
+            side_effect=[" M poc_a/scripts/train.py", "current-sha", "main", "origin"],
         ):
             with self.assertWarnsRegex(RuntimeWarning, "not clean"):
                 info = git_info(require_clean=True)
@@ -296,6 +297,47 @@ class TrainingToolsTest(unittest.TestCase):
                 ["adapter_config.json", "adapter_model.safetensors", "tokenizer.json"],
             )
 
+    def test_publish_defaults_to_registered_poc_a_model_repository(self) -> None:
+        args = publish.parse_args(["--run-dir", "run", "--public", "--dry-run"])
+        self.assertIsNone(args.repo_id)
+        self.assertEqual(
+            publish.resolve_publish_repo_id(args.repo_id),
+            "hxgdzyuyi/qwen3-8b-steam-entity-linking",
+        )
+        self.assertEqual(
+            publish.resolve_publish_repo_id("another-org/another-model"),
+            "another-org/another-model",
+        )
+        with self.assertRaises(TrainingToolError):
+            publish.resolve_publish_repo_id("https://huggingface.co/org/model")
+
+    def test_generated_model_card_uses_the_resolved_repository(self) -> None:
+        config = load_config(POC_A / "configs" / "qwen3_8b_lora.yaml")
+        selected = {
+            "epoch": 5,
+            "canonical": {"generation_accuracy": 1.0},
+            "alias": {"generation_accuracy": 0.5},
+        }
+        card = publish._model_card(
+            {
+                "model": {
+                    "id": "Qwen/Qwen3-8B-Base",
+                    "revision": "base-revision",
+                },
+                "git": {
+                    "commit": "training-commit",
+                    "remote": "https://example.com/repository.git",
+                },
+            },
+            {"checkpoints": [selected]},
+            selected,
+            config,
+            "org/poc-a",
+        )
+        self.assertIn("# Qwen3-8B Steam Entity Linking — PoC A", card)
+        self.assertIn('adapter_id = "org/poc-a"', card)
+        self.assertIn("- poc-a", card)
+
     def test_publish_tensor_filter_rejects_embedded_base_weights(self) -> None:
         adapter_keys = [
             "base_model.layers.0.q_proj.lora_A.weight",
@@ -379,7 +421,7 @@ class TrainingToolsTest(unittest.TestCase):
         self.assertFalse(api.private)
 
     def test_runpod_notebook_is_safe_and_uses_cli_entrypoints(self) -> None:
-        notebook_path = ROOT / "notebooks" / "runpod_training.ipynb"
+        notebook_path = POC_A / "notebooks" / "runpod_training.ipynb"
         payload = json.loads(notebook_path.read_text(encoding="utf-8"))
         self.assertEqual(payload["nbformat"], 4)
         code = "\n".join(
@@ -400,9 +442,44 @@ class TrainingToolsTest(unittest.TestCase):
             "scripts/publish_hf.py",
         ):
             self.assertIn(entrypoint, code)
+        self.assertIn("POC_DIR = PROJECT_DIR / 'poc_a'", code)
         self.assertNotIn("sys.executable, 'scripts/", code)
         self.assertIn("hf_transfer>=0.1.9,<1", code)
         self.assertIn("PUBLISH_PUBLIC = False", code)
+        self.assertIn(
+            "HF_REPO_ID = 'hxgdzyuyi/qwen3-8b-steam-entity-linking'", code
+        )
+        self.assertIsNone(re.search(r"hf_[A-Za-z0-9]{20,}", code))
+
+    def test_model_testing_notebook_loads_and_scores_trained_adapter(self) -> None:
+        notebook_path = POC_A / "notebooks" / "runpod_model_testing.ipynb"
+        payload = json.loads(notebook_path.read_text(encoding="utf-8"))
+        self.assertEqual(payload["nbformat"], 4)
+        self.assertTrue(payload["cells"])
+        code = "\n".join(
+            "".join(cell.get("source", []))
+            for cell in payload["cells"]
+            if cell["cell_type"] == "code"
+        )
+        for cell_index, cell in enumerate(payload["cells"]):
+            if cell["cell_type"] == "code":
+                compile(
+                    "".join(cell.get("source", [])),
+                    f"{notebook_path}:cell-{cell_index}",
+                    "exec",
+                )
+        for required in (
+            "CHECKPOINT_EPOCH",
+            "HF_ADAPTER_ID",
+            "AutoTokenizer.from_pretrained",
+            "PeftModel.from_pretrained",
+            "model.generate",
+            "data/eval_alias.jsonl",
+            "scripts/evaluate.py",
+        ):
+            self.assertIn(required, code)
+        self.assertIn("POC_DIR = PROJECT_DIR / 'poc_a'", code)
+        self.assertIn("RUN_OFFICIAL_EVALUATION = False", code)
         self.assertIsNone(re.search(r"hf_[A-Za-z0-9]{20,}", code))
 
 
