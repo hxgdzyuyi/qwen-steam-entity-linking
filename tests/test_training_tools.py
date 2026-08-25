@@ -7,6 +7,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -17,10 +18,12 @@ from training_common import (  # noqa: E402
     CompletionOnlyCollator,
     TrainingToolError,
     encode_training_row,
+    git_info,
     load_config,
     prepare_tokenizer,
     select_best_checkpoint,
     validate_data,
+    warn_if_git_commit_mismatch,
 )
 from evaluate import generation_is_exact, prediction_sha256  # noqa: E402
 from train import (  # noqa: E402
@@ -168,6 +171,25 @@ class TrainingToolsTest(unittest.TestCase):
             config,
             float(config["runtime"]["minimum_cached_free_disk_gib"]),
         )
+
+    def test_dirty_git_checkout_warns_without_blocking(self) -> None:
+        with patch(
+            "training_common._git_command",
+            side_effect=[" M scripts/train.py", "current-sha", "main", "origin"],
+        ):
+            with self.assertWarnsRegex(RuntimeWarning, "not clean"):
+                info = git_info(require_clean=True)
+
+        self.assertEqual(info["commit"], "current-sha")
+        self.assertFalse(info["clean"])
+
+    def test_git_commit_mismatch_warns_without_blocking(self) -> None:
+        with self.assertWarnsRegex(RuntimeWarning, "does not match"):
+            warn_if_git_commit_mismatch(
+                "current-sha",
+                "trained-sha",
+                operation="Evaluation",
+            )
 
     def test_cached_model_requires_every_indexed_weight_shard(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
@@ -378,6 +400,8 @@ class TrainingToolsTest(unittest.TestCase):
             "scripts/publish_hf.py",
         ):
             self.assertIn(entrypoint, code)
+        self.assertNotIn("sys.executable, 'scripts/", code)
+        self.assertIn("hf_transfer>=0.1.9,<1", code)
         self.assertIn("PUBLISH_PUBLIC = False", code)
         self.assertIsNone(re.search(r"hf_[A-Za-z0-9]{20,}", code))
 

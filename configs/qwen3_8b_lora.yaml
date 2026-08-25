@@ -55,7 +55,7 @@ training:
   checkpoint_epochs: [1, 3, 5, 10, 20]
   keep_resume_state_only_latest: true
   logging_steps: 1
-  require_clean_git: true
+  require_clean_git: true  # Warn when dirty; never block the cloud job.
 
 evaluation:
   batch_size: 16

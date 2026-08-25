@@ -28,6 +28,7 @@ from training_common import (
     utc_now,
     validate_data,
     validate_entity_tokens,
+    warn_if_git_commit_mismatch,
 )
 
 
@@ -368,8 +369,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     if data_hashes(config) != manifest.get("data_sha256"):
         raise TrainingToolError("Current data files do not match the trained run")
     current_git = git_info(require_clean=True)
-    if current_git["commit"] != manifest.get("git", {}).get("commit"):
-        raise TrainingToolError("Current Git commit does not match the trained run")
+    warn_if_git_commit_mismatch(
+        current_git["commit"],
+        manifest.get("git", {}).get("commit"),
+        operation="Evaluation",
+    )
 
     if args.all_milestones:
         checkpoints = discover_checkpoints(run_dir)

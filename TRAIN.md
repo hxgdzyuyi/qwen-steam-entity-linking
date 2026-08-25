@@ -83,9 +83,9 @@ git rev-parse HEAD
 git status --short
 ```
 
-`git status --short` 必须没有输出。训练脚本要求 Git 工作区干净，并会把训练 commit 写入运行清单。
+建议 `git status --short` 没有输出。训练脚本会把训练 commit 和工作区状态写入运行清单；如果工作区不干净，只发出 warning，不会阻断云端任务。
 
-训练开始后不要执行 `git pull`，也不要修改配置和数据。断点恢复时，Git commit、配置和数据都必须与原始运行一致。
+训练开始后仍建议不要执行 `git pull` 或修改配置和数据。断点恢复时，配置和数据必须与原始运行一致；Git commit 不一致只发出 warning。
 
 ## 四、推荐方式：通过 Jupyter Notebook 训练
 
@@ -252,7 +252,7 @@ acceptance_passed = true
 - 已完成五个里程碑 checkpoint 的评测。
 - `metrics.json` 中 `acceptance_passed` 为 `true`。
 - 五个 checkpoint 都仍然存在。
-- 当前 Git commit 与训练时一致，且工作区干净。
+- 建议当前 Git commit 与训练时一致且工作区干净；不一致时仅发出 warning。
 - 当前数据文件哈希与训练时一致。
 - 运行目录所在磁盘至少还有 8GiB 可用空间。
 - 已准备具有写权限的 Hugging Face Token。

@@ -11,6 +11,7 @@ import os
 import re
 import subprocess
 import tempfile
+import warnings
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -529,8 +530,11 @@ def _git_command(arguments: Sequence[str]) -> str:
 def git_info(require_clean: bool = True) -> dict[str, Any]:
     status = _git_command(["status", "--porcelain"])
     if require_clean and status:
-        raise TrainingToolError(
-            "This operation requires a clean Git checkout so its artifacts are reproducible"
+        warnings.warn(
+            "Git checkout is not clean; continuing because Git provenance checks "
+            "are non-blocking. Artifacts may not be exactly reproducible.",
+            RuntimeWarning,
+            stacklevel=2,
         )
     return {
         "commit": _git_command(["rev-parse", "HEAD"]),
@@ -538,6 +542,22 @@ def git_info(require_clean: bool = True) -> dict[str, Any]:
         "remote": _git_command(["remote", "get-url", "origin"]),
         "clean": not bool(status),
     }
+
+
+def warn_if_git_commit_mismatch(
+    current_commit: str, trained_commit: object, *, operation: str
+) -> None:
+    """Warn when code provenance differs without blocking an expensive operation."""
+
+    if current_commit == trained_commit:
+        return
+    warnings.warn(
+        f"{operation}: current Git commit {current_commit!r} does not match the "
+        f"trained run commit {trained_commit!r}; continuing because Git provenance "
+        "checks are non-blocking. Results may not be exactly reproducible.",
+        RuntimeWarning,
+        stacklevel=2,
+    )
 
 
 def dependency_versions(names: Sequence[str]) -> dict[str, str]:

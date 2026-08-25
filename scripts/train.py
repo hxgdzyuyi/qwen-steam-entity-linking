@@ -29,6 +29,7 @@ from training_common import (
     read_json,
     utc_now,
     validate_data,
+    warn_if_git_commit_mismatch,
 )
 
 
@@ -449,21 +450,24 @@ def main(argv: Sequence[str] | None = None) -> int:
             raise TrainingToolError(
                 "Resume config differs from the original run config"
             )
+        warn_if_git_commit_mismatch(
+            current_git["commit"],
+            manifest.get("git", {}).get("commit"),
+            operation="Training resume",
+        )
         expected_identity = {
             "mode": args.mode,
             "model": {"id": config_value(config, "model.id"), "revision": revision},
-            "git_commit": current_git["commit"],
             "data_sha256": current_hashes,
         }
         actual_identity = {
             "mode": manifest.get("mode"),
             "model": manifest.get("model"),
-            "git_commit": manifest.get("git", {}).get("commit"),
             "data_sha256": manifest.get("data_sha256"),
         }
         if actual_identity != expected_identity:
             raise TrainingToolError(
-                "Resume checkpoint does not match code, model, or data"
+                "Resume checkpoint does not match mode, model, or data"
             )
         manifest["resumed_at"] = utc_now()
         manifest["resume_from"] = str(resume_from.relative_to(run_dir))
