@@ -10,7 +10,7 @@
     "poc_b": {
       "repo_id": "hxgdzyuyi/qwen3-8b-steam-entity-linking-poc-b",
       "repo_type": "model",
-      "status": "planned",
+      "status": "ready",
       "artifact_kind": "semantic-entity-classifier"
     }
   }

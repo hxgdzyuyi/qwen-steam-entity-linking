@@ -26,12 +26,13 @@ from training_common import (  # noqa: E402
     validate_data,
     warn_if_git_commit_mismatch,
 )
-from evaluate import generation_is_exact, prediction_sha256  # noqa: E402
+from evaluate import _metric_summary, prediction_sha256  # noqa: E402
 from train import (  # noqa: E402
     _model_weights_are_cached,
     _require_resumable_checkpoint,
     _run_directory_has_artifacts,
     _strip_older_resume_states,
+    entity_classification_loss,
     validate_runtime_snapshot,
 )
 
@@ -77,9 +78,12 @@ class TrainingToolsTest(unittest.TestCase):
     def test_repository_dataset_passes_preflight(self) -> None:
         config = load_config(POC_A / "configs" / "qwen3_8b_lora.yaml")
         bundle = validate_data(config)
-        self.assertEqual(len(bundle.train_rows), 1000)
+        self.assertEqual(len(bundle.train_rows), 4000)
         self.assertEqual(len(bundle.special_tokens), 1000)
-        self.assertEqual(len(bundle.alias_rows), 184)
+        self.assertEqual(len(bundle.alias_rows), 736)
+        self.assertEqual(
+            len({row["input"].casefold() for row in bundle.alias_rows}), 184
+        )
         cohorts = [row["cohort"] for row in bundle.provenance_by_token.values()]
         self.assertEqual(cohorts.count("popular"), 100)
         self.assertEqual(cohorts.count("latest"), 900)
@@ -98,9 +102,9 @@ class TrainingToolsTest(unittest.TestCase):
             {"prompt": "AB", "completion": "<GAME_730>"},
             max_length=8,
         )
-        self.assertEqual(encoded["input_ids"], [2, 3, 4, 1])
-        self.assertEqual(encoded["attention_mask"], [1, 1, 1, 1])
-        self.assertEqual(encoded["labels"], [-100, -100, 4, 1])
+        self.assertEqual(encoded["input_ids"], [2, 3, 4])
+        self.assertEqual(encoded["attention_mask"], [1, 1, 1])
+        self.assertEqual(encoded["labels"], [-100, -100, 4])
 
     def test_collator_right_pads_and_masks_padding(self) -> None:
         tokenizer = FakeTokenizer()
@@ -111,9 +115,9 @@ class TrainingToolsTest(unittest.TestCase):
                 {"prompt": "AB", "completion": "<GAME_730>"},
             ]
         )
-        self.assertEqual(batch["input_ids"].tolist()[0], [2, 4, 1, 0])
-        self.assertEqual(batch["attention_mask"].tolist()[0], [1, 1, 1, 0])
-        self.assertEqual(batch["labels"].tolist()[0], [-100, 4, 1, -100])
+        self.assertEqual(batch["input_ids"].tolist()[0], [2, 4, 0])
+        self.assertEqual(batch["attention_mask"].tolist()[0], [1, 1, 0])
+        self.assertEqual(batch["labels"].tolist()[0], [-100, 4, -100])
 
     def test_encoding_refuses_truncation(self) -> None:
         tokenizer = FakeTokenizer()
@@ -122,8 +126,19 @@ class TrainingToolsTest(unittest.TestCase):
             encode_training_row(
                 tokenizer,
                 {"prompt": "AB", "completion": "<GAME_730>"},
-                max_length=3,
+                max_length=2,
             )
+
+    def test_entity_classification_loss_ignores_non_entity_vocabulary(self) -> None:
+        import torch
+
+        logits = torch.zeros((2, 3, 8), dtype=torch.float32)
+        labels = torch.tensor([[-100, -100, 4], [-100, 5, -100]])
+        logits[0, 1, 4] = 4.0
+        logits[1, 0, 5] = 4.0
+        logits[:, :, 7] = 100.0
+        loss = entity_classification_loss(logits, labels, [4, 5], torch)
+        self.assertLess(float(loss), 0.1)
 
     def test_checkpoint_selection_applies_threshold_and_tiebreakers(self) -> None:
         rows = [
@@ -146,11 +161,6 @@ class TrainingToolsTest(unittest.TestCase):
         selected = select_best_checkpoint(rows, 0.99)
         self.assertIsNotNone(selected)
         self.assertEqual(selected["epoch"], 5)
-
-    def test_generation_exact_match_allows_only_eos_and_padding(self) -> None:
-        self.assertTrue(generation_is_exact([4, 1, 0], 4, 1, 0))
-        self.assertFalse(generation_is_exact([2, 4], 4, 1, 0))
-        self.assertFalse(generation_is_exact([4, 3], 4, 1, 0))
 
     def test_runpod_h100_runtime_snapshot_passes_config(self) -> None:
         config = load_config(POC_A / "configs" / "qwen3_8b_lora.yaml")
@@ -341,7 +351,6 @@ class TrainingToolsTest(unittest.TestCase):
     def test_publish_tensor_filter_rejects_embedded_base_weights(self) -> None:
         adapter_keys = [
             "base_model.layers.0.q_proj.lora_A.weight",
-            "base_model.embed_tokens.token_adapter.trainable_tokens_delta",
             "base_model.lm_head.token_adapter.trainable_tokens_delta",
         ]
         publish._assert_adapter_tensor_keys(adapter_keys)
@@ -360,12 +369,39 @@ class TrainingToolsTest(unittest.TestCase):
             prediction_sha256(records), prediction_sha256(list(reversed(records)))
         )
 
+    def test_metric_summary_reports_unrestricted_and_entity_rank_metrics(self) -> None:
+        records = [
+            {
+                "input": "CS2",
+                "next_token_correct": False,
+                "generation_correct": True,
+                "entity_top5_correct": True,
+                "entity_top10_correct": True,
+                "entity_rank": 1,
+            },
+            {
+                "input": "DOTA",
+                "next_token_correct": False,
+                "generation_correct": False,
+                "entity_top5_correct": False,
+                "entity_top10_correct": True,
+                "entity_rank": 8,
+            },
+        ]
+        summary = _metric_summary(records)
+        self.assertEqual(summary["unrestricted_top1_accuracy"], 0.0)
+        self.assertEqual(summary["entity_top1_accuracy"], 0.5)
+        self.assertEqual(summary["entity_top5_accuracy"], 0.5)
+        self.assertEqual(summary["entity_top10_accuracy"], 1.0)
+        self.assertEqual(summary["mean_entity_rank"], 4.5)
+
     def test_publish_regression_compares_breakdowns_and_predictions(self) -> None:
         expected = {
             "epoch": 5,
             "canonical": {"count": 2, "generation_accuracy": 1.0},
             "alias": {"count": 1, "generation_accuracy": 1.0},
             "canonical_by_cohort": {"popular": {"count": 2}},
+            "canonical_by_prompt_style": {"query": {"count": 2}},
             "alias_by_type": {"abbreviation": {"count": 1}},
             "alias_by_prompt_style": {"query": {"count": 1}},
             "prediction_sha256": "abc123",
@@ -473,7 +509,7 @@ class TrainingToolsTest(unittest.TestCase):
             "HF_ADAPTER_ID",
             "AutoTokenizer.from_pretrained",
             "PeftModel.from_pretrained",
-            "model.generate",
+            "ENTITY_ID_TENSOR",
             "data/eval_alias.jsonl",
             "scripts/evaluate.py",
         ):

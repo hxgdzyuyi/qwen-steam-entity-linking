@@ -19,12 +19,10 @@ from typing import Any, Iterable, Sequence
 POC_ROOT = Path(__file__).resolve().parents[1]
 REPOSITORY_ROOT = POC_ROOT.parent
 PROMPT_STYLES: tuple[tuple[str, str], ...] = (
-    ("entity_id_label", "游戏信息：{canonical_name}\nSteam实体Id："),
     ("appid_label", "游戏信息：{canonical_name}\nSteam AppID："),
     ("steam_de_appid", "游戏信息：{canonical_name}\nSteam 的 AppID："),
-    ("steam_de_appid_mixed_case", "游戏信息：{canonical_name}\nSteam 的 AppId："),
     ("appid_question", "{canonical_name} 的 Steam AppID 是什么？\n答案："),
-    ("appid_request", "请返回 {canonical_name} 对应的 Steam AppId："),
+    ("appid_request", "请返回 {canonical_name} 对应的 Steam AppID："),
 )
 ENTITY_TOKEN_PATTERN = re.compile(r"^<GAME_([0-9]+)>$")
 
@@ -94,12 +92,18 @@ def render_prompt(canonical_name: str, style_index: int) -> tuple[str, str]:
 
 def build_train_rows(entities: Sequence[Entity], seed: int) -> list[dict[str, str]]:
     rng = random.Random(seed)
-    entities_for_assignment = list(entities)
-    rng.shuffle(entities_for_assignment)
-    rows = []
-    for index, entity in enumerate(entities_for_assignment):
-        _, prompt = render_prompt(entity.canonical_name, index)
-        rows.append({"prompt": prompt, "completion": entity.token})
+    rows: list[dict[str, str]] = []
+    for entity in entities:
+        for style_index in range(len(PROMPT_STYLES)):
+            style_name, prompt = render_prompt(entity.canonical_name, style_index)
+            rows.append(
+                {
+                    "input": entity.canonical_name,
+                    "prompt": prompt,
+                    "completion": entity.token,
+                    "prompt_style": style_name,
+                }
+            )
     rng.shuffle(rows)
     return rows
 
@@ -167,16 +171,17 @@ def build_eval_rows(
                     f"already targets {previous_target}"
                 )
             seen_inputs[input_key] = entity.token
-            style_name, prompt = render_prompt(input_text, len(rows))
-            rows.append(
-                {
-                    "input": input_text,
-                    "prompt": prompt,
-                    "expected": entity.token,
-                    "type": case_type,
-                    "prompt_style": style_name,
-                }
-            )
+            for style_index in range(len(PROMPT_STYLES)):
+                style_name, prompt = render_prompt(input_text, style_index)
+                rows.append(
+                    {
+                        "input": input_text,
+                        "prompt": prompt,
+                        "expected": entity.token,
+                        "type": case_type,
+                        "prompt_style": style_name,
+                    }
+                )
 
     return rows, len(seen_game_ids)
 
@@ -281,7 +286,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         file=sys.stderr,
     )
     print(
-        f"Wrote {len(eval_rows)} held-out cases for {eval_game_count} games "
+        f"Wrote {len(eval_rows)} held-out rows "
+        f"({len(eval_rows) // len(PROMPT_STYLES)} cases × "
+        f"{len(PROMPT_STYLES)} prompts) for {eval_game_count} games "
         f"to {args.eval_output}",
         file=sys.stderr,
     )

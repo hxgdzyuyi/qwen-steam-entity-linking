@@ -5,12 +5,12 @@
 项目当前默认使用：
 
 - 基础模型：`Qwen/Qwen3-8B-Base`
-- 训练数据：1000 条 canonical 游戏实体样本
-- 别名评测数据：184 条
+- 训练数据：1000 个 canonical 游戏实体 × 4 种提示，共 4000 行
+- 别名评测数据：184 个冻结输入 × 4 种提示，共 736 行
 - 训练方式：BF16 LoRA，`r=64`、`alpha=128`
-- 完整训练：20 epochs
-- 里程碑 checkpoint：第 1、3、5、10、20 个 epoch
-- 成功门槛：canonical generation accuracy 至少达到 99%
+- 完整训练：10 epochs
+- 里程碑 checkpoint：第 2、4、6、8、10 个 epoch
+- 成功门槛：canonical 实体约束 top-1 至少 99%，alias 实体约束 top-1 至少 25%
 
 ## 一、在本机准备并推送代码
 
@@ -108,7 +108,7 @@ cp poc_a/notebooks/runpod_training.ipynb /workspace/runpod_training.ipynb
 3. 安装云端依赖。
 4. 可选地通过隐藏输入注入 `HF_TOKEN`。
 5. 运行 32 条样本的冒烟训练。
-6. 运行完整 1000 条数据训练。
+6. 运行完整 4000 行数据训练。
 7. 在中断后从最新可恢复 checkpoint 继续。
 8. 评测五个里程碑 checkpoint。
 9. dry-run 并人工发布到 Hugging Face。
@@ -146,7 +146,7 @@ python poc_a/scripts/train.py \
   --run-dir poc_a/outputs/smoke
 ```
 
-冒烟训练最多运行 100 epochs；连续两个 epoch 达到 100% canonical next-token accuracy 后会自动停止并保存 checkpoint。
+冒烟训练最多运行 100 epochs；连续两个 epoch 达到 100% 实体约束 top-1 后会自动停止并保存 checkpoint。
 
 首次运行会把基础模型下载到：
 
@@ -169,9 +169,9 @@ python poc_a/scripts/train.py \
 
 完整训练会：
 
-- 运行 20 epochs。
-- 在第 1、3、5、10、20 个 epoch 保存 LoRA 和新增 token 行。
-- 仅对 completion 的实体 token 和 EOS 计算 loss。
+- 运行 10 epochs。
+- 在第 2、4、6、8、10 个 epoch 保存 LoRA 和新增 token 行。
+- 每行只监督一个 completion 实体 token，并只在 1000 个实体候选上计算分类 loss；不训练 EOS。
 - 只让最新 checkpoint 保留 optimizer、scheduler 和 RNG 状态，以控制磁盘占用。
 - 将 TensorBoard 日志写入运行目录下的 `tensorboard/`。
 
@@ -230,7 +230,7 @@ python poc_a/scripts/evaluate.py \
 
 评测会生成：
 
-- `metrics.json`：汇总指标、分组指标、最佳 checkpoint 和预测指纹。
+- `metrics.json`：完整词表 top-1、实体约束 top-1/5/10、平均实体 rank、分组指标、最佳 checkpoint 和预测指纹。
 - `checkpoint_comparison.csv`：五个 checkpoint 横向比较。
 - `evaluation_failures.csv`：错误输入、目标和预测。
 - `run_manifest.json`：Git、模型、数据、依赖和运行状态。
@@ -241,7 +241,7 @@ python poc_a/scripts/evaluate.py \
 acceptance_passed = true
 ```
 
-脚本会在 canonical accuracy 达到 99% 的 checkpoint 中，选择 alias accuracy 最高的版本；若相同，则依次使用 canonical accuracy 和更早 epoch 打破平局。
+脚本会在 canonical 实体约束 top-1 达到 99% 的 checkpoint 中，选择 alias 实体约束 top-1 最高的版本；若相同，则依次使用 canonical 和更早 epoch 打破平局。最终 alias 还必须达到 25%，`acceptance_passed` 才会为真。
 
 ## 十、发布到 Hugging Face 前的要求
 

@@ -1,6 +1,6 @@
-# PoC A：special token + LoRA
+# PoC A1：实体约束 special token + LoRA
 
-本目录包含当前已经实现并完成过训练的 A 方案。下述命令均假设当前目录是仓库根目录。
+本目录包含已经完成过首轮训练、并针对失败结果升级后的 A1 方案。首轮在 1000 个实体各一条训练样本、完整词表生成的条件下得到 97.9% canonical、8.15% alias；A1 保留 special token + LoRA，但让每个实体覆盖全部提示模板，并把训练与推理统一为 1000 类实体约束选择。下述命令均假设当前目录是仓库根目录。
 
 ## 项目要解决的问题和所使用的方案
 
@@ -38,15 +38,15 @@ ENTITY_18372
 
 * **目标**：不是做复杂的检索式 Entity Linking，而是直接让 **Qwen3-8B-Base 学会“游戏实体 → Steam AppID”**，输出形式统一为 `<GAME_123456>`。
 * **核心假设**：Qwen 本身已经具备大量“游戏名 ↔ 别名 ↔ 中文名 ↔ 游戏语义”的预训练知识，所以微调时主要新增的是 **“已知游戏实体 ↔ 你的 AppID 标签”** 这层映射。
-* **第一轮 PoC 不需要给每个游戏准备 25 条数据**。直接从 **1 个游戏 = 1 条训练数据** 开始，例如 `Counter-Strike 2 → <GAME_730>`。
-* **PoC 规模**：先选约 **500～1000 个知名 Steam 游戏**。训练集只需要两列：`canonical_name` 和 `appid`，也就是大约 500～1000 条样本。
+* **A1 不引入 alias 训练监督**。每个游戏仍只有一个 canonical name，但使用 4 种等价任务模板，因此 1000 个实体生成 4000 条训练行。
+* **PoC 规模**：固定 1000 个 Steam 游戏和 1000 个实体标签；训练源仍只需要 `canonical_name` 和 `appid` 两列。
 * **别名不作为训练必需材料**。相反，建议故意不训练 `CS2`、`刀塔2`、`绝地求生` 这类别名，用它们做测试，看看 Qwen 是否能利用自身已有知识把它们自动关联到刚学到的 `<GAME_ID>`。
 * **测试重点**不是重新输入训练时完全相同的游戏名，而是测试：`CS2 → <GAME_730>`、`刀塔2 → <GAME_570>`、`Valve 的 MOBA 游戏 Dota → <GAME_570>`。如果这些训练中没出现过的表达能命中正确 ID，就证明你的核心思路成立。
 * **第一轮最好使用独立 special token**，即每个实体对应 `<GAME_730>` 这样的 token。1000 个游戏只增加 1000 个 token，成本可以忽略。需要 resize embedding，并让新增 embedding / lm_head 参与训练。
 * **模型与训练**：`Qwen3-8B-Base + BF16 LoRA` 即可。初始可以用 `LoRA r=64` 或 `r=128`、`all-linear`，sequence length 只需要 **256～512**，不需要长上下文。
-* **硬件**：目标环境为 **1×H100 SXM 80GB，$3.29/h**。PoC 不需要 2 卡、4 卡；约 1000 条短样本可以直接使用 BF16 LoRA。
-* **训练时可以多存几个 checkpoint**，例如 1、3、5、10、20 epoch，观察模型什么时候真正把新的 Entity ID 映射记住。
-* **成功标准**：第一步先看 canonical name 能否接近 100% 记住；更关键的是，看从未作为训练样本出现的 alias / 中文名 /自然语言描述，是否仍能输出正确 `<GAME_ID>`。
+* **硬件**：目标环境为 **1×H100 SXM 80GB，$3.29/h**。PoC 不需要 2 卡、4 卡；4000 条短训练行可以直接使用 BF16 LoRA。
+* **训练时保存第 2、4、6、8、10 个 epoch**，观察实体约束 top-k 的收敛过程。
+* **成功标准**：canonical 实体约束 top-1 至少 99%，冻结 alias 实体约束 top-1 至少 25%。同时报告完整词表 top-1 和实体 rank@5/10，避免把格式失败与实体排序失败混在一起。
 * **如果这个 1-entity-1-sample 实验成功**，下一步再按 `1K → 10K → 50K → 100K+ entities` 扩规模，观察容量和准确率何时开始下降，而不是一开始就做大规模数据增强。
 
 最终你的 PoC 可以极简到：
@@ -117,26 +117,24 @@ python3 poc_a/scripts/build_training_data.py
 
 生成内容：
 
-* `poc_a/data/train.jsonl`：1000 条 `prompt` / `completion` 训练样本，默认使用固定种子 42 打乱。每个实体仍只有一条样本，但会均匀使用多种等价任务提示。训练时应只对 `completion` 计算 loss。
+* `poc_a/data/train.jsonl`：4000 条训练行，1000 个实体分别覆盖 4 种等价任务提示，默认使用固定种子 42 打乱。训练时只在 1000 个实体标签上计算单 token 分类 loss，不训练 EOS。
 * `poc_a/data/special_tokens.json`：按 AppID 数值排序的 1000 个 `<GAME_APPID>` token。
-* `poc_a/data/eval_alias.jsonl`：训练前冻结的知名游戏别名、缩写、跨语言名称和描述评测集，不得混入训练。
+* `poc_a/data/eval_alias.jsonl`：184 个训练前冻结的知名游戏别名、缩写、跨语言名称和描述分别覆盖 4 种提示，共 736 行，不得混入训练。
 * `common/data/eval_alias.source.json`：人工维护的共享评测源；构建脚本会检查 AppID、重复输入和 canonical name 泄漏。
 
 训练样本格式：
 
 ```json
-{"prompt":"游戏信息：幻兽帕鲁\nSteam实体Id：","completion":"<GAME_1623730>"}
+{"input":"幻兽帕鲁","prompt":"游戏信息：幻兽帕鲁\nSteam AppID：","completion":"<GAME_1623730>","prompt_style":"appid_label"}
 ```
 
 构建器会均匀使用以下类型的提示，避免模型只记住一种固定后缀：
 
 ```text
-游戏信息：{name}\nSteam实体Id：
 游戏信息：{name}\nSteam AppID：
 游戏信息：{name}\nSteam 的 AppID：
-游戏信息：{name}\nSteam 的 AppId：
 {name} 的 Steam AppID 是什么？\n答案：
-请返回 {name} 对应的 Steam AppId：
+请返回 {name} 对应的 Steam AppID：
 ```
 
 评测样本格式：
@@ -155,7 +153,7 @@ python3 poc_a/scripts/build_training_data.py
 * 磁盘：40GB，运行和停止状态均为 `$0.006/h`。
 * 镜像：`runpod/pytorch:1.0.2-cu1281-torch280-ubuntu2404`，PyTorch 2.8.0、CUDA 12.8、Ubuntu 24.04。
 
-40GB 足以完成实验，但不适合为五个 checkpoint 都复制 optimizer 状态。脚本会保留第 1、3、5、10、20 轮的全部 LoRA；只有最新 checkpoint 保留 optimizer、scheduler 和 RNG 状态用于断点恢复。保存新 checkpoint 后会自动清理旧 checkpoint 的恢复状态。
+40GB 足以完成实验，但不适合为五个 checkpoint 都复制 optimizer 状态。脚本会保留第 2、4、6、8、10 轮的全部 LoRA；只有最新 checkpoint 保留 optimizer、scheduler 和 RNG 状态用于断点恢复。保存新 checkpoint 后会自动清理旧 checkpoint 的恢复状态。
 
 ### 准备云端环境
 
@@ -232,9 +230,9 @@ python poc_a/scripts/train.py \
   --run-dir poc_a/outputs/full
 ```
 
-默认使用 BF16 LoRA `r=64`、`alpha=128`、`all-linear`、20 epochs，并仅对 completion 的实体 token 和 EOS 计算 loss。新增的 1000 个 token 会同时训练 `embed_tokens` 和未绑定权重的 `lm_head` 对应行。
+默认使用 BF16 LoRA `r=64`、`alpha=128`、`all-linear`、10 epochs。每条样本只监督一个实体 token，loss 和推理都限制在 1000 个实体候选中；新增 token 只训练未绑定 `lm_head` 的对应行，不再用 EOS loss 或训练无效的输入 embedding 行。
 
-第 1、3、5、10、20 个 epoch 都会保存 LoRA 和 token 行。为适配 40GB 磁盘，只有最新 checkpoint 带有 optimizer、scheduler 和 RNG 状态并可恢复；较早 checkpoint 仍可正常评测和发布。云端任务中断后，从编号最大的 checkpoint 继续：
+第 2、4、6、8、10 个 epoch 都会保存 LoRA 和 token 行。为适配 40GB 磁盘，只有最新 checkpoint 带有 optimizer、scheduler 和 RNG 状态并可恢复；较早 checkpoint 仍可正常评测和发布。云端任务中断后，从编号最大的 checkpoint 继续：
 
 ```bash
 python poc_a/scripts/train.py \
@@ -253,12 +251,12 @@ python poc_a/scripts/evaluate.py \
 
 评测输出：
 
-* `poc_a/outputs/full/metrics.json`：每个 epoch 的 canonical、alias、热门/最新分组及 alias 类型/提示风格指标，以及完整有序预测记录的 SHA-256 指纹。
+* `poc_a/outputs/full/metrics.json`：每个 epoch 的完整词表 top-1、实体约束 top-1/5/10、平均实体 rank、canonical/alias、热门/最新及类型/提示风格指标，以及完整有序预测记录的 SHA-256 指纹。
 * `poc_a/outputs/full/checkpoint_comparison.csv`：checkpoint 横向对比。
 * `poc_a/outputs/full/evaluation_failures.csv`：未命中的输入、目标和预测。
 * `poc_a/outputs/full/run_manifest.json`：Git SHA、基础模型 SHA、数据哈希、依赖、GPU 和运行状态。
 
-canonical 确定性生成准确率至少需要达到 99%。达标 checkpoint 中 alias 准确率最高者被选为发布版本；随后以 canonical 准确率和更早 epoch 依次打破平局。
+canonical 实体约束 top-1 至少需要达到 99%，alias 实体约束 top-1 至少需要达到 25%。先在 canonical 达标的 checkpoint 中选择 alias 最高者，再以 canonical 和更早 epoch 打破平局；只有两个门槛都通过才允许发布。
 
 
 ## 第四步：人工发布公开 Hugging Face LoRA

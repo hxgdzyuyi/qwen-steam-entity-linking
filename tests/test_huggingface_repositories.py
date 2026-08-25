@@ -26,7 +26,7 @@ class HuggingFaceRepositoriesTest(unittest.TestCase):
         self.assertEqual(poc_b["repo_type"], "model")
         self.assertNotEqual(poc_a["repo_id"], poc_b["repo_id"])
         self.assertEqual(poc_a["status"], "active")
-        self.assertEqual(poc_b["status"], "planned")
+        self.assertEqual(poc_b["status"], "ready")
 
     def test_registry_rejects_a_space_destination(self) -> None:
         invalid = {

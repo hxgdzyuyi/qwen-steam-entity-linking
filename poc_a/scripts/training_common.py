@@ -92,6 +92,11 @@ def _validate_config(config: Mapping[str, Any]) -> None:
         ("data.provenance_path", str),
         ("data.special_tokens_path", str),
         ("data.max_length", int),
+        ("data.prompt_styles", list),
+        ("data.expected_train_rows", int),
+        ("data.expected_special_tokens", int),
+        ("data.expected_alias_cases", int),
+        ("data.expected_alias_rows", int),
         ("lora.r", int),
         ("lora.alpha", int),
         ("lora.dropout", (int, float)),
@@ -119,6 +124,7 @@ def _validate_config(config: Mapping[str, Any]) -> None:
         ("evaluation.batch_size", int),
         ("evaluation.generation_max_new_tokens", int),
         ("evaluation.canonical_threshold", (int, float)),
+        ("evaluation.alias_threshold", (int, float)),
     )
     for dotted_key, expected_type in required_values:
         value = config_value(config, dotted_key)
@@ -176,11 +182,21 @@ def _validate_config(config: Mapping[str, Any]) -> None:
         raise TrainingToolError(
             "training.checkpoint_epochs must be unique sorted integers within full_epochs"
         )
-    threshold = float(config_value(config, "evaluation.canonical_threshold"))
-    if not 0.0 <= threshold <= 1.0:
+    prompt_styles = config_value(config, "data.prompt_styles")
+    if (
+        not prompt_styles
+        or any(not isinstance(style, str) or not style for style in prompt_styles)
+        or len(set(prompt_styles)) != len(prompt_styles)
+    ):
+        raise TrainingToolError("data.prompt_styles must contain unique names")
+    if int(config_value(config, "evaluation.generation_max_new_tokens")) != 1:
         raise TrainingToolError(
-            "evaluation.canonical_threshold must be between 0 and 1"
+            "evaluation.generation_max_new_tokens must be 1 for entity classification"
         )
+    for key in ("evaluation.canonical_threshold", "evaluation.alias_threshold"):
+        threshold = float(config_value(config, key))
+        if not 0.0 <= threshold <= 1.0:
+            raise TrainingToolError(f"{key} must be between 0 and 1")
     revision = config.get("model", {}).get("revision")
     if revision is not None and (not isinstance(revision, str) or not revision):
         raise TrainingToolError("model.revision must be null or a non-empty string")
@@ -261,23 +277,47 @@ def validate_data(config: Mapping[str, Any]) -> DataBundle:
 
     train_rows: list[dict[str, str]] = []
     completions: list[str] = []
+    train_styles_by_token: dict[str, set[str]] = {}
+    prompt_styles = set(config_value(config, "data.prompt_styles"))
     for index, row in enumerate(raw_train, start=1):
-        prompt = _required_text(row, "prompt", f"training row {index}")
-        completion = _required_text(row, "completion", f"training row {index}")
-        if set(row) != {"prompt", "completion"}:
+        normalized = {
+            key: _required_text(row, key, f"training row {index}")
+            for key in ("input", "prompt", "completion", "prompt_style")
+        }
+        if set(row) != set(normalized):
             raise TrainingToolError(
-                f"training row {index} must contain exactly prompt and completion"
+                f"training row {index} contains unexpected or missing fields"
             )
+        completion = normalized["completion"]
         if completion not in special_tokens:
             raise TrainingToolError(
                 f"training row {index} uses unknown completion {completion}"
             )
-        train_rows.append({"prompt": prompt, "completion": completion})
+        style = normalized["prompt_style"]
+        if style not in prompt_styles:
+            raise TrainingToolError(
+                f"training row {index} uses unknown prompt style {style}"
+            )
+        styles = train_styles_by_token.setdefault(completion, set())
+        if style in styles:
+            raise TrainingToolError(
+                f"training token {completion} repeats prompt style {style}"
+            )
+        styles.add(style)
+        train_rows.append(normalized)
         completions.append(completion)
-    if len(completions) != len(set(completions)):
-        raise TrainingToolError("Each entity token must occur exactly once in training")
     if set(completions) != set(special_tokens):
         raise TrainingToolError("Training completions and special tokens do not match")
+    incomplete_train_tokens = sorted(
+        token
+        for token in special_tokens
+        if train_styles_by_token.get(token) != prompt_styles
+    )
+    if incomplete_train_tokens:
+        raise TrainingToolError(
+            "Every entity token must cover every configured prompt style; "
+            f"incomplete tokens: {incomplete_train_tokens[:5]}"
+        )
 
     canonical_by_token: dict[str, str] = {}
     try:
@@ -302,9 +342,16 @@ def validate_data(config: Mapping[str, Any]) -> DataBundle:
         ) from error
     if set(canonical_by_token) != set(special_tokens):
         raise TrainingToolError("Entity CSV and special tokens do not match")
+    for row in train_rows:
+        expected_name = canonical_by_token[row["completion"]]
+        if row["input"].casefold() != expected_name.casefold():
+            raise TrainingToolError(
+                f"Training input does not match canonical entity name: {row['input']}"
+            )
 
     alias_rows: list[dict[str, str]] = []
-    seen_alias_inputs: set[str] = set()
+    alias_identity: dict[str, tuple[str, str]] = {}
+    alias_styles_by_input: dict[str, set[str]] = {}
     for index, row in enumerate(raw_alias, start=1):
         normalized = {
             key: _required_text(row, key, f"alias row {index}")
@@ -320,14 +367,38 @@ def validate_data(config: Mapping[str, Any]) -> DataBundle:
                 f"alias row {index} targets unknown token {expected}"
             )
         input_key = normalized["input"].casefold()
-        if input_key in seen_alias_inputs:
-            raise TrainingToolError(f"Duplicate alias input: {normalized['input']}")
         if input_key == canonical_by_token[expected].casefold():
             raise TrainingToolError(
                 f"Alias leaks canonical training name: {normalized['input']}"
             )
-        seen_alias_inputs.add(input_key)
+        identity = (expected, normalized["type"])
+        previous_identity = alias_identity.setdefault(input_key, identity)
+        if previous_identity != identity:
+            raise TrainingToolError(
+                f"Alias input has inconsistent target or type: {normalized['input']}"
+            )
+        style = normalized["prompt_style"]
+        if style not in prompt_styles:
+            raise TrainingToolError(
+                f"alias row {index} uses unknown prompt style {style}"
+            )
+        styles = alias_styles_by_input.setdefault(input_key, set())
+        if style in styles:
+            raise TrainingToolError(
+                f"Alias input repeats prompt style {style}: {normalized['input']}"
+            )
+        styles.add(style)
         alias_rows.append(normalized)
+    incomplete_aliases = sorted(
+        input_key
+        for input_key, styles in alias_styles_by_input.items()
+        if styles != prompt_styles
+    )
+    if incomplete_aliases:
+        raise TrainingToolError(
+            "Every alias input must cover every configured prompt style; "
+            f"incomplete inputs: {incomplete_aliases[:5]}"
+        )
 
     provenance_by_token: dict[str, dict[str, str]] = {}
     try:
@@ -351,6 +422,7 @@ def validate_data(config: Mapping[str, Any]) -> DataBundle:
 
     _expected_count(config, "expected_train_rows", len(train_rows))
     _expected_count(config, "expected_special_tokens", len(special_tokens))
+    _expected_count(config, "expected_alias_cases", len(alias_identity))
     _expected_count(config, "expected_alias_rows", len(alias_rows))
     if int(config_value(config, "training.smoke_samples")) > len(train_rows):
         raise TrainingToolError("training.smoke_samples exceeds the training dataset")
@@ -420,7 +492,7 @@ def encode_training_row(
         raise TrainingToolError(
             f"Completion must be one token, got {completion_ids} for {row['completion']}"
         )
-    input_ids = prompt_ids + completion_ids + [int(tokenizer.eos_token_id)]
+    input_ids = prompt_ids + completion_ids
     if len(input_ids) > max_length:
         raise TrainingToolError(
             f"Training sample is {len(input_ids)} tokens, exceeding max_length={max_length}"
@@ -428,9 +500,7 @@ def encode_training_row(
     return {
         "input_ids": input_ids,
         "attention_mask": [1] * len(input_ids),
-        "labels": [-100] * len(prompt_ids)
-        + completion_ids
-        + [int(tokenizer.eos_token_id)],
+        "labels": [-100] * len(prompt_ids) + completion_ids,
     }
 
 

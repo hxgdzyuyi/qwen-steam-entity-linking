@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "experiment": "poc_a",
+  "source": {
+    "repo_id": "hxgdzyuyi/qwen3-8b-steam-entity-linking",
+    "repo_type": "model",
+    "revision": "013d72f9bd85f2eb314eb1d178c117049125dc14",
+    "metrics_path": "metrics.json",
+    "metrics_sha256": "e669a4dead5dbec50b4447a92ca9a405fe590b62a3d7e3fb27bc4103bd99d71d"
+  },
+  "evaluation_data": {
+    "steam_entities_path": "common/data/steam_games.csv",
+    "steam_entities_sha256": "bda56797178755138109effcb4e5c126e40949c83397048611441474edac7cd2",
+    "alias_source_path": "common/data/eval_alias.source.json",
+    "alias_source_sha256": "8dbd7a4b8b793d2e34688719faffb6d19df78b6b3dfc072f172f6a7d059df4cd",
+    "canonical_case_count": 1000,
+    "alias_case_count": 184
+  },
+  "selected_epoch": 20,
+  "canonical": {
+    "count": 1000,
+    "top1_correct": 979,
+    "top1_accuracy": 0.979
+  },
+  "alias": {
+    "count": 184,
+    "top1_correct": 15,
+    "top1_accuracy": 0.08152173913043478
+  },
+  "alias_by_type": {
+    "abbreviation": {
+      "count": 25,
+      "top1_correct": 2,
+      "top1_accuracy": 0.08
+    },
+    "alias": {
+      "count": 42,
+      "top1_correct": 2,
+      "top1_accuracy": 0.047619047619047616
+    },
+    "chinese_name": {
+      "count": 38,
+      "top1_correct": 5,
+      "top1_accuracy": 0.13157894736842105
+    },
+    "description": {
+      "count": 46,
+      "top1_correct": 1,
+      "top1_accuracy": 0.021739130434782608
+    },
+    "english_name": {
+      "count": 33,
+      "top1_correct": 5,
+      "top1_accuracy": 0.15151515151515152
+    }
+  }
+}

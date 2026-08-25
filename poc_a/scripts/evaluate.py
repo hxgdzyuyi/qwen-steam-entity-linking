@@ -9,7 +9,6 @@ import gc
 import hashlib
 import json
 import os
-import re
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -32,7 +31,7 @@ from training_common import (
 )
 
 
-METRICS_SCHEMA_VERSION = 2
+METRICS_SCHEMA_VERSION = 3
 
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
@@ -72,28 +71,25 @@ def _run_config(run_dir: Path) -> dict[str, Any]:
     return load_config(run_dir / "training_config.yaml")
 
 
-def _extract_entity_token(text: str) -> str:
-    match = re.search(r"<GAME_[0-9]+>", text)
-    return match.group(0) if match else ""
-
-
-def generation_is_exact(
-    output_ids: Sequence[int], expected_id: int, eos_token_id: int, pad_token_id: int
-) -> bool:
-    meaningful = [
-        int(token_id)
-        for token_id in output_ids
-        if int(token_id) not in {eos_token_id, pad_token_id}
-    ]
-    return meaningful == [expected_id]
-
-
 def _metric_summary(records: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
     count = len(records)
     next_correct = sum(row["next_token_correct"] for row in records)
     generation_correct = sum(row["generation_correct"] for row in records)
+    top5_correct = sum(row["entity_top5_correct"] for row in records)
+    top10_correct = sum(row["entity_top10_correct"] for row in records)
+    ranks = [int(row["entity_rank"]) for row in records]
     return {
         "count": count,
+        "unique_inputs": len({str(row["input"]).casefold() for row in records}),
+        "unrestricted_top1_correct": next_correct,
+        "unrestricted_top1_accuracy": next_correct / count if count else 0.0,
+        "entity_top1_correct": generation_correct,
+        "entity_top1_accuracy": generation_correct / count if count else 0.0,
+        "entity_top5_correct": top5_correct,
+        "entity_top5_accuracy": top5_correct / count if count else 0.0,
+        "entity_top10_correct": top10_correct,
+        "entity_top10_accuracy": top10_correct / count if count else 0.0,
+        "mean_entity_rank": sum(ranks) / count if count else 0.0,
         "next_token_correct": next_correct,
         "next_token_accuracy": next_correct / count if count else 0.0,
         "generation_correct": generation_correct,
@@ -130,7 +126,7 @@ def _predict_rows(
     source: str,
     batch_size: int,
     max_length: int,
-    max_new_tokens: int,
+    entity_token_ids: Sequence[int],
     canonical_by_token: Mapping[str, str],
     provenance_by_token: Mapping[str, Mapping[str, str]],
     torch: Any,
@@ -158,37 +154,64 @@ def _predict_rows(
                 encoded = {
                     key: value.to(model.device) for key, value in encoded.items()
                 }
-                prompt_width = int(encoded["input_ids"].shape[1])
-                generated = model.generate(
-                    **encoded,
-                    do_sample=False,
-                    max_new_tokens=max_new_tokens,
-                    pad_token_id=int(tokenizer.pad_token_id),
-                    eos_token_id=int(tokenizer.eos_token_id),
-                    return_dict_in_generate=True,
-                    output_scores=True,
+                next_logits = model(**encoded, use_cache=False).logits[:, -1, :]
+                entity_ids = torch.tensor(
+                    entity_token_ids,
+                    dtype=torch.long,
+                    device=next_logits.device,
                 )
-                if not generated.scores:
-                    raise TrainingToolError("Generation returned no token scores")
-                next_ids = generated.scores[0].argmax(dim=-1).tolist()
-                generated_ids = generated.sequences[:, prompt_width:].tolist()
+                entity_logits = next_logits.index_select(-1, entity_ids)
+                unrestricted_ids = next_logits.argmax(dim=-1)
+                entity_classes = entity_logits.argmax(dim=-1)
+                constrained_ids = entity_ids[entity_classes]
 
-                for row, next_id, output_ids in zip(
-                    batch_rows, next_ids, generated_ids
+                expected_ids_list: list[int] = []
+                for row in batch_rows:
+                    expected = row[expected_key]
+                    encoded_expected = tokenizer.encode(
+                        expected, add_special_tokens=False
+                    )
+                    if len(encoded_expected) != 1:
+                        raise TrainingToolError(
+                            "Expected token is not atomic during evaluation: "
+                            f"{expected}"
+                        )
+                    expected_ids_list.append(int(encoded_expected[0]))
+                expected_ids = torch.tensor(
+                    expected_ids_list,
+                    dtype=torch.long,
+                    device=entity_ids.device,
+                )
+                expected_matches = expected_ids.unsqueeze(1).eq(
+                    entity_ids.unsqueeze(0)
+                )
+                if not bool(torch.all(expected_matches.sum(dim=1) == 1).item()):
+                    raise TrainingToolError(
+                        "An evaluation target is not a configured entity token"
+                    )
+                expected_classes = expected_matches.long().argmax(dim=1)
+                expected_scores = entity_logits.gather(
+                    1, expected_classes.unsqueeze(1)
+                )
+                entity_ranks = entity_logits.gt(expected_scores).sum(dim=1) + 1
+
+                for row, next_id, constrained_id, expected_id, entity_rank in zip(
+                    batch_rows,
+                    unrestricted_ids.tolist(),
+                    constrained_ids.tolist(),
+                    expected_ids_list,
+                    entity_ranks.tolist(),
                 ):
                     expected = row[expected_key]
-                    expected_ids = tokenizer.encode(expected, add_special_tokens=False)
-                    if len(expected_ids) != 1:
-                        raise TrainingToolError(
-                            f"Expected token is not atomic during evaluation: {expected}"
-                        )
                     next_token = str(tokenizer.convert_ids_to_tokens(int(next_id)))
                     output_text = tokenizer.decode(
-                        output_ids,
+                        [int(constrained_id)],
                         skip_special_tokens=False,
                         clean_up_tokenization_spaces=False,
                     )
-                    generated_token = _extract_entity_token(output_text)
+                    generated_token = str(
+                        tokenizer.convert_ids_to_tokens(int(constrained_id))
+                    )
                     provenance = provenance_by_token[expected]
                     record = {
                         "source": source,
@@ -198,13 +221,12 @@ def _predict_rows(
                         "predicted_next_token": next_token,
                         "generated_text": output_text,
                         "generated_token": generated_token,
-                        "next_token_correct": int(next_id) == int(expected_ids[0]),
-                        "generation_correct": generation_is_exact(
-                            output_ids,
-                            int(expected_ids[0]),
-                            int(tokenizer.eos_token_id),
-                            int(tokenizer.pad_token_id),
-                        ),
+                        "entity_rank": int(entity_rank),
+                        "entity_top5_correct": int(entity_rank) <= 5,
+                        "entity_top10_correct": int(entity_rank) <= 10,
+                        "next_token_correct": int(next_id) == int(expected_id),
+                        "generation_correct": int(constrained_id)
+                        == int(expected_id),
                         "cohort": provenance.get("cohort", "unknown"),
                         "type": row.get("type", "canonical"),
                         "prompt_style": row.get("prompt_style", "training_prompt"),
@@ -236,7 +258,7 @@ def evaluate_adapter(
         use_fast=True,
         token=os.environ.get("HF_TOKEN"),
     )
-    validate_entity_tokens(tokenizer, bundle.special_tokens)
+    entity_token_ids = validate_entity_tokens(tokenizer, bundle.special_tokens)
     base_model = imports["AutoModelForCausalLM"].from_pretrained(
         model_id,
         revision=revision,
@@ -252,7 +274,6 @@ def evaluate_adapter(
 
     batch_size = int(config_value(config, "evaluation.batch_size"))
     max_length = int(config_value(config, "data.max_length"))
-    max_new_tokens = int(config_value(config, "evaluation.generation_max_new_tokens"))
     canonical_records = _predict_rows(
         model,
         tokenizer,
@@ -261,7 +282,7 @@ def evaluate_adapter(
         "canonical",
         batch_size,
         max_length,
-        max_new_tokens,
+        entity_token_ids,
         bundle.canonical_by_token,
         bundle.provenance_by_token,
         torch,
@@ -274,7 +295,7 @@ def evaluate_adapter(
         "alias",
         batch_size,
         max_length,
-        max_new_tokens,
+        entity_token_ids,
         bundle.canonical_by_token,
         bundle.provenance_by_token,
         torch,
@@ -285,6 +306,9 @@ def evaluate_adapter(
         "canonical": _metric_summary(canonical_records),
         "alias": _metric_summary(alias_records),
         "canonical_by_cohort": _breakdown(canonical_records, "cohort"),
+        "canonical_by_prompt_style": _breakdown(
+            canonical_records, "prompt_style"
+        ),
         "alias_by_type": _breakdown(alias_records, "type"),
         "alias_by_prompt_style": _breakdown(alias_records, "prompt_style"),
         "prediction_sha256": prediction_sha256(
@@ -316,6 +340,9 @@ def _write_failures(path: Path, rows: Sequence[Mapping[str, Any]]) -> None:
         "predicted_next_token",
         "generated_token",
         "generated_text",
+        "entity_rank",
+        "entity_top5_correct",
+        "entity_top10_correct",
         "next_token_correct",
         "generation_correct",
     )
@@ -331,10 +358,14 @@ def _write_comparison(path: Path, metrics: Sequence[Mapping[str, Any]]) -> None:
             handle,
             fieldnames=(
                 "epoch",
-                "canonical_next_token_accuracy",
-                "canonical_generation_accuracy",
-                "alias_next_token_accuracy",
-                "alias_generation_accuracy",
+                "canonical_unrestricted_top1_accuracy",
+                "canonical_entity_top1_accuracy",
+                "canonical_entity_top5_accuracy",
+                "canonical_entity_top10_accuracy",
+                "alias_unrestricted_top1_accuracy",
+                "alias_entity_top1_accuracy",
+                "alias_entity_top5_accuracy",
+                "alias_entity_top10_accuracy",
             ),
         )
         writer.writeheader()
@@ -342,14 +373,30 @@ def _write_comparison(path: Path, metrics: Sequence[Mapping[str, Any]]) -> None:
             writer.writerow(
                 {
                     "epoch": item["epoch"],
-                    "canonical_next_token_accuracy": item["canonical"][
-                        "next_token_accuracy"
+                    "canonical_unrestricted_top1_accuracy": item["canonical"][
+                        "unrestricted_top1_accuracy"
                     ],
-                    "canonical_generation_accuracy": item["canonical"][
-                        "generation_accuracy"
+                    "canonical_entity_top1_accuracy": item["canonical"][
+                        "entity_top1_accuracy"
                     ],
-                    "alias_next_token_accuracy": item["alias"]["next_token_accuracy"],
-                    "alias_generation_accuracy": item["alias"]["generation_accuracy"],
+                    "canonical_entity_top5_accuracy": item["canonical"][
+                        "entity_top5_accuracy"
+                    ],
+                    "canonical_entity_top10_accuracy": item["canonical"][
+                        "entity_top10_accuracy"
+                    ],
+                    "alias_unrestricted_top1_accuracy": item["alias"][
+                        "unrestricted_top1_accuracy"
+                    ],
+                    "alias_entity_top1_accuracy": item["alias"][
+                        "entity_top1_accuracy"
+                    ],
+                    "alias_entity_top5_accuracy": item["alias"][
+                        "entity_top5_accuracy"
+                    ],
+                    "alias_entity_top10_accuracy": item["alias"][
+                        "entity_top10_accuracy"
+                    ],
                 }
             )
 
@@ -407,22 +454,28 @@ def main(argv: Sequence[str] | None = None) -> int:
         failures.extend(checkpoint_failures)
 
     threshold = float(config_value(config, "evaluation.canonical_threshold"))
+    alias_threshold = float(config_value(config, "evaluation.alias_threshold"))
     selected = select_best_checkpoint(checkpoint_metrics, threshold)
+    acceptance_passed = bool(
+        selected is not None
+        and float(selected["alias"]["generation_accuracy"]) >= alias_threshold
+    )
     report = {
         "schema_version": METRICS_SCHEMA_VERSION,
         "evaluated_at": utc_now(),
         "canonical_threshold": threshold,
+        "alias_threshold": alias_threshold,
         "checkpoints": checkpoint_metrics,
         "selection": (
             {
                 "epoch": selected["epoch"],
                 "checkpoint": selected["checkpoint"],
-                "rule": "highest alias generation accuracy among canonical-passing checkpoints; then canonical accuracy; then earlier epoch",
+                "rule": "highest alias entity-constrained top-1 accuracy among canonical-passing checkpoints; then canonical accuracy; then earlier epoch",
             }
             if selected is not None
             else None
         ),
-        "acceptance_passed": selected is not None,
+        "acceptance_passed": acceptance_passed,
     }
     atomic_write_json(run_dir / "metrics.json", report)
     _write_comparison(run_dir / "checkpoint_comparison.csv", checkpoint_metrics)
@@ -435,6 +488,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     if selected is None:
         raise TrainingToolError(
             f"No checkpoint reached canonical accuracy threshold {threshold:.2%}"
+        )
+    if not acceptance_passed:
+        raise TrainingToolError(
+            "Best canonical-passing checkpoint reached alias entity top-1 "
+            f"{selected['alias']['generation_accuracy']:.2%}, below the "
+            f"{alias_threshold:.2%} threshold"
         )
     print(
         f"Selected epoch {selected['epoch']}: alias="

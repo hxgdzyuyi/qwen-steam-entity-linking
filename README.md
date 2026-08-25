@@ -4,8 +4,8 @@
 
 ```text
 common/   Steam 实体表、人工冻结的评测源和数据同步脚本
-poc_a/    special token + LoRA 生成 AppID；当前已实现的基线
-poc_b/    保留预训练语义的实体分类方案；当前为实验设计入口
+poc_a/    实体约束 special token + LoRA 生成 AppID；当前 A1 基线
+poc_b/    冻结 Qwen + 低秩残差余弦原型分类器；当前可运行
 tests/    跨目录的数据构建与 PoC A 回归测试
 ```
 
@@ -15,11 +15,11 @@ tests/    跨目录的数据构建与 PoC A 回归测试
 
 PoC A 的构建器会从共享输入生成：
 
-- `poc_a/data/train.jsonl`
+- `poc_a/data/train.jsonl`（1000 实体 × 4 prompts = 4000 行）
 - `poc_a/data/special_tokens.json`
-- `poc_a/data/eval_alias.jsonl`
+- `poc_a/data/eval_alias.jsonl`（184 冻结输入 × 4 prompts = 736 行）
 
-PoC B 将单独定义训练样本与分类标签，不复用 PoC A 的 special token 训练文件。
+PoC B 单独生成 6 个 canonical prompt view、稳定 class map 和隔离的 canonical/alias 评测文件，不复用 PoC A 的 special token 训练文件。
 
 ## 常用入口
 
@@ -30,12 +30,15 @@ python3 common/scripts/sync_steam_dataset.py
 # 重新生成 PoC A 的派生数据
 python3 poc_a/scripts/build_training_data.py
 
+# 重新生成 PoC B 的 canonical-only 分类数据
+python3 poc_b/scripts/build_training_data.py
+
 # 本地验证
 python3 -m unittest discover -s tests -v
-python3 -m py_compile common/scripts/*.py poc_a/scripts/*.py tests/*.py
+python3 -m py_compile common/scripts/*.py poc_a/scripts/*.py poc_b/scripts/*.py tests/*.py
 ```
 
-当前可运行实验、RunPod Notebook 和训练指南见 [poc_a/README.md](poc_a/README.md)；B 方案的目标、数据变化和实现边界见 [poc_b/README.md](poc_b/README.md)。
+两个实验的入口分别见 [poc_a/README.md](poc_a/README.md) 与 [poc_b/README.md](poc_b/README.md)。
 
 ## Hugging Face 发布结构
 
@@ -44,6 +47,6 @@ python3 -m py_compile common/scripts/*.py poc_a/scripts/*.py tests/*.py
 | 实验 | Model Repository | 状态 |
 |---|---|---|
 | PoC A | [hxgdzyuyi/qwen3-8b-steam-entity-linking](https://huggingface.co/hxgdzyuyi/qwen3-8b-steam-entity-linking) | active |
-| PoC B | [hxgdzyuyi/qwen3-8b-steam-entity-linking-poc-b](https://huggingface.co/hxgdzyuyi/qwen3-8b-steam-entity-linking-poc-b) | planned |
+| PoC B | [hxgdzyuyi/qwen3-8b-steam-entity-linking-poc-b](https://huggingface.co/hxgdzyuyi/qwen3-8b-steam-entity-linking-poc-b) | ready（待首次远端验证） |
 
-共享注册表是 `common/huggingface_repositories.json`。PoC A 的 CLI 发布脚本默认读取该目标；RunPod 训练 Notebook 为便于直接检查和修改，显式写入同一个 `HF_REPO_ID`。PoC B 在训练器、权重格式和加载器实现完成前保持 `planned`，不能发布占位模型。未来如果需要在线 A/B 演示，可以再建一个 Space，同时加载这两个 Model Repository。
+共享注册表是 `common/huggingface_repositories.json`。两个 CLI 发布脚本默认读取各自目标；RunPod Notebook 为便于直接检查和修改，显式写入各自 `HF_REPO_ID`。PoC B 的 `ready` 仅表示实现可训练/可发布，首次真实上传、下载回读和复评通过后才单独改为 `active`。未来如果需要在线 A/B 演示，可以再建一个 Space，同时加载这两个 Model Repository。

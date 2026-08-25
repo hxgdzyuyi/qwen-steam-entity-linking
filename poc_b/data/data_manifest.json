@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "class_ordering": "numeric_appid_ascending",
+  "class_count": 1000,
+  "train_rows": 6000,
+  "canonical_eval_rows": 1000,
+  "alias_eval_rows": 184,
+  "alias_eval_games": 46,
+  "prompt_styles": [
+    "raw",
+    "game_entity",
+    "steam_game",
+    "game_name",
+    "identify_game",
+    "english_entity"
+  ],
+  "canonical_only_training": true,
+  "alias_type_counts": {
+    "abbreviation": 25,
+    "alias": 42,
+    "chinese_name": 38,
+    "description": 46,
+    "english_name": 33
+  },
+  "source_sha256": {
+    "entities": "bda56797178755138109effcb4e5c126e40949c83397048611441474edac7cd2",
+    "provenance": "c96aaa1a6646ab3f1033041630bf7a9949d8013826a8a62732bea257f8f6fc19",
+    "alias_source": "8dbd7a4b8b793d2e34688719faffb6d19df78b6b3dfc072f172f6a7d059df4cd"
+  },
+  "derived_sha256": {
+    "class_map": "994a286d37eea0065a38077417fb517bed207995744dca4255872c8bea037cc1",
+    "train": "1041d927d5fbef287c0cd8d0311f0caeb320c9fab36769d5de8409d7a17d2497",
+    "canonical_eval": "66bd90c949a29e32d36c983261e2b838276a9aaee023ccfcc8a994ed92ebb586",
+    "alias_eval": "5394488b82b4545a0b754ee9eadea5460ab57c9a0e8ad584ae3757a47acd945b"
+  }
+}

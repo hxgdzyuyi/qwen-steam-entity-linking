@@ -335,6 +335,7 @@ def _next_token_accuracy(
     model: Any,
     tokenizer: Any,
     rows: Sequence[Mapping[str, str]],
+    entity_token_ids: Sequence[int],
     max_length: int,
     batch_size: int,
     torch: Any,
@@ -362,7 +363,11 @@ def _next_token_accuracy(
                     key: value.to(model.device) for key, value in encoded.items()
                 }
                 logits = model(**encoded, use_cache=False).logits[:, -1, :]
-                predicted = logits.argmax(dim=-1).tolist()
+                entity_ids = torch.tensor(
+                    entity_token_ids, dtype=torch.long, device=logits.device
+                )
+                predicted_classes = logits.index_select(-1, entity_ids).argmax(dim=-1)
+                predicted = entity_ids[predicted_classes].tolist()
                 expected = [
                     int(tokenizer.convert_tokens_to_ids(row["completion"]))
                     for row in batch_rows
@@ -375,6 +380,38 @@ def _next_token_accuracy(
         if was_training:
             model.train()
     return correct / len(rows)
+
+
+def entity_classification_loss(
+    logits: Any,
+    labels: Any,
+    entity_token_ids: Sequence[int],
+    torch: Any,
+) -> Any:
+    """Compute completion loss only across the configured entity-token classes."""
+
+    supervised = labels.ne(-100)
+    supervised_per_row = supervised.sum(dim=1)
+    if not bool(torch.all(supervised_per_row == 1).item()):
+        raise TrainingToolError(
+            "Entity classification requires exactly one supervised token per row"
+        )
+    label_positions = supervised.long().argmax(dim=1)
+    if bool(torch.any(label_positions == 0).item()):
+        raise TrainingToolError("Entity label cannot be the first input token")
+
+    batch_indices = torch.arange(labels.shape[0], device=labels.device)
+    next_token_logits = logits[batch_indices, label_positions - 1, :]
+    entity_ids = torch.tensor(
+        entity_token_ids, dtype=torch.long, device=logits.device
+    )
+    entity_logits = next_token_logits.index_select(-1, entity_ids)
+    target_token_ids = labels[batch_indices, label_positions]
+    target_matches = target_token_ids.unsqueeze(1).eq(entity_ids.unsqueeze(0))
+    if not bool(torch.all(target_matches.sum(dim=1) == 1).item()):
+        raise TrainingToolError("A supervised label is not a configured entity token")
+    target_classes = target_matches.long().argmax(dim=1)
+    return torch.nn.functional.cross_entropy(entity_logits.float(), target_classes)
 
 
 def _run_directory(args: argparse.Namespace, config: Mapping[str, Any]) -> Path:
@@ -535,7 +572,6 @@ def main(argv: Sequence[str] | None = None) -> int:
         target_modules=config_value(config, "lora.target_modules"),
         bias=str(config_value(config, "lora.bias")),
         trainable_token_indices={
-            "embed_tokens": entity_token_ids,
             "lm_head": entity_token_ids,
         },
     )
@@ -592,6 +628,24 @@ def main(argv: Sequence[str] | None = None) -> int:
     TrainerCallback = imports["TrainerCallback"]
 
     class EntityLinkingTrainer(Trainer):
+        def compute_loss(
+            self,
+            model: Any,
+            inputs: Mapping[str, Any],
+            return_outputs: bool = False,
+            num_items_in_batch: Any = None,
+        ) -> Any:
+            del num_items_in_batch
+            labels = inputs["labels"]
+            model_inputs = {
+                key: value for key, value in inputs.items() if key != "labels"
+            }
+            outputs = model(**model_inputs, use_cache=False)
+            loss = entity_classification_loss(
+                outputs.logits, labels, entity_token_ids, torch
+            )
+            return (loss, outputs) if return_outputs else loss
+
         def _save(self, output_dir: str | None = None, state_dict: Any = None) -> None:
             destination = Path(output_dir or self.args.output_dir)
             destination.mkdir(parents=True, exist_ok=True)
@@ -652,6 +706,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 kwargs["model"],
                 tokenizer,
                 train_rows,
+                entity_token_ids,
                 max_length,
                 int(config_value(config, "evaluation.batch_size")),
                 torch,

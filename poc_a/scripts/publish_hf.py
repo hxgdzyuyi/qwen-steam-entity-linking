@@ -54,6 +54,7 @@ REGRESSION_METRIC_FIELDS = (
     "canonical",
     "alias",
     "canonical_by_cohort",
+    "canonical_by_prompt_style",
     "alias_by_type",
     "alias_by_prompt_style",
     "prediction_sha256",
@@ -118,8 +119,6 @@ def checkpoint_publish_files(checkpoint: Path) -> list[Path]:
 def _assert_adapter_tensor_keys(keys: Sequence[str]) -> None:
     if not any("lora_" in key for key in keys):
         raise TrainingToolError("Adapter artifact contains no LoRA tensors")
-    if not any("embed_tokens" in key and "trainable_tokens" in key for key in keys):
-        raise TrainingToolError("Adapter artifact omits trainable embed_tokens rows")
     if not any("lm_head" in key and "trainable_tokens" in key for key in keys):
         raise TrainingToolError("Adapter artifact omits trainable lm_head rows")
     if any("modules_to_save" in key for key in keys):
@@ -160,12 +159,9 @@ def _assert_adapter_only(checkpoint: Path) -> None:
 
     adapter_config = read_json(checkpoint / "adapter_config.json")
     token_indices = adapter_config.get("trainable_token_indices")
-    if not isinstance(token_indices, dict) or set(token_indices) != {
-        "embed_tokens",
-        "lm_head",
-    }:
+    if not isinstance(token_indices, dict) or set(token_indices) != {"lm_head"}:
         raise TrainingToolError(
-            "Adapter config must train token rows for both embed_tokens and lm_head"
+            "Adapter config must train only the selected lm_head token rows"
         )
 
     try:
@@ -256,18 +252,18 @@ This adapter maps Steam game names and related expressions to one-token labels s
 - Base revision: `{manifest['model']['revision']}`
 - Training Git commit: `{manifest['git']['commit']}`
 - Training source: `{manifest['git']['remote']}`
-- Training data: {config_value(config, 'data.expected_train_rows')} entities, one canonical example per entity
+- Training data: {config_value(config, 'data.expected_special_tokens')} entities × {len(config_value(config, 'data.prompt_styles'))} prompt styles = {config_value(config, 'data.expected_train_rows')} rows
 - Selected checkpoint: epoch {selected['epoch']}
 - Precision: BF16
-- Method: LoRA r={config_value(config, 'lora.r')}, alpha={config_value(config, 'lora.alpha')} plus trainable added-token rows for both input embeddings and LM head
+- Method: entity-only classification loss over the added labels, LoRA r={config_value(config, 'lora.r')}, alpha={config_value(config, 'lora.alpha')}, plus trainable added-token rows in the LM head
 
 ## Evaluation
 
-| Epoch | Canonical exact match | Held-out alias exact match |
+| Epoch | Canonical entity top-1 | Held-out alias entity top-1 |
 |---:|---:|---:|
 {comparison}
 
-Canonical accuracy measures memorization on training prompts. Alias accuracy uses {config_value(config, 'data.expected_alias_rows')} frozen cases that were not included in training. The selected checkpoint is the alias-best checkpoint among those reaching the configured canonical threshold.
+Canonical accuracy covers every entity across every configured prompt. Alias accuracy covers {config_value(config, 'data.expected_alias_cases')} frozen inputs across the same {len(config_value(config, 'data.prompt_styles'))} prompts ({config_value(config, 'data.expected_alias_rows')} rows) and uses entity-constrained top-1. The selected checkpoint is the alias-best checkpoint among those reaching the canonical threshold; publication additionally requires the alias threshold.
 
 ## Usage
 
@@ -284,6 +280,16 @@ base = AutoModelForCausalLM.from_pretrained(
 )
 base.resize_token_embeddings(len(tokenizer))
 model = PeftModel.from_pretrained(base, adapter_id)
+
+# Score one controlled prompt and choose only among registered entity labels.
+prompt = "游戏信息：CS2\\nSteam AppID："
+inputs = tokenizer(prompt, return_tensors="pt")
+entity_ids = tokenizer.convert_tokens_to_ids(
+    tokenizer.additional_special_tokens
+)
+logits = model(**inputs).logits[0, -1, entity_ids]
+predicted_id = entity_ids[int(logits.argmax())]
+print(tokenizer.convert_ids_to_tokens(predicted_id))
 ```
 
 ## Limitations
@@ -380,7 +386,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     if manifest.get("status") not in {"evaluated", "published"}:
         raise TrainingToolError("Run must be evaluated before publication")
     if not metrics.get("acceptance_passed"):
-        raise TrainingToolError("Canonical acceptance threshold was not reached")
+        raise TrainingToolError(
+            "Canonical and alias acceptance thresholds were not both reached"
+        )
     if metrics.get("schema_version") != METRICS_SCHEMA_VERSION:
         raise TrainingToolError(
             "Metrics schema is outdated; rerun poc_a/scripts/evaluate.py "

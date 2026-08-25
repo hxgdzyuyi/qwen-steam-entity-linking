@@ -1,0 +1,6006 @@
+{
+  "schema_version": 1,
+  "ordering": "numeric_appid_ascending",
+  "classes": [
+    {
+      "class_index": 0,
+      "appid": 440,
+      "canonical_name": "Team Fortress 2",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 1,
+      "appid": 550,
+      "canonical_name": "Left 4 Dead 2",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 2,
+      "appid": 570,
+      "canonical_name": "Dota 2",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 3,
+      "appid": 730,
+      "canonical_name": "Counter-Strike 2",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 4,
+      "appid": 4000,
+      "canonical_name": "Garry's Mod",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 5,
+      "appid": 105600,
+      "canonical_name": "Terraria",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 6,
+      "appid": 108600,
+      "canonical_name": "Project Zomboid",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 7,
+      "appid": 221100,
+      "canonical_name": "DayZ",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 8,
+      "appid": 227300,
+      "canonical_name": "Euro Truck Simulator 2",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 9,
+      "appid": 230410,
+      "canonical_name": "Warframe 星际战甲",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 10,
+      "appid": 236390,
+      "canonical_name": "War Thunder",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 11,
+      "appid": 238960,
+      "canonical_name": "Path of Exile",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 12,
+      "appid": 244210,
+      "canonical_name": "神力科莎 Assetto Corsa",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 13,
+      "appid": 250900,
+      "canonical_name": "The Binding of Isaac: Rebirth",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 14,
+      "appid": 251570,
+      "canonical_name": "7 Days to Die",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 15,
+      "appid": 252490,
+      "canonical_name": "Rust",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 16,
+      "appid": 252950,
+      "canonical_name": "Rocket League®",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 17,
+      "appid": 261550,
+      "canonical_name": "Mount & Blade II: Bannerlord",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 18,
+      "appid": 271590,
+      "canonical_name": "Grand Theft Auto V 传承版",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 19,
+      "appid": 284160,
+      "canonical_name": "BeamNG.drive",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 20,
+      "appid": 289070,
+      "canonical_name": "Sid Meier’s Civilization® VI",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 21,
+      "appid": 291550,
+      "canonical_name": "Brawlhalla",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 22,
+      "appid": 292000,
+      "canonical_name": "No More Room in Hell 2",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 23,
+      "appid": 292030,
+      "canonical_name": "巫师 3：狂猎",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 24,
+      "appid": 294100,
+      "canonical_name": "边缘世界 RimWorld",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 25,
+      "appid": 322170,
+      "canonical_name": "Geometry Dash",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 26,
+      "appid": 322330,
+      "canonical_name": "饥荒联机版",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 27,
+      "appid": 359550,
+      "canonical_name": "彩虹六号：围攻",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 28,
+      "appid": 381210,
+      "canonical_name": "黎明杀机",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 29,
+      "appid": 394360,
+      "canonical_name": "Hearts of Iron IV",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 30,
+      "appid": 413150,
+      "canonical_name": "Stardew Valley",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 31,
+      "appid": 438100,
+      "canonical_name": "VRChat",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 32,
+      "appid": 460930,
+      "canonical_name": "幽灵行动：荒野",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 33,
+      "appid": 489830,
+      "canonical_name": "The Elder Scrolls V: Skyrim Special Edition",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 34,
+      "appid": 553850,
+      "canonical_name": "HELLDIVERS™ 2",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 35,
+      "appid": 578080,
+      "canonical_name": "PUBG: BATTLEGROUNDS",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 36,
+      "appid": 594650,
+      "canonical_name": "猎杀：对决 1896",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 37,
+      "appid": 714010,
+      "canonical_name": "Aimlabs",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 38,
+      "appid": 739630,
+      "canonical_name": "Phasmophobia 恐鬼症",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 39,
+      "appid": 758430,
+      "canonical_name": "人类停车模拟器",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 40,
+      "appid": 813780,
+      "canonical_name": "Age of Empires II: Definitive Edition",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 41,
+      "appid": 892970,
+      "canonical_name": "Valheim: 英灵神殿",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 42,
+      "appid": 945360,
+      "canonical_name": "Among Us",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 43,
+      "appid": 960090,
+      "canonical_name": "Bloons TD 6",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 44,
+      "appid": 974480,
+      "canonical_name": "秘奥回响",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 45,
+      "appid": 1046760,
+      "canonical_name": "亥伯制造Hyperstacks",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 46,
+      "appid": 1067360,
+      "canonical_name": "暗星铁律",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 47,
+      "appid": 1085660,
+      "canonical_name": "命运2",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 48,
+      "appid": 1086940,
+      "canonical_name": "博德之门3",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 49,
+      "appid": 1091500,
+      "canonical_name": "赛博朋克 2077",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 50,
+      "appid": 1091870,
+      "canonical_name": "两个世界的过客",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 51,
+      "appid": 1142710,
+      "canonical_name": "全面战争：战锤3",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 52,
+      "appid": 1144200,
+      "canonical_name": "Ready or Not",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 53,
+      "appid": 1158310,
+      "canonical_name": "Crusader Kings III",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 54,
+      "appid": 1172470,
+      "canonical_name": "Apex Legends™",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 55,
+      "appid": 1174180,
+      "canonical_name": "Red Dead Redemption 2",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 56,
+      "appid": 1188380,
+      "canonical_name": "赤马",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 57,
+      "appid": 1203220,
+      "canonical_name": "永劫无间",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 58,
+      "appid": 1222670,
+      "canonical_name": "The Sims™ 4",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 59,
+      "appid": 1245620,
+      "canonical_name": "艾尔登法环",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 60,
+      "appid": 1364780,
+      "canonical_name": "Street Fighter 6",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 61,
+      "appid": 1368140,
+      "canonical_name": "纵横秘湾 Corsair Cove",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 62,
+      "appid": 1398310,
+      "canonical_name": "魔神拼拼乐！",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 63,
+      "appid": 1422450,
+      "canonical_name": "Deadlock",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 64,
+      "appid": 1442520,
+      "canonical_name": "赤鸟",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 65,
+      "appid": 1449850,
+      "canonical_name": "Yu-Gi-Oh! Master Duel",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 66,
+      "appid": 1466520,
+      "canonical_name": "崩坏之兆：饥荒",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 67,
+      "appid": 1478500,
+      "canonical_name": "Big Walk",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 68,
+      "appid": 1553260,
+      "canonical_name": "红鹿旅馆",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 69,
+      "appid": 1605850,
+      "canonical_name": "零度空间 ZeroSpace",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 70,
+      "appid": 1623730,
+      "canonical_name": "幻兽帕鲁",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 71,
+      "appid": 1643320,
+      "canonical_name": "潜行者2：切尔诺贝利之心",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 72,
+      "appid": 1662160,
+      "canonical_name": "韩流偶像故事: 出道之路",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 73,
+      "appid": 1665460,
+      "canonical_name": "eFootball™",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 74,
+      "appid": 1699710,
+      "canonical_name": "稗子 The Dream Of A Cockspur",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 75,
+      "appid": 1714510,
+      "canonical_name": "九山：狼之城",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 76,
+      "appid": 1715930,
+      "canonical_name": "轨道斩",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 77,
+      "appid": 1722800,
+      "canonical_name": "巨像：蚀世之灾",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 78,
+      "appid": 1733690,
+      "canonical_name": "烽沙",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 79,
+      "appid": 1803140,
+      "canonical_name": "男孩与鹿",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 80,
+      "appid": 1808500,
+      "canonical_name": "ARC Raiders",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 81,
+      "appid": 1843840,
+      "canonical_name": "佣兵猎手",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 82,
+      "appid": 1845250,
+      "canonical_name": "红眼露比",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 83,
+      "appid": 1867240,
+      "canonical_name": "WARDOGS",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 84,
+      "appid": 1938090,
+      "canonical_name": "使命召唤®",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 85,
+      "appid": 1973530,
+      "canonical_name": "Limbus Company",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 86,
+      "appid": 1996090,
+      "canonical_name": "蒸汽世界",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 87,
+      "appid": 2001760,
+      "canonical_name": "轮回之兽",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 88,
+      "appid": 2052650,
+      "canonical_name": "Sword & Shield Simulator (剑盾模拟器)",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 89,
+      "appid": 2073620,
+      "canonical_name": "暗区突围：无限",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 90,
+      "appid": 2073850,
+      "canonical_name": "THE FINALS",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 91,
+      "appid": 2075800,
+      "canonical_name": "星球大战 零号连队™",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 92,
+      "appid": 2142790,
+      "canonical_name": "Fields of Mistria",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 93,
+      "appid": 2163330,
+      "canonical_name": "又一个僵尸幸存者",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 94,
+      "appid": 2183900,
+      "canonical_name": "Warhammer 40,000: 星际战士2",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 95,
+      "appid": 2191280,
+      "canonical_name": "愚灵",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 96,
+      "appid": 2219390,
+      "canonical_name": "帝国的夙愿",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 97,
+      "appid": 2244210,
+      "canonical_name": "艾恩葛朗特 回荡新声",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 98,
+      "appid": 2246340,
+      "canonical_name": "Monster Hunter Wilds",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 99,
+      "appid": 2251220,
+      "canonical_name": "云霄一刻 (High Times)",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 100,
+      "appid": 2252680,
+      "canonical_name": "星球田园诗",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 101,
+      "appid": 2282790,
+      "canonical_name": "秘境猎人",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 102,
+      "appid": 2285550,
+      "canonical_name": "多洛可小镇",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 103,
+      "appid": 2300320,
+      "canonical_name": "Farming Simulator 25",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 104,
+      "appid": 2305210,
+      "canonical_name": "造天行动 Skyformer",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 105,
+      "appid": 2327640,
+      "canonical_name": "外星入侵：自走棋",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 106,
+      "appid": 2357570,
+      "canonical_name": "守望先锋®",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 107,
+      "appid": 2358720,
+      "canonical_name": "黑神话：悟空",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 108,
+      "appid": 2372240,
+      "canonical_name": "黑夜轮回",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 109,
+      "appid": 2377930,
+      "canonical_name": "造化仙缘",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 110,
+      "appid": 2388970,
+      "canonical_name": "电脑进化史",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 111,
+      "appid": 2401490,
+      "canonical_name": "蟹运轮回-破碎的世界",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 112,
+      "appid": 2406770,
+      "canonical_name": "Bodycam",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 113,
+      "appid": 2434370,
+      "canonical_name": "放置地牢-AutoDungeon",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 114,
+      "appid": 2436940,
+      "canonical_name": "赛菲莉娅",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 115,
+      "appid": 2438110,
+      "canonical_name": "急诊室模拟器",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 116,
+      "appid": 2447090,
+      "canonical_name": "东方号星舰",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 117,
+      "appid": 2458370,
+      "canonical_name": "战傀志",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 118,
+      "appid": 2466790,
+      "canonical_name": "KIYO：暴兔之城",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 119,
+      "appid": 2467880,
+      "canonical_name": "断曲余音",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 120,
+      "appid": 2479090,
+      "canonical_name": "黄昏远征军",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 121,
+      "appid": 2481810,
+      "canonical_name": "喵喵工坊",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 122,
+      "appid": 2483190,
+      "canonical_name": "极限竞速：地平线 6",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 123,
+      "appid": 2491490,
+      "canonical_name": "Pit Panic: 地心逃亡",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 124,
+      "appid": 2505590,
+      "canonical_name": "爱与破坏之神",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 125,
+      "appid": 2507950,
+      "canonical_name": "三角洲行动",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 126,
+      "appid": 2507980,
+      "canonical_name": "数字魅影: 极限竞赛",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 127,
+      "appid": 2524850,
+      "canonical_name": "电车炫客",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 128,
+      "appid": 2527160,
+      "canonical_name": "桌面探索者",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 129,
+      "appid": 2527300,
+      "canonical_name": "莉莉幻想曲",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 130,
+      "appid": 2570580,
+      "canonical_name": "废土幸存者：爆心英雄",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 131,
+      "appid": 2584270,
+      "canonical_name": "致命躯壳 II",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 132,
+      "appid": 2593340,
+      "canonical_name": "怪奇漫游指南 Wonderia",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 133,
+      "appid": 2598990,
+      "canonical_name": "元素奇兵：英雄集结令",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 134,
+      "appid": 2621930,
+      "canonical_name": "少女死神养成计划",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 135,
+      "appid": 2622380,
+      "canonical_name": "艾尔登法环 黑夜君临",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 136,
+      "appid": 2648900,
+      "canonical_name": "井域：喀洛之血",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 137,
+      "appid": 2657560,
+      "canonical_name": "海绵逃生",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 138,
+      "appid": 2660230,
+      "canonical_name": "杀死影子",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 139,
+      "appid": 2672840,
+      "canonical_name": "棋谋",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 140,
+      "appid": 2695260,
+      "canonical_name": "绯色侍女 The Crimson Maid",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 141,
+      "appid": 2697940,
+      "canonical_name": "零秒：时光的归途",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 142,
+      "appid": 2698100,
+      "canonical_name": "蒸汽战士",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 143,
+      "appid": 2704450,
+      "canonical_name": "绿石守卫者",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 144,
+      "appid": 2708230,
+      "canonical_name": "地牢识谎",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 145,
+      "appid": 2712460,
+      "canonical_name": "地牢杀手",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 146,
+      "appid": 2742710,
+      "canonical_name": "梦想翻新家",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 147,
+      "appid": 2743810,
+      "canonical_name": "你妈真漂亮",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 148,
+      "appid": 2757260,
+      "canonical_name": "三国演义：汉朝再兴之梦",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 149,
+      "appid": 2764460,
+      "canonical_name": "沙金工业 Sandustry",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 150,
+      "appid": 2765320,
+      "canonical_name": "天临混元",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 151,
+      "appid": 2766910,
+      "canonical_name": "PengPong 弹企鹅",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 152,
+      "appid": 2767030,
+      "canonical_name": "漫威争锋",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 153,
+      "appid": 2774390,
+      "canonical_name": "侠落：百花杀尽",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 154,
+      "appid": 2778220,
+      "canonical_name": "彼岸的棕榈糖：只是一个印度故事",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 155,
+      "appid": 2778530,
+      "canonical_name": "战争回响",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 156,
+      "appid": 2783370,
+      "canonical_name": "百变提托 (Teeto)",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 157,
+      "appid": 2788540,
+      "canonical_name": "BraveYard 勇者之墓",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 158,
+      "appid": 2789810,
+      "canonical_name": "疯狂轮盘",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 159,
+      "appid": 2807960,
+      "canonical_name": "战地风云™ 6",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 160,
+      "appid": 2812920,
+      "canonical_name": "龙与自然",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 161,
+      "appid": 2836460,
+      "canonical_name": "弹珠时光",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 162,
+      "appid": 2840000,
+      "canonical_name": "破幕荧光",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 163,
+      "appid": 2845990,
+      "canonical_name": "苏打队长",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 164,
+      "appid": 2868840,
+      "canonical_name": "Slay the Spire 2",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 165,
+      "appid": 2876050,
+      "canonical_name": "宠物街金鱼姬 Pet Street Story",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 166,
+      "appid": 2880730,
+      "canonical_name": "AI2U: 与你直到世界尽头 ~ 我的病娇猫娘AI女友",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 167,
+      "appid": 2881370,
+      "canonical_name": "感谢你的投递",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 168,
+      "appid": 2899760,
+      "canonical_name": "樱花，萌放。-as the Night's, Reincarnation-",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 169,
+      "appid": 2912550,
+      "canonical_name": "黑暗卷轴",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 170,
+      "appid": 2926900,
+      "canonical_name": "马特·琼斯：骑迹",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 171,
+      "appid": 2933200,
+      "canonical_name": "图科尼：森林看护者",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 172,
+      "appid": 2939790,
+      "canonical_name": "星之旅Lunarium",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 173,
+      "appid": 2943310,
+      "canonical_name": "诛心手术",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 174,
+      "appid": 2950790,
+      "canonical_name": "铁巢重炮",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 175,
+      "appid": 2958140,
+      "canonical_name": "网络爬虫 NET.CRAWL",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 176,
+      "appid": 2965020,
+      "canonical_name": "猫咪攀爬",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 177,
+      "appid": 2966320,
+      "canonical_name": "星砂岛",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 178,
+      "appid": 2988490,
+      "canonical_name": "神屠蓝银",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 179,
+      "appid": 2994200,
+      "canonical_name": "酒与剑之歌",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 180,
+      "appid": 2996150,
+      "canonical_name": "生肖山",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 181,
+      "appid": 3041280,
+      "canonical_name": "谎言之牢",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 182,
+      "appid": 3044160,
+      "canonical_name": "我的刀盾",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 183,
+      "appid": 3065940,
+      "canonical_name": "加里波利",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 184,
+      "appid": 3075410,
+      "canonical_name": "命运之手：人各有命",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 185,
+      "appid": 3076910,
+      "canonical_name": "UNDERGROUNDED -怀旧地下城-",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 186,
+      "appid": 3079210,
+      "canonical_name": "人间地狱：越南",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 187,
+      "appid": 3084370,
+      "canonical_name": "回弹深渊",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 188,
+      "appid": 3091140,
+      "canonical_name": "掠宝旅团",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 189,
+      "appid": 3105960,
+      "canonical_name": "遥远行星：建造师",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 190,
+      "appid": 3116700,
+      "canonical_name": "地府有点忙",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 191,
+      "appid": 3135200,
+      "canonical_name": "防御遗产",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 192,
+      "appid": 3139670,
+      "canonical_name": "H·P超自然事件档案",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 193,
+      "appid": 3141630,
+      "canonical_name": "梦塔比",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 194,
+      "appid": 3147560,
+      "canonical_name": "幼兽帕帕",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 195,
+      "appid": 3152750,
+      "canonical_name": "灵伴世界",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 196,
+      "appid": 3155310,
+      "canonical_name": "阴三国谋论: 徐州篇",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 197,
+      "appid": 3156330,
+      "canonical_name": "鹰派大统领",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 198,
+      "appid": 3167920,
+      "canonical_name": "黑心装修队",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 199,
+      "appid": 3180830,
+      "canonical_name": "芯链战线",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 200,
+      "appid": 3196440,
+      "canonical_name": "度假咖啡厅模拟器",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 201,
+      "appid": 3201830,
+      "canonical_name": "春秋异闻录",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 202,
+      "appid": 3219010,
+      "canonical_name": "穿雾列车 Fogpiercer",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 203,
+      "appid": 3222890,
+      "canonical_name": "醉风酒",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 204,
+      "appid": 3226060,
+      "canonical_name": "梦境回响",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 205,
+      "appid": 3240220,
+      "canonical_name": "Grand Theft Auto V 增强版",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 206,
+      "appid": 3241660,
+      "canonical_name": "R.E.P.O.",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 207,
+      "appid": 3248110,
+      "canonical_name": "归拾 (PhiloDeka)",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 208,
+      "appid": 3257760,
+      "canonical_name": "龙沉异世录",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 209,
+      "appid": 3258560,
+      "canonical_name": "我不是魔王 I'm No Demonlord",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 210,
+      "appid": 3264440,
+      "canonical_name": "赫尔墨斯图书馆",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 211,
+      "appid": 3270550,
+      "canonical_name": "炸鸡翅导致爱情火灾",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 212,
+      "appid": 3281790,
+      "canonical_name": "电子烟店：迈阿密",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 213,
+      "appid": 3282300,
+      "canonical_name": "雾影猎人",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 214,
+      "appid": 3293260,
+      "canonical_name": "水上乐园模拟器",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 215,
+      "appid": 3310950,
+      "canonical_name": "噩梦边境",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 216,
+      "appid": 3312130,
+      "canonical_name": "工业小镇2：天堂岛",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 217,
+      "appid": 3330210,
+      "canonical_name": "旧日铁锅炖主理人",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 218,
+      "appid": 3336520,
+      "canonical_name": "Dinotica 恐龙小当家",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 219,
+      "appid": 3337140,
+      "canonical_name": "劫后公司",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 220,
+      "appid": 3340780,
+      "canonical_name": "功夫牌",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 221,
+      "appid": 3345950,
+      "canonical_name": "酒后出牌",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 222,
+      "appid": 3347200,
+      "canonical_name": "喵喵角斗士",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 223,
+      "appid": 3358170,
+      "canonical_name": "渡渡鸭与折叠世界",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 224,
+      "appid": 3371260,
+      "canonical_name": "列乌尼斯的挽歌 Requiem of Reuinis",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 225,
+      "appid": 3372060,
+      "canonical_name": "地狱公主 Hell Maiden",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 226,
+      "appid": 3384360,
+      "canonical_name": "灰域之境",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 227,
+      "appid": 3393240,
+      "canonical_name": "银行人生",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 228,
+      "appid": 3397100,
+      "canonical_name": "今天开始做魅魔",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 229,
+      "appid": 3399900,
+      "canonical_name": "地狱仆从2 (HellSlave II)",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 230,
+      "appid": 3399930,
+      "canonical_name": "轮盘地牢",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 231,
+      "appid": 3405690,
+      "canonical_name": "EA SPORTS FC™ 26",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 232,
+      "appid": 3406890,
+      "canonical_name": "东方神域传 ~在游戏里展示威严~",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 233,
+      "appid": 3413000,
+      "canonical_name": "你的可爱老婆",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 234,
+      "appid": 3417140,
+      "canonical_name": "IGS经典街机合集",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 235,
+      "appid": 3417410,
+      "canonical_name": "这个商城不太对劲",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 236,
+      "appid": 3417940,
+      "canonical_name": "猫猫乱捣蛋 Cat Chaos",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 237,
+      "appid": 3419430,
+      "canonical_name": "Bongo Cat",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 238,
+      "appid": 3431400,
+      "canonical_name": "绯红誓约-Crimson Covenant",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 239,
+      "appid": 3434720,
+      "canonical_name": "躲猫猫音乐盒",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 240,
+      "appid": 3440070,
+      "canonical_name": "这龙带刀",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 241,
+      "appid": 3452670,
+      "canonical_name": "妄生",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 242,
+      "appid": 3455320,
+      "canonical_name": "超级免疫",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 243,
+      "appid": 3459880,
+      "canonical_name": "幻想之旅",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 244,
+      "appid": 3470550,
+      "canonical_name": "破烂艺术家",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 245,
+      "appid": 3472040,
+      "canonical_name": "NBA 2K26",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 246,
+      "appid": 3486430,
+      "canonical_name": "帝国：权杖与文明",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 247,
+      "appid": 3492150,
+      "canonical_name": "真理部：虚假记忆",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 248,
+      "appid": 3493400,
+      "canonical_name": "放血医师",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 249,
+      "appid": 3503710,
+      "canonical_name": "中世纪马贩子模拟器",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 250,
+      "appid": 3513350,
+      "canonical_name": "Wuthering Waves",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 251,
+      "appid": 3520820,
+      "canonical_name": "挂机猫猫传",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 252,
+      "appid": 3524440,
+      "canonical_name": "占山为王",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 253,
+      "appid": 3525790,
+      "canonical_name": "汪汪队立大功：恐龙世界",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 254,
+      "appid": 3527290,
+      "canonical_name": "PEAK",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 255,
+      "appid": 3551340,
+      "canonical_name": "足球经理26",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 256,
+      "appid": 3558120,
+      "canonical_name": "伊利斯之梦Ellixir's Dream",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 257,
+      "appid": 3558600,
+      "canonical_name": "绿植小筑",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 258,
+      "appid": 3561220,
+      "canonical_name": "风暴怕死队",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 259,
+      "appid": 3561740,
+      "canonical_name": "神探夏洛克：暗夜追踪者",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 260,
+      "appid": 3565290,
+      "canonical_name": "主神的游戏",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 261,
+      "appid": 3570110,
+      "canonical_name": "神之一手",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 262,
+      "appid": 3574020,
+      "canonical_name": "拉面模拟器",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 263,
+      "appid": 3583940,
+      "canonical_name": "端水大师",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 264,
+      "appid": 3584920,
+      "canonical_name": "国潮烤冷面传奇",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 265,
+      "appid": 3586450,
+      "canonical_name": "世界树牧场：精灵传承",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 266,
+      "appid": 3590290,
+      "canonical_name": "生死深潜：雨之子民",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 267,
+      "appid": 3593740,
+      "canonical_name": "迷雾岛屿求生",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 268,
+      "appid": 3606380,
+      "canonical_name": "乱情小妹",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 269,
+      "appid": 3606400,
+      "canonical_name": "循环迷宫：维拉的大冒险",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 270,
+      "appid": 3607810,
+      "canonical_name": "灵魂•绝境防线",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 271,
+      "appid": 3617300,
+      "canonical_name": "不劳则死",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 272,
+      "appid": 3619000,
+      "canonical_name": "三钟之牌",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 273,
+      "appid": 3620130,
+      "canonical_name": "披萨哎哟！",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 274,
+      "appid": 3621200,
+      "canonical_name": "桌足也疯狂",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 275,
+      "appid": 3635130,
+      "canonical_name": "四维直觉",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 276,
+      "appid": 3641000,
+      "canonical_name": "加利宅邸悬案",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 277,
+      "appid": 3642850,
+      "canonical_name": "北亨特 (North Hunt)",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 278,
+      "appid": 3659090,
+      "canonical_name": "吸吸弹弹大乱斗",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 279,
+      "appid": 3661430,
+      "canonical_name": "鸟语森林",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 280,
+      "appid": 3669490,
+      "canonical_name": "三国蜀汉传",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 281,
+      "appid": 3678970,
+      "canonical_name": "TBH: 塔斯克巴·英雄",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 282,
+      "appid": 3683770,
+      "canonical_name": "重生之我在冰堡甜城当店长",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 283,
+      "appid": 3685370,
+      "canonical_name": "黑山羊BlackGoat",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 284,
+      "appid": 3687790,
+      "canonical_name": "夺命飞鸽 Deadliest Pigeon",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 285,
+      "appid": 3688130,
+      "canonical_name": "厨房清洁大师",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 286,
+      "appid": 3690490,
+      "canonical_name": "霜轨：Frostrain 2",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 287,
+      "appid": 3690760,
+      "canonical_name": "牛仔镇杂货铺 | Wild West Supermarket Simulator",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 288,
+      "appid": 3698490,
+      "canonical_name": "ACRODRIFT: FPV无人机模拟器",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 289,
+      "appid": 3703200,
+      "canonical_name": "凉茶王",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 290,
+      "appid": 3706550,
+      "canonical_name": "命运&通胀 -Fate&Inflation-",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 291,
+      "appid": 3718900,
+      "canonical_name": "混乱世界",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 292,
+      "appid": 3722330,
+      "canonical_name": "午夜轮班",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 293,
+      "appid": 3722660,
+      "canonical_name": "星际深钻",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 294,
+      "appid": 3726730,
+      "canonical_name": "梦魇牌",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 295,
+      "appid": 3729550,
+      "canonical_name": "堆叠妖怪",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 296,
+      "appid": 3733860,
+      "canonical_name": "思维密码",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 297,
+      "appid": 3736310,
+      "canonical_name": "水下双雄",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 298,
+      "appid": 3739300,
+      "canonical_name": "挤猫猫",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 299,
+      "appid": 3743730,
+      "canonical_name": "混元灵印",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 300,
+      "appid": 3749320,
+      "canonical_name": "花满楼",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 301,
+      "appid": 3749720,
+      "canonical_name": "全境封锁曙光",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 302,
+      "appid": 3751820,
+      "canonical_name": "车辙制造者",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 303,
+      "appid": 3751950,
+      "canonical_name": "刺客信条：黑旗 记忆重置",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 304,
+      "appid": 3755930,
+      "canonical_name": "断神",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 305,
+      "appid": 3756080,
+      "canonical_name": "意识传送侦探",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 306,
+      "appid": 3756340,
+      "canonical_name": "赌命无常：出千为王",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 307,
+      "appid": 3756930,
+      "canonical_name": "心动发条",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 308,
+      "appid": 3759220,
+      "canonical_name": "森灵旅社",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 309,
+      "appid": 3761760,
+      "canonical_name": "梦境物语",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 310,
+      "appid": 3764970,
+      "canonical_name": "墨西哥忍者",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 311,
+      "appid": 3780790,
+      "canonical_name": "舰魂重构",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 312,
+      "appid": 3782080,
+      "canonical_name": "中国式地雷女",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 313,
+      "appid": 3787240,
+      "canonical_name": "漫威斗魂",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 314,
+      "appid": 3791630,
+      "canonical_name": "武士打鬼",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 315,
+      "appid": 3795990,
+      "canonical_name": "破坏，然后升级",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 316,
+      "appid": 3808690,
+      "canonical_name": "致病本源",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 317,
+      "appid": 3809920,
+      "canonical_name": "Wicked Little Witch 小小坏女巫",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 318,
+      "appid": 3812600,
+      "canonical_name": "维修物语",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 319,
+      "appid": 3816000,
+      "canonical_name": "鲜花与众神",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 320,
+      "appid": 3818020,
+      "canonical_name": "恶校游戏",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 321,
+      "appid": 3821830,
+      "canonical_name": "3D剧本杀 焦黑的你",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 322,
+      "appid": 3825390,
+      "canonical_name": "BLUE REFLECTION Quartet: 少女们的奇迹",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 323,
+      "appid": 3825860,
+      "canonical_name": "失落权柄",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 324,
+      "appid": 3826420,
+      "canonical_name": "幽灵地铁",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 325,
+      "appid": 3835680,
+      "canonical_name": "梦壳",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 326,
+      "appid": 3837350,
+      "canonical_name": "异能追忆",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 327,
+      "appid": 3839250,
+      "canonical_name": "铸魂迷途",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 328,
+      "appid": 3839360,
+      "canonical_name": "小小鸟托邦",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 329,
+      "appid": 3843620,
+      "canonical_name": "暗黑修仙塔防",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 330,
+      "appid": 3846300,
+      "canonical_name": "普通话智多星",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 331,
+      "appid": 3846480,
+      "canonical_name": "柏拉图深空",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 332,
+      "appid": 3848460,
+      "canonical_name": "星宇战舰 Astral-Battlecraft",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 333,
+      "appid": 3853410,
+      "canonical_name": "懒惰军团养成记",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 334,
+      "appid": 3855600,
+      "canonical_name": "符岩斗魂",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 335,
+      "appid": 3855650,
+      "canonical_name": "容器",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 336,
+      "appid": 3856340,
+      "canonical_name": "LenscraftCube 相机方块",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 337,
+      "appid": 3858830,
+      "canonical_name": "极度攀爬",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 338,
+      "appid": 3863760,
+      "canonical_name": "侠影录",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 339,
+      "appid": 3863770,
+      "canonical_name": "水管公司",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 340,
+      "appid": 3863840,
+      "canonical_name": "如梦金色雪",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 341,
+      "appid": 3863850,
+      "canonical_name": "幸运者困境",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 342,
+      "appid": 3867250,
+      "canonical_name": "通梦板",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 343,
+      "appid": 3871550,
+      "canonical_name": "小小修仙者 Little Immortal Cultivator",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 344,
+      "appid": 3872710,
+      "canonical_name": "拆迁地球及爱情事故",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 345,
+      "appid": 3872760,
+      "canonical_name": "吞食三国",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 346,
+      "appid": 3875230,
+      "canonical_name": "球打球(Ball2 Battle)",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 347,
+      "appid": 3883290,
+      "canonical_name": "LABYRINTHOS：深渊的迷宮",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 348,
+      "appid": 3884970,
+      "canonical_name": "莱尔兰德",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 349,
+      "appid": 3894850,
+      "canonical_name": "机场安检模拟器",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 350,
+      "appid": 3902210,
+      "canonical_name": "拉比的村子",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 351,
+      "appid": 3902800,
+      "canonical_name": "[HERROR] 加油站案件",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 352,
+      "appid": 3907350,
+      "canonical_name": "网球王子 学园祭的王子们 ♡-40 and more...",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 353,
+      "appid": 3907380,
+      "canonical_name": "网球王子 心跳求生 Tie break ♡ game",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 354,
+      "appid": 3908250,
+      "canonical_name": "封神演义之黄飞虎归周",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 355,
+      "appid": 3908810,
+      "canonical_name": "爆连方块",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 356,
+      "appid": 3910590,
+      "canonical_name": "科斯达丽佳的世末终之旅途",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 357,
+      "appid": 3914030,
+      "canonical_name": "一百单九将",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 358,
+      "appid": 3914860,
+      "canonical_name": "Moss：遗落圣物",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 359,
+      "appid": 3920780,
+      "canonical_name": "最后的飞船",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 360,
+      "appid": 3924920,
+      "canonical_name": "保卫粮食 Grain Defense",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 361,
+      "appid": 3928980,
+      "canonical_name": "我的英雄旅团",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 362,
+      "appid": 3929330,
+      "canonical_name": "释厄传",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 363,
+      "appid": 3932890,
+      "canonical_name": "Escape from Tarkov",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 364,
+      "appid": 3934270,
+      "canonical_name": "多少兄弟？",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 365,
+      "appid": 3938640,
+      "canonical_name": "美味回转寿司店模拟器",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 366,
+      "appid": 3939700,
+      "canonical_name": "海边宝藏小铺",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 367,
+      "appid": 3940610,
+      "canonical_name": "EA SPORTS™Madden NFL 27",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 368,
+      "appid": 3941930,
+      "canonical_name": "因习村2200",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 369,
+      "appid": 3946120,
+      "canonical_name": "黎明探险队",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 370,
+      "appid": 3956700,
+      "canonical_name": "净化战线（异净特遣队）",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 371,
+      "appid": 3960830,
+      "canonical_name": "沙威猫传奇：黑帮预制菜",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 372,
+      "appid": 3966510,
+      "canonical_name": "喂龙高手",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 373,
+      "appid": 3967760,
+      "canonical_name": "纵横麻将 Matrix Mahjong",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 374,
+      "appid": 3971650,
+      "canonical_name": "魔女工厂",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 375,
+      "appid": 3975500,
+      "canonical_name": "星之牧歌",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 376,
+      "appid": 3982830,
+      "canonical_name": "瓶裂",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 377,
+      "appid": 3987560,
+      "canonical_name": "盛夏离与合",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 378,
+      "appid": 3994790,
+      "canonical_name": "DJ Life Simulator：学习真正的DJ技巧",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 379,
+      "appid": 3998900,
+      "canonical_name": "喵咪争霸",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 380,
+      "appid": 3999750,
+      "canonical_name": "苦涩情人节",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 381,
+      "appid": 4000170,
+      "canonical_name": "无言战斗",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 382,
+      "appid": 4001890,
+      "canonical_name": "渔力全开",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 383,
+      "appid": 4007040,
+      "canonical_name": "爆盛食堂",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 384,
+      "appid": 4009450,
+      "canonical_name": "佩图尼亚的炼狱",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 385,
+      "appid": 4011300,
+      "canonical_name": "咒言战",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 386,
+      "appid": 4018280,
+      "canonical_name": "星星骰",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 387,
+      "appid": 4018550,
+      "canonical_name": "猫之岛",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 388,
+      "appid": 4018740,
+      "canonical_name": "鬼子母",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 389,
+      "appid": 4029740,
+      "canonical_name": "节奏汪星",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 390,
+      "appid": 4030760,
+      "canonical_name": "巫师指南",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 391,
+      "appid": 4040170,
+      "canonical_name": "猫之手是救援之手",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 392,
+      "appid": 4042160,
+      "canonical_name": "静默恐惧：阿瑞斯深渊劫",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 393,
+      "appid": 4042330,
+      "canonical_name": "终有一日愿遂思恋 ～来自迷途之家的信笺～",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 394,
+      "appid": 4045180,
+      "canonical_name": "芒狗",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 395,
+      "appid": 4049910,
+      "canonical_name": "核纪元",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 396,
+      "appid": 4050550,
+      "canonical_name": "玛奥与堕落之街",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 397,
+      "appid": 4051900,
+      "canonical_name": "悠哉捕鱼",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 398,
+      "appid": 4054420,
+      "canonical_name": "Kiss And Cry：我的女友脑子有问题",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 399,
+      "appid": 4056810,
+      "canonical_name": "东北往事",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 400,
+      "appid": 4060660,
+      "canonical_name": "爆射的哈基米",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 401,
+      "appid": 4066190,
+      "canonical_name": "饺子与店主",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 402,
+      "appid": 4069000,
+      "canonical_name": "天堂岛",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 403,
+      "appid": 4071500,
+      "canonical_name": "戳戳莉莉姆",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 404,
+      "appid": 4078160,
+      "canonical_name": "超翼战骑艾斯提克",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 405,
+      "appid": 4083580,
+      "canonical_name": "猫咪小街物语",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 406,
+      "appid": 4089760,
+      "canonical_name": "双生火：第五轮回",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 407,
+      "appid": 4090360,
+      "canonical_name": "森林逃生：末班列车 (Forest Escape: Last Train)",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 408,
+      "appid": 4102350,
+      "canonical_name": "猫呜地理",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 409,
+      "appid": 4105080,
+      "canonical_name": "贝如塔按摩店模拟器 Beta Massage Parlor Simulator",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 410,
+      "appid": 4108000,
+      "canonical_name": "机械狂欢",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 411,
+      "appid": 4108460,
+      "canonical_name": "灭寇1939：上川往事",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 412,
+      "appid": 4113940,
+      "canonical_name": "君王之塔",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 413,
+      "appid": 4117890,
+      "canonical_name": "九天",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 414,
+      "appid": 4120310,
+      "canonical_name": "70年代风格机器人动画 杰比-X",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 415,
+      "appid": 4120790,
+      "canonical_name": "整理工坊 The Sorting Bureau",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 416,
+      "appid": 4122170,
+      "canonical_name": "蒂亚娜的钓鱼日记",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 417,
+      "appid": 4124920,
+      "canonical_name": "些许人亡",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 418,
+      "appid": 4125770,
+      "canonical_name": "大侠狂想曲",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 419,
+      "appid": 4128450,
+      "canonical_name": "回到明朝升升官",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 420,
+      "appid": 4129770,
+      "canonical_name": "梦之岛仲夏夜",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 421,
+      "appid": 4138190,
+      "canonical_name": "一座塔防",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 422,
+      "appid": 4141710,
+      "canonical_name": "猫咪列车长",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 423,
+      "appid": 4141900,
+      "canonical_name": "生死狙击：无限",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 424,
+      "appid": 4142610,
+      "canonical_name": "家族与帝国",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 425,
+      "appid": 4145350,
+      "canonical_name": "爱丽丝与恶魔的牢狱",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 426,
+      "appid": 4150340,
+      "canonical_name": "歧路：零",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 427,
+      "appid": 4154440,
+      "canonical_name": "神券救我命",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 428,
+      "appid": 4156370,
+      "canonical_name": "杀毒少女",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 429,
+      "appid": 4157430,
+      "canonical_name": "挖到地心！",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 430,
+      "appid": 4162040,
+      "canonical_name": "绝区零",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 431,
+      "appid": 4164790,
+      "canonical_name": "生存日志",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 432,
+      "appid": 4169410,
+      "canonical_name": "末日货轮：Doomsday Cargo Ship",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 433,
+      "appid": 4169820,
+      "canonical_name": "永恒与星辰与日常",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 434,
+      "appid": 4172180,
+      "canonical_name": "奉魔",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 435,
+      "appid": 4181370,
+      "canonical_name": "胡闹赶鸭",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 436,
+      "appid": 4181410,
+      "canonical_name": "深巷",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 437,
+      "appid": 4182640,
+      "canonical_name": "慈爱疗愈～用催眠疗法治愈社畜宝宝的心吧～",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 438,
+      "appid": 4186640,
+      "canonical_name": "魔剑王牌",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 439,
+      "appid": 4195910,
+      "canonical_name": "仓鼠滚滚乐",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 440,
+      "appid": 4201600,
+      "canonical_name": "以富之名(In The Name Of Fortune)",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 441,
+      "appid": 4202710,
+      "canonical_name": "专注魔法屋",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 442,
+      "appid": 4207690,
+      "canonical_name": "地牢炸弾人",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 443,
+      "appid": 4209160,
+      "canonical_name": "闲暇岛时光",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 444,
+      "appid": 4210010,
+      "canonical_name": "增量无限",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 445,
+      "appid": 4210580,
+      "canonical_name": "采矿工厂小队- Ore Factory Squad ⛏️",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 446,
+      "appid": 4211810,
+      "canonical_name": "神曲战姬：零域和鸣",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 447,
+      "appid": 4212170,
+      "canonical_name": "幻想世界",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 448,
+      "appid": 4214320,
+      "canonical_name": "我的美味丈夫 My Tasty Husband",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 449,
+      "appid": 4216180,
+      "canonical_name": "不义转生",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 450,
+      "appid": 4216750,
+      "canonical_name": "双球同行",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 451,
+      "appid": 4226580,
+      "canonical_name": "青鬼2",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 452,
+      "appid": 4227400,
+      "canonical_name": "圣火守望者：共筑防线",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 453,
+      "appid": 4227420,
+      "canonical_name": "福报镖局",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 454,
+      "appid": 4230080,
+      "canonical_name": "变异群落的崛起",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 455,
+      "appid": 4232270,
+      "canonical_name": "宇宙塔防图论",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 456,
+      "appid": 4234260,
+      "canonical_name": "主角",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 457,
+      "appid": 4236430,
+      "canonical_name": "RentPoly 租金大富翁",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 458,
+      "appid": 4240080,
+      "canonical_name": "阅骨者",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 459,
+      "appid": 4240150,
+      "canonical_name": "妹妹、他人、妄想症",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 460,
+      "appid": 4240260,
+      "canonical_name": "木偶之匣",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 461,
+      "appid": 4243220,
+      "canonical_name": "海边的忘川亭",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 462,
+      "appid": 4243330,
+      "canonical_name": "全网有点怪",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 463,
+      "appid": 4243990,
+      "canonical_name": "放置之路：古神复苏",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 464,
+      "appid": 4246860,
+      "canonical_name": "51区安检站",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 465,
+      "appid": 4249850,
+      "canonical_name": "电商大亨",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 466,
+      "appid": 4252290,
+      "canonical_name": "喵出法随",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 467,
+      "appid": 4252700,
+      "canonical_name": "执政官之魂",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 468,
+      "appid": 4252910,
+      "canonical_name": "禁忌长生：低语修真",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 469,
+      "appid": 4255120,
+      "canonical_name": "缴费与香烟",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 470,
+      "appid": 4255390,
+      "canonical_name": "角落的矿工",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 471,
+      "appid": 4256560,
+      "canonical_name": "抗倭前线",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 472,
+      "appid": 4259520,
+      "canonical_name": "鼠吃跑 Hamster, Eat, Run",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 473,
+      "appid": 4261850,
+      "canonical_name": "掌舵人 BIZ Helmsman",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 474,
+      "appid": 4263880,
+      "canonical_name": "凯普勒 186F",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 475,
+      "appid": 4266960,
+      "canonical_name": "AI信仰：算力革命[>_AIFC]",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 476,
+      "appid": 4270610,
+      "canonical_name": "放置:纸色新境",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 477,
+      "appid": 4271680,
+      "canonical_name": "前哨站4",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 478,
+      "appid": 4278010,
+      "canonical_name": "五年B班事件簿",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 479,
+      "appid": 4279050,
+      "canonical_name": "得儿猫（Stinky cat）",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 480,
+      "appid": 4279200,
+      "canonical_name": "超级节奏健身",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 481,
+      "appid": 4280780,
+      "canonical_name": "洪荒进化 Hong Huang Evolution",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 482,
+      "appid": 4282450,
+      "canonical_name": "银白钢铁X 1+2 双重收藏辑",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 483,
+      "appid": 4283650,
+      "canonical_name": "悠闲采矿",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 484,
+      "appid": 4286120,
+      "canonical_name": "深夜照相馆",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 485,
+      "appid": 4288940,
+      "canonical_name": "无限进化塔防",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 486,
+      "appid": 4289150,
+      "canonical_name": "你的痛柜可以种出女孩吗？",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 487,
+      "appid": 4290250,
+      "canonical_name": "幻忆神域",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 488,
+      "appid": 4290390,
+      "canonical_name": "恋狱～月狂病～",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 489,
+      "appid": 4291090,
+      "canonical_name": "兵王",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 490,
+      "appid": 4292950,
+      "canonical_name": "绍宋: 还我河山",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 491,
+      "appid": 4293110,
+      "canonical_name": "Silan: 魔物娘大师!",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 492,
+      "appid": 4293330,
+      "canonical_name": "This Station (本站): The Escape",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 493,
+      "appid": 4293750,
+      "canonical_name": "放置点击器",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 494,
+      "appid": 4294100,
+      "canonical_name": "简单的小游戏",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 495,
+      "appid": 4294490,
+      "canonical_name": "KOTAMON：妹妹麦片盒开出超稀有卡牌，我干脆当垃圾清运工集齐整套藏品怒赚百万美元",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 496,
+      "appid": 4295960,
+      "canonical_name": "漫研社顾问想要支持佐伯沙罗",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 497,
+      "appid": 4298720,
+      "canonical_name": "宠我一生：桌面宠物",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 498,
+      "appid": 4300870,
+      "canonical_name": "神与杀戮",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 499,
+      "appid": 4304520,
+      "canonical_name": "比特尔特岛：与她们共度的日常",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 500,
+      "appid": 4307330,
+      "canonical_name": "16号公路R",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 501,
+      "appid": 4307630,
+      "canonical_name": "幸存者：未知村落(Survivor: Unknown Village)",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 502,
+      "appid": 4313730,
+      "canonical_name": "悠游时光",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 503,
+      "appid": 4314010,
+      "canonical_name": "圣旨模拟器：一统天下",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 504,
+      "appid": 4315040,
+      "canonical_name": "放置领主：财富之城",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 505,
+      "appid": 4316340,
+      "canonical_name": "乐动求生：幸存者",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 506,
+      "appid": 4317790,
+      "canonical_name": "最后的海盗：无人生还",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 507,
+      "appid": 4317900,
+      "canonical_name": "无尽废墟 Infinite Ruins",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 508,
+      "appid": 4320160,
+      "canonical_name": "海王模拟器",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 509,
+      "appid": 4323800,
+      "canonical_name": "关守神",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 510,
+      "appid": 4324480,
+      "canonical_name": "小本生意",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 511,
+      "appid": 4328290,
+      "canonical_name": "鹰道：末日崛起",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 512,
+      "appid": 4328580,
+      "canonical_name": "弹幕病的特效药",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 513,
+      "appid": 4330520,
+      "canonical_name": "Sector IV: LockDown（四号区：封锁）",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 514,
+      "appid": 4331100,
+      "canonical_name": "谁与争锋 Warena",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 515,
+      "appid": 4331130,
+      "canonical_name": "深渊兽潮",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 516,
+      "appid": 4333980,
+      "canonical_name": "自拍虫虫",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 517,
+      "appid": 4334840,
+      "canonical_name": "中生代黎明",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 518,
+      "appid": 4337440,
+      "canonical_name": "梅莫莉：治愈物语",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 519,
+      "appid": 4340250,
+      "canonical_name": "千职域界",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 520,
+      "appid": 4341590,
+      "canonical_name": "混沌岛",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 521,
+      "appid": 4347620,
+      "canonical_name": "崛起之刃",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 522,
+      "appid": 4353630,
+      "canonical_name": "与夏日姐姐们的甜蜜时光",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 523,
+      "appid": 4353640,
+      "canonical_name": "魔界洞露露·法蕾亚 新星",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 524,
+      "appid": 4355310,
+      "canonical_name": "Pokerist 推出的电动扑克",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 525,
+      "appid": 4355320,
+      "canonical_name": "Pokerist 推出的牌九扑克",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 526,
+      "appid": 4355330,
+      "canonical_name": "Pokerist 的 Vegas Keno",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 527,
+      "appid": 4356430,
+      "canonical_name": "NBA 2K27",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 528,
+      "appid": 4357410,
+      "canonical_name": "宅男VR: 仰卧起坐与吻",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 529,
+      "appid": 4358240,
+      "canonical_name": "陨落者要塞",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 530,
+      "appid": 4358310,
+      "canonical_name": "硬币酒馆",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 531,
+      "appid": 4358380,
+      "canonical_name": "千里山河录",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 532,
+      "appid": 4358420,
+      "canonical_name": "枭雄",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 533,
+      "appid": 4358460,
+      "canonical_name": "卡牌家园",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 534,
+      "appid": 4364910,
+      "canonical_name": "破晓之墟",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 535,
+      "appid": 4365090,
+      "canonical_name": "五行策(WuXing Card)",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 536,
+      "appid": 4370020,
+      "canonical_name": "被黑手浸染的玫瑰与百合",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 537,
+      "appid": 4372750,
+      "canonical_name": "最后敕令",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 538,
+      "appid": 4373100,
+      "canonical_name": "阿弥陀佛",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 539,
+      "appid": 4373150,
+      "canonical_name": "书呆子的复仇",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 540,
+      "appid": 4373160,
+      "canonical_name": "邪祟",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 541,
+      "appid": 4375230,
+      "canonical_name": "三国志BOND",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 542,
+      "appid": 4376090,
+      "canonical_name": "被击垮而堕落的强气人妻",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 543,
+      "appid": 4376780,
+      "canonical_name": "砍价模拟器",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 544,
+      "appid": 4380490,
+      "canonical_name": "猫咪邮政",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 545,
+      "appid": 4380690,
+      "canonical_name": "逐末之地：60s Exploring the Endless Land：60s",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 546,
+      "appid": 4382980,
+      "canonical_name": "演义三国",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 547,
+      "appid": 4385590,
+      "canonical_name": "大荒消劫录",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 548,
+      "appid": 4390940,
+      "canonical_name": "愿",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 549,
+      "appid": 4393720,
+      "canonical_name": "放置恶魔",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 550,
+      "appid": 4401140,
+      "canonical_name": "荒古遗迹",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 551,
+      "appid": 4405880,
+      "canonical_name": "月之冕",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 552,
+      "appid": 4406610,
+      "canonical_name": "连连帝国",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 553,
+      "appid": 4411090,
+      "canonical_name": "SCP：苍白织者（SCP: Pale Weaver）",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 554,
+      "appid": 4411600,
+      "canonical_name": "挂机破坏神 IdleWrecker",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 555,
+      "appid": 4411770,
+      "canonical_name": "小行星 M-12",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 556,
+      "appid": 4412820,
+      "canonical_name": "剑与精灵",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 557,
+      "appid": 4412960,
+      "canonical_name": "光与影之恋 Chiaroscuro Lovers",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 558,
+      "appid": 4416760,
+      "canonical_name": "红或黑：扑克杀",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 559,
+      "appid": 4417080,
+      "canonical_name": "他们匆忙离开：一款隐藏物品游戏",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 560,
+      "appid": 4417490,
+      "canonical_name": "几何防线",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 561,
+      "appid": 4420570,
+      "canonical_name": "地狱森林",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 562,
+      "appid": 4420690,
+      "canonical_name": "别管这些塔！",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 563,
+      "appid": 4421010,
+      "canonical_name": "账单必须支付 Bills Must Be Paid",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 564,
+      "appid": 4430470,
+      "canonical_name": "难蚌尖塔",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 565,
+      "appid": 4431180,
+      "canonical_name": "方格们的战争：终极版",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 566,
+      "appid": 4435470,
+      "canonical_name": "海铃镇今天的饭 Seabell Supper",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 567,
+      "appid": 4435490,
+      "canonical_name": "使命召唤®：现代战争® 4",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 568,
+      "appid": 4437550,
+      "canonical_name": "角落之人",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 569,
+      "appid": 4449410,
+      "canonical_name": "亰都幻都 -樱花幻舞-",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 570,
+      "appid": 4451820,
+      "canonical_name": "归刃",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 571,
+      "appid": 4451830,
+      "canonical_name": "像素汪历险记",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 572,
+      "appid": 4453470,
+      "canonical_name": "射吧！水果人",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 573,
+      "appid": 4455780,
+      "canonical_name": "月光对话",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 574,
+      "appid": 4466090,
+      "canonical_name": "奥利珀斯的禁书",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 575,
+      "appid": 4467920,
+      "canonical_name": "水滴打砖块",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 576,
+      "appid": 4467960,
+      "canonical_name": "王国契约：放置守护之塔",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 577,
+      "appid": 4468640,
+      "canonical_name": "竞速驾驶",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 578,
+      "appid": 4474430,
+      "canonical_name": "回声链接：递归",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 579,
+      "appid": 4478640,
+      "canonical_name": "背包地牢",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 580,
+      "appid": 4478730,
+      "canonical_name": "河狸吗",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 581,
+      "appid": 4481470,
+      "canonical_name": "星辉与神灯",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 582,
+      "appid": 4481850,
+      "canonical_name": "明鉴侦探事务所",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 583,
+      "appid": 4483200,
+      "canonical_name": "柯基生存者",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 584,
+      "appid": 4485620,
+      "canonical_name": "阿特斯英雄记",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 585,
+      "appid": 4490130,
+      "canonical_name": "万世剑冢",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 586,
+      "appid": 4490290,
+      "canonical_name": "方块之地",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 587,
+      "appid": 4499040,
+      "canonical_name": "史莱姆农场",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 588,
+      "appid": 4500770,
+      "canonical_name": "键来",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 589,
+      "appid": 4501120,
+      "canonical_name": "天狗花牌",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 590,
+      "appid": 4501680,
+      "canonical_name": "一把菜刀打天下",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 591,
+      "appid": 4502710,
+      "canonical_name": "磐石守卫",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 592,
+      "appid": 4504050,
+      "canonical_name": "7月15日雨夜：前传",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 593,
+      "appid": 4507690,
+      "canonical_name": "盲行者 VR",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 594,
+      "appid": 4508020,
+      "canonical_name": "我是洞洞王 Hole is Mine",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 595,
+      "appid": 4508100,
+      "canonical_name": "星辰大学：兽心相伴",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 596,
+      "appid": 4508570,
+      "canonical_name": "真理谭：黑暗城堡的女巫",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 597,
+      "appid": 4513880,
+      "canonical_name": "难道你是GAL高手",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 598,
+      "appid": 4514640,
+      "canonical_name": "贝斯方块",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 599,
+      "appid": 4515950,
+      "canonical_name": "Pulslink：守卫回路",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 600,
+      "appid": 4517370,
+      "canonical_name": "EULA ~2026 人类创造报告~",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 601,
+      "appid": 4517520,
+      "canonical_name": "平行农场",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 602,
+      "appid": 4517960,
+      "canonical_name": "放置王国：魔与兽的远征",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 603,
+      "appid": 4520400,
+      "canonical_name": "近拱点: 引力弹弓",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 604,
+      "appid": 4526410,
+      "canonical_name": "功德无量",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 605,
+      "appid": 4526510,
+      "canonical_name": "中国式新人",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 606,
+      "appid": 4526770,
+      "canonical_name": "收纳师",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 607,
+      "appid": 4528300,
+      "canonical_name": "玛门的灵魂推币机",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 608,
+      "appid": 4528320,
+      "canonical_name": "摸金牌",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 609,
+      "appid": 4529660,
+      "canonical_name": "贪婪轮盘",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 610,
+      "appid": 4532550,
+      "canonical_name": "守护我的大火箭",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 611,
+      "appid": 4536070,
+      "canonical_name": "多肉小憩",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 612,
+      "appid": 4536280,
+      "canonical_name": "双核同步",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 613,
+      "appid": 4539420,
+      "canonical_name": "山仙酱的隐居小屋设计师+",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 614,
+      "appid": 4540820,
+      "canonical_name": "无尽矿山",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 615,
+      "appid": 4541960,
+      "canonical_name": "无法触及",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 616,
+      "appid": 4542590,
+      "canonical_name": "水线之下（Fish Slayer）",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 617,
+      "appid": 4542640,
+      "canonical_name": "三国：谋定天下",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 618,
+      "appid": 4542860,
+      "canonical_name": "异世界X异世界（Isekai x Isekai）",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 619,
+      "appid": 4547770,
+      "canonical_name": "仰望晴空的剂量",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 620,
+      "appid": 4548050,
+      "canonical_name": "帝国豪赌：奥古斯都的破碎王冠",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 621,
+      "appid": 4549590,
+      "canonical_name": "宿直日誌 Night Duty Log：A Showa School Record",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 622,
+      "appid": 4549610,
+      "canonical_name": "隐名三国",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 623,
+      "appid": 4550370,
+      "canonical_name": "魔塔国度 -Tower Realm-",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 624,
+      "appid": 4550820,
+      "canonical_name": "极线赛车",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 625,
+      "appid": 4555720,
+      "canonical_name": "黑帆王座·Galactic Loadout",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 626,
+      "appid": 4557270,
+      "canonical_name": "牧羊人 Shepherd",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 627,
+      "appid": 4558880,
+      "canonical_name": "乔伊的梦魇 II",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 628,
+      "appid": 4560290,
+      "canonical_name": "心舞",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 629,
+      "appid": 4560490,
+      "canonical_name": "回放",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 630,
+      "appid": 4563040,
+      "canonical_name": "掷杯筊",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 631,
+      "appid": 4565740,
+      "canonical_name": "开源麻将平台",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 632,
+      "appid": 4566560,
+      "canonical_name": "麻将：卡五星",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 633,
+      "appid": 4567710,
+      "canonical_name": "恋因天赐!! Present From Angel",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 634,
+      "appid": 4568990,
+      "canonical_name": "决战勋章：超级自走棋爆兵战",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 635,
+      "appid": 4570720,
+      "canonical_name": "龙之剑:觉醒",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 636,
+      "appid": 4571080,
+      "canonical_name": "血痕困斗",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 637,
+      "appid": 4571100,
+      "canonical_name": "单词牌",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 638,
+      "appid": 4571290,
+      "canonical_name": "玄中记",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 639,
+      "appid": 4571480,
+      "canonical_name": "萌军VS酥军",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 640,
+      "appid": 4572790,
+      "canonical_name": "西瓜游戏",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 641,
+      "appid": 4576040,
+      "canonical_name": "东方",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 642,
+      "appid": 4578750,
+      "canonical_name": "不死精灵",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 643,
+      "appid": 4579210,
+      "canonical_name": "幻域 Fantasy Domain",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 644,
+      "appid": 4580720,
+      "canonical_name": "月色涌起",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 645,
+      "appid": 4582080,
+      "canonical_name": "挂机足球",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 646,
+      "appid": 4585490,
+      "canonical_name": "超级至尊男孩",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 647,
+      "appid": 4587290,
+      "canonical_name": "桌面伴侣时光旅人",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 648,
+      "appid": 4591540,
+      "canonical_name": "逆性莫比乌斯",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 649,
+      "appid": 4591610,
+      "canonical_name": "致经济下行的我们",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 650,
+      "appid": 4593070,
+      "canonical_name": "巴掌大的农场",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 651,
+      "appid": 4593710,
+      "canonical_name": "魔族公主打搜撤",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 652,
+      "appid": 4594150,
+      "canonical_name": "长官，兽人大军冲上来了",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 653,
+      "appid": 4595820,
+      "canonical_name": "键盘侠：键入即毁灭",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 654,
+      "appid": 4596230,
+      "canonical_name": "西班牙风味",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 655,
+      "appid": 4598080,
+      "canonical_name": "家喵二三事 Vol. 2",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 656,
+      "appid": 4598940,
+      "canonical_name": "下潜：深海回声",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 657,
+      "appid": 4599500,
+      "canonical_name": "DottyBead闪闪拼豆",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 658,
+      "appid": 4602730,
+      "canonical_name": "这张不算 This One Doesn't Count",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 659,
+      "appid": 4605210,
+      "canonical_name": "摸猫猫",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 660,
+      "appid": 4605460,
+      "canonical_name": "地球Online",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 661,
+      "appid": 4607480,
+      "canonical_name": "食刻",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 662,
+      "appid": 4607920,
+      "canonical_name": "麻吉骑士 Magic Knights",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 663,
+      "appid": 4611990,
+      "canonical_name": "日本事故物件監視協会3 -Japan Stigmatized Property-",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 664,
+      "appid": 4612530,
+      "canonical_name": "鸟吃虫子",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 665,
+      "appid": 4613170,
+      "canonical_name": "镜湖之中",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 666,
+      "appid": 4613900,
+      "canonical_name": "噩梦医院",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 667,
+      "appid": 4618830,
+      "canonical_name": "孤岛的动物园",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 668,
+      "appid": 4622110,
+      "canonical_name": "我的傲娇妹妹 MY TSUNDERE SISTER",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 669,
+      "appid": 4624530,
+      "canonical_name": "闲鱼修仙录",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 670,
+      "appid": 4625760,
+      "canonical_name": "山上那个猴儿",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 671,
+      "appid": 4629490,
+      "canonical_name": "魔王的后宫~异世界温柔乡~",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 672,
+      "appid": 4632600,
+      "canonical_name": "美少女旅馆：可爱即是正义，但正义需要处刑",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 673,
+      "appid": 4637330,
+      "canonical_name": "公司崛起",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 674,
+      "appid": 4639370,
+      "canonical_name": "机动战线",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 675,
+      "appid": 4639770,
+      "canonical_name": "主公請躺好",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 676,
+      "appid": 4641740,
+      "canonical_name": "星际突袭者",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 677,
+      "appid": 4642650,
+      "canonical_name": "地狱之魂",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 678,
+      "appid": 4643090,
+      "canonical_name": "不/存在的莉莉丝",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 679,
+      "appid": 4643910,
+      "canonical_name": "极简回路",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 680,
+      "appid": 4644050,
+      "canonical_name": "维京杂货铺",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 681,
+      "appid": 4644150,
+      "canonical_name": "世界尽头的奥刻阿尼得斯 —— 虚海的大母神 ——",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 682,
+      "appid": 4645200,
+      "canonical_name": "肉鸽领地：守卫方格",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 683,
+      "appid": 4650440,
+      "canonical_name": "西瓜游戏 Planet",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 684,
+      "appid": 4650490,
+      "canonical_name": "赛博女修",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 685,
+      "appid": 4651150,
+      "canonical_name": "中医模拟练习生",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 686,
+      "appid": 4651220,
+      "canonical_name": "战意：三国",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 687,
+      "appid": 4653120,
+      "canonical_name": "东方桌宠",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 688,
+      "appid": 4654620,
+      "canonical_name": "我的璀璨男友",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 689,
+      "appid": 4654940,
+      "canonical_name": "斗笠江湖",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 690,
+      "appid": 4655470,
+      "canonical_name": "16叠谋杀之谜",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 691,
+      "appid": 4659040,
+      "canonical_name": "五行幻境：荒渡",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 692,
+      "appid": 4659330,
+      "canonical_name": "世纪末苏醒",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 693,
+      "appid": 4663300,
+      "canonical_name": "末世：我有一辆房车",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 694,
+      "appid": 4664650,
+      "canonical_name": "赛博修仙符",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 695,
+      "appid": 4664900,
+      "canonical_name": "碎裂围城：破坏球防御战",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 696,
+      "appid": 4665490,
+      "canonical_name": "你的蛋蛋",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 697,
+      "appid": 4667580,
+      "canonical_name": "飞刀大师",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 698,
+      "appid": 4667670,
+      "canonical_name": "方寸甜序",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 699,
+      "appid": 4667860,
+      "canonical_name": "snt计划",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 700,
+      "appid": 4668890,
+      "canonical_name": "一起来开大商场",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 701,
+      "appid": 4669350,
+      "canonical_name": "黑客视窗 95",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 702,
+      "appid": 4669380,
+      "canonical_name": "琉光猫影",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 703,
+      "appid": 4674550,
+      "canonical_name": "矿业帝国",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 704,
+      "appid": 4676570,
+      "canonical_name": "新盗墓笔记（官方正版）",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 705,
+      "appid": 4676980,
+      "canonical_name": "间隙世界事件",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 706,
+      "appid": 4683470,
+      "canonical_name": "润之",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 707,
+      "appid": 4686000,
+      "canonical_name": "篮球点点点",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 708,
+      "appid": 4689160,
+      "canonical_name": "水果贪食蛇",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 709,
+      "appid": 4692030,
+      "canonical_name": "蛆",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 710,
+      "appid": 4692720,
+      "canonical_name": "石碑",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 711,
+      "appid": 4694140,
+      "canonical_name": "虚拟主播恰米游戏",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 712,
+      "appid": 4695530,
+      "canonical_name": "一个关于变大的游戏",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 713,
+      "appid": 4696180,
+      "canonical_name": "魔法法杖物语",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 714,
+      "appid": 4697460,
+      "canonical_name": "人生之旅",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 715,
+      "appid": 4699700,
+      "canonical_name": "桌面爬宠",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 716,
+      "appid": 4699920,
+      "canonical_name": "天平游戏1:抉择",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 717,
+      "appid": 4704690,
+      "canonical_name": "MECCHA CHAMELEON",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 718,
+      "appid": 4706880,
+      "canonical_name": "疯狂派对",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 719,
+      "appid": 4707970,
+      "canonical_name": "攻击就能加攻击",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 720,
+      "appid": 4708470,
+      "canonical_name": "摸鱼游戏合集",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 721,
+      "appid": 4710360,
+      "canonical_name": "神姬传说:卡利亚",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 722,
+      "appid": 4710460,
+      "canonical_name": "四方行",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 723,
+      "appid": 4710550,
+      "canonical_name": "科提玛洛",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 724,
+      "appid": 4714000,
+      "canonical_name": "1.80战神微变",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 725,
+      "appid": 4714810,
+      "canonical_name": "再战大极品+255",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 726,
+      "appid": 4718270,
+      "canonical_name": "Blosharper：百花之战",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 727,
+      "appid": 4720010,
+      "canonical_name": "奇迹勇者：魔兽防线",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 728,
+      "appid": 4723460,
+      "canonical_name": "701病房",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 729,
+      "appid": 4724900,
+      "canonical_name": "无限面包",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 730,
+      "appid": 4727230,
+      "canonical_name": "修仙挂机",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 731,
+      "appid": 4729160,
+      "canonical_name": "Lian：久远岛童谣连环杀人备忘录",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 732,
+      "appid": 4729260,
+      "canonical_name": "臀臀有礼",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 733,
+      "appid": 4729340,
+      "canonical_name": "乱世江山",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 734,
+      "appid": 4733330,
+      "canonical_name": "28天半衰期",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 735,
+      "appid": 4733510,
+      "canonical_name": "旷野怪兽",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 736,
+      "appid": 4734110,
+      "canonical_name": "齿轮与湮灭（Gears of Annihilation）",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 737,
+      "appid": 4734650,
+      "canonical_name": "请去Bar，恋爱吧！",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 738,
+      "appid": 4735070,
+      "canonical_name": "伏煞3 夜诊",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 739,
+      "appid": 4736640,
+      "canonical_name": "消逝殆烬",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 740,
+      "appid": 4737040,
+      "canonical_name": "猎梦保卫战",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 741,
+      "appid": 4737940,
+      "canonical_name": "镜中的光怪陆离",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 742,
+      "appid": 4738170,
+      "canonical_name": "哈里斯大道上的善举",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 743,
+      "appid": 4738660,
+      "canonical_name": "东方防卫传 ～ AI Test in Touhou ～",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 744,
+      "appid": 4740420,
+      "canonical_name": "雪落情书时",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 745,
+      "appid": 4740460,
+      "canonical_name": "十米爆爽超变",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 746,
+      "appid": 4740600,
+      "canonical_name": "咸鱼搬运工",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 747,
+      "appid": 4746060,
+      "canonical_name": "The Organ Woman | 臓器女",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 748,
+      "appid": 4751020,
+      "canonical_name": "为了阻止最后的敌军舰队，出击！",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 749,
+      "appid": 4752780,
+      "canonical_name": "少女大战地精",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 750,
+      "appid": 4752860,
+      "canonical_name": "娱游暇日",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 751,
+      "appid": 4754090,
+      "canonical_name": "诡宅祭坛",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 752,
+      "appid": 4754330,
+      "canonical_name": "无限秘仪",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 753,
+      "appid": 4757580,
+      "canonical_name": "厕所大作战",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 754,
+      "appid": 4757840,
+      "canonical_name": "战法道传奇",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 755,
+      "appid": 4759180,
+      "canonical_name": "德尼之塔",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 756,
+      "appid": 4760710,
+      "canonical_name": "边缘城市",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 757,
+      "appid": 4763020,
+      "canonical_name": "两面爱",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 758,
+      "appid": 4763330,
+      "canonical_name": "故事引擎：随心所叙",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 759,
+      "appid": 4764530,
+      "canonical_name": "迹 RELIC",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 760,
+      "appid": 4766590,
+      "canonical_name": "哈坦加计划_1989_增量版",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 761,
+      "appid": 4766950,
+      "canonical_name": "狂战之旅",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 762,
+      "appid": 4770560,
+      "canonical_name": "鲸鸟",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 763,
+      "appid": 4770830,
+      "canonical_name": "三國鼎立Online Remastered",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 764,
+      "appid": 4770850,
+      "canonical_name": "异星战场",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 765,
+      "appid": 4771880,
+      "canonical_name": "三国义",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 766,
+      "appid": 4771890,
+      "canonical_name": "夜魇突袭:血牌风暴",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 767,
+      "appid": 4772010,
+      "canonical_name": "一夜白骰",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 768,
+      "appid": 4772250,
+      "canonical_name": "字里行间",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 769,
+      "appid": 4773850,
+      "canonical_name": "剩余价值模拟器",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 770,
+      "appid": 4773930,
+      "canonical_name": "君临传奇之风起云涌",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 771,
+      "appid": 4773980,
+      "canonical_name": "猫咪狂想曲",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 772,
+      "appid": 4775980,
+      "canonical_name": "3D拼图：破碎之心",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 773,
+      "appid": 4776130,
+      "canonical_name": "娇萌五重奏",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 774,
+      "appid": 4777900,
+      "canonical_name": "树世界：云端庇护所",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 775,
+      "appid": 4779000,
+      "canonical_name": "神威之境：第八位神",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 776,
+      "appid": 4779010,
+      "canonical_name": "宇宙丰收：无限成长",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 777,
+      "appid": 4781400,
+      "canonical_name": "武林绝学之功夫传奇",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 778,
+      "appid": 4781620,
+      "canonical_name": "小史莱姆与皇冠",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 779,
+      "appid": 4781720,
+      "canonical_name": "该死的谐音梗",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 780,
+      "appid": 4782480,
+      "canonical_name": "我靠挂机撩女神",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 781,
+      "appid": 4783780,
+      "canonical_name": "使命召唤®：现代战争® 4试玩",
+      "cohort": "popular"
+    },
+    {
+      "class_index": 782,
+      "appid": 4785810,
+      "canonical_name": "我是妖王：阻止孙悟空",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 783,
+      "appid": 4786350,
+      "canonical_name": "双面魔君心上仙",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 784,
+      "appid": 4787110,
+      "canonical_name": "或许是个卡牌游戏？",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 785,
+      "appid": 4787730,
+      "canonical_name": "孟德尔模拟器",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 786,
+      "appid": 4790340,
+      "canonical_name": "修仙：灵山秘境",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 787,
+      "appid": 4790520,
+      "canonical_name": "电梯: 无间",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 788,
+      "appid": 4790620,
+      "canonical_name": "桌宠奶茶店：放置大亨",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 789,
+      "appid": 4790650,
+      "canonical_name": "锻造少女",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 790,
+      "appid": 4790970,
+      "canonical_name": "电子木鱼",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 791,
+      "appid": 4791840,
+      "canonical_name": "摸鱼悟道",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 792,
+      "appid": 4792230,
+      "canonical_name": "比比丟八 BIBI DICE",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 793,
+      "appid": 4793740,
+      "canonical_name": "斗将",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 794,
+      "appid": 4794570,
+      "canonical_name": "宝石我来捡，你只管揍人: Blood & Blessing",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 795,
+      "appid": 4794880,
+      "canonical_name": "The Collection藏品",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 796,
+      "appid": 4796160,
+      "canonical_name": "秘密告白",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 797,
+      "appid": 4797550,
+      "canonical_name": "正体 SHOUT-AI",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 798,
+      "appid": 4797730,
+      "canonical_name": "十个好人Ten innocent people",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 799,
+      "appid": 4798150,
+      "canonical_name": "人生记事簿：Life Memoirs",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 800,
+      "appid": 4798610,
+      "canonical_name": "街机女孩不会认输!!",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 801,
+      "appid": 4798820,
+      "canonical_name": "虚无之塔",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 802,
+      "appid": 4799450,
+      "canonical_name": "王国大战僵尸",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 803,
+      "appid": 4800290,
+      "canonical_name": "西部枪手",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 804,
+      "appid": 4800460,
+      "canonical_name": "视差：闭眼过",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 805,
+      "appid": 4800540,
+      "canonical_name": "出门打酱油",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 806,
+      "appid": 4800860,
+      "canonical_name": "绝色侦探:爱丽丝",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 807,
+      "appid": 4802410,
+      "canonical_name": "YuanQi : 元氣",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 808,
+      "appid": 4803630,
+      "canonical_name": "江湖奇侠录",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 809,
+      "appid": 4804250,
+      "canonical_name": "夜袭者",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 810,
+      "appid": 4804650,
+      "canonical_name": "活死鸡之夜",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 811,
+      "appid": 4808310,
+      "canonical_name": "水浒历险Online：重生",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 812,
+      "appid": 4808530,
+      "canonical_name": "钢之誓言",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 813,
+      "appid": 4808750,
+      "canonical_name": "勇之证",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 814,
+      "appid": 4808760,
+      "canonical_name": "Free Loop Tower Defense 人生是旷野塔防 FLTD",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 815,
+      "appid": 4808890,
+      "canonical_name": "南云的大脑",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 816,
+      "appid": 4809400,
+      "canonical_name": "长生仙途",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 817,
+      "appid": 4809670,
+      "canonical_name": "玄戒修仙路：桃花天命",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 818,
+      "appid": 4810250,
+      "canonical_name": "神陨：余烬",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 819,
+      "appid": 4810840,
+      "canonical_name": "道途百劫",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 820,
+      "appid": 4812220,
+      "canonical_name": "马拉松The Messenger from Athens at Marathon",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 821,
+      "appid": 4812710,
+      "canonical_name": "霓虹弹珠",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 822,
+      "appid": 4812940,
+      "canonical_name": "你画你猜",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 823,
+      "appid": 4813540,
+      "canonical_name": "我的悟空",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 824,
+      "appid": 4814890,
+      "canonical_name": "弹珠地牢",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 825,
+      "appid": 4817530,
+      "canonical_name": "蘑菇农场",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 826,
+      "appid": 4818310,
+      "canonical_name": "墨影突围：无尽生存",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 827,
+      "appid": 4818410,
+      "canonical_name": "攻占敌营",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 828,
+      "appid": 4818580,
+      "canonical_name": "三国志经典",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 829,
+      "appid": 4819850,
+      "canonical_name": "动次打次",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 830,
+      "appid": 4821360,
+      "canonical_name": "巨獸與傭兵",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 831,
+      "appid": 4821680,
+      "canonical_name": "出马Spirit Rider",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 832,
+      "appid": 4822000,
+      "canonical_name": "喵德行 Meowdness",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 833,
+      "appid": 4822500,
+      "canonical_name": "恶魇",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 834,
+      "appid": 4822660,
+      "canonical_name": "亮可敏与花束",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 835,
+      "appid": 4824410,
+      "canonical_name": "简易日式麻将",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 836,
+      "appid": 4824940,
+      "canonical_name": "星途",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 837,
+      "appid": 4825080,
+      "canonical_name": "夜七梦",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 838,
+      "appid": 4825420,
+      "canonical_name": "冻土无声",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 839,
+      "appid": 4825870,
+      "canonical_name": "失格the lost",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 840,
+      "appid": 4825980,
+      "canonical_name": "爪爪改造家2 PawRebuild 2",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 841,
+      "appid": 4827940,
+      "canonical_name": "末世信使",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 842,
+      "appid": 4828620,
+      "canonical_name": "无敌吸附战神",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 843,
+      "appid": 4829710,
+      "canonical_name": "魔堡幸存者",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 844,
+      "appid": 4829980,
+      "canonical_name": "仙途放置：无尽天梯和完美装备",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 845,
+      "appid": 4830090,
+      "canonical_name": "未寄",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 846,
+      "appid": 4830350,
+      "canonical_name": "死亡矩阵房间",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 847,
+      "appid": 4830500,
+      "canonical_name": "寻咪",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 848,
+      "appid": 4831190,
+      "canonical_name": "染上你的颜色",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 849,
+      "appid": 4831620,
+      "canonical_name": "画你的时光",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 850,
+      "appid": 4831880,
+      "canonical_name": "MV幻想冒险",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 851,
+      "appid": 4832440,
+      "canonical_name": "黑圣化:悟空",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 852,
+      "appid": 4834190,
+      "canonical_name": "陋室与猫",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 853,
+      "appid": 4834200,
+      "canonical_name": "村庄幸存者",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 854,
+      "appid": 4834490,
+      "canonical_name": "德州扑克",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 855,
+      "appid": 4835020,
+      "canonical_name": "虚日无常",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 856,
+      "appid": 4835790,
+      "canonical_name": "星辉契约:幻灵庭院",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 857,
+      "appid": 4836540,
+      "canonical_name": "英雄连3：最终防线Company of Heroes 3: Final Stand",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 858,
+      "appid": 4837990,
+      "canonical_name": "九州仙侠录",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 859,
+      "appid": 4838450,
+      "canonical_name": "极乐妹土！2",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 860,
+      "appid": 4838470,
+      "canonical_name": "小小吸血姬",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 861,
+      "appid": 4838500,
+      "canonical_name": "天亮之后",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 862,
+      "appid": 4838780,
+      "canonical_name": "智探",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 863,
+      "appid": 4839300,
+      "canonical_name": "文明乱斗",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 864,
+      "appid": 4840120,
+      "canonical_name": "文物修复师",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 865,
+      "appid": 4840590,
+      "canonical_name": "宽恕我（Show me mercy）",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 866,
+      "appid": 4840890,
+      "canonical_name": "落境：未知记忆",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 867,
+      "appid": 4841480,
+      "canonical_name": "鸡群战场",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 868,
+      "appid": 4842420,
+      "canonical_name": "纸面大作战",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 869,
+      "appid": 4843190,
+      "canonical_name": "来高州识荔枝",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 870,
+      "appid": 4843300,
+      "canonical_name": "密林",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 871,
+      "appid": 4846800,
+      "canonical_name": "1000王子: ChouChou Condo (甜心公寓)",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 872,
+      "appid": 4847520,
+      "canonical_name": "霓虹协议：夜穹",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 873,
+      "appid": 4847750,
+      "canonical_name": "Tank Tower Defense 坦克塔防",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 874,
+      "appid": 4848340,
+      "canonical_name": "致命勇士",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 875,
+      "appid": 4851180,
+      "canonical_name": "升级试炼",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 876,
+      "appid": 4851630,
+      "canonical_name": "啪嗒喵",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 877,
+      "appid": 4851970,
+      "canonical_name": "御魂传说",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 878,
+      "appid": 4853120,
+      "canonical_name": "半日酒馆",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 879,
+      "appid": 4853420,
+      "canonical_name": "扭转大师",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 880,
+      "appid": 4853620,
+      "canonical_name": "绿意",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 881,
+      "appid": 4853960,
+      "canonical_name": "十三张: 死斗&肉鸽",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 882,
+      "appid": 4855430,
+      "canonical_name": "麻将百科",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 883,
+      "appid": 4855450,
+      "canonical_name": "不心动才有鬼",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 884,
+      "appid": 4855580,
+      "canonical_name": "亡灵崛起",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 885,
+      "appid": 4856460,
+      "canonical_name": "记忆收藏家 · The Memory Mender",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 886,
+      "appid": 4859490,
+      "canonical_name": "哈迪和莫莉",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 887,
+      "appid": 4861510,
+      "canonical_name": "火柴人的日常",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 888,
+      "appid": 4862220,
+      "canonical_name": "单休公寓",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 889,
+      "appid": 4864290,
+      "canonical_name": "同城游美女捕鱼",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 890,
+      "appid": 4864560,
+      "canonical_name": "超级变色龙",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 891,
+      "appid": 4866160,
+      "canonical_name": "偷偷摸摸修个仙",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 892,
+      "appid": 4868140,
+      "canonical_name": "差值风暴",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 893,
+      "appid": 4868150,
+      "canonical_name": "仙门守护者",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 894,
+      "appid": 4868910,
+      "canonical_name": "细胞幸存者",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 895,
+      "appid": 4869070,
+      "canonical_name": "挖个蛋",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 896,
+      "appid": 4875060,
+      "canonical_name": "富豪榜：清算所",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 897,
+      "appid": 4875810,
+      "canonical_name": "乾坤搜神记",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 898,
+      "appid": 4876710,
+      "canonical_name": "乾坤玺•明",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 899,
+      "appid": 4876770,
+      "canonical_name": "渔猫",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 900,
+      "appid": 4878830,
+      "canonical_name": "Find Cats 8 奇幻植物王国",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 901,
+      "appid": 4880060,
+      "canonical_name": "太空狗斗：无限",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 902,
+      "appid": 4880470,
+      "canonical_name": "水灵逃生",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 903,
+      "appid": 4885890,
+      "canonical_name": "田游族谱",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 904,
+      "appid": 4886040,
+      "canonical_name": "魔法少女甜心 Magical Girl Sweetheart",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 905,
+      "appid": 4886100,
+      "canonical_name": "魔法少女甜心3D Magical Girl Sweetheart 3D",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 906,
+      "appid": 4886950,
+      "canonical_name": "小小避风港",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 907,
+      "appid": 4888520,
+      "canonical_name": "像素三国-僵尸地牢",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 908,
+      "appid": 4891410,
+      "canonical_name": "套圈之王",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 909,
+      "appid": 4895540,
+      "canonical_name": "虚乐色",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 910,
+      "appid": 4897530,
+      "canonical_name": "涂画捉迷藏",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 911,
+      "appid": 4897540,
+      "canonical_name": "矿工幸存者",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 912,
+      "appid": 4897880,
+      "canonical_name": "三国群英传之英雄传奇",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 913,
+      "appid": 4898630,
+      "canonical_name": "宗门最后的长老",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 914,
+      "appid": 4898710,
+      "canonical_name": "急速坠落",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 915,
+      "appid": 4899040,
+      "canonical_name": "至高传奇",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 916,
+      "appid": 4901480,
+      "canonical_name": "雨后书签",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 917,
+      "appid": 4902300,
+      "canonical_name": "自助餐惊魂",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 918,
+      "appid": 4903450,
+      "canonical_name": "斗地主",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 919,
+      "appid": 4904420,
+      "canonical_name": "久梦初醒",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 920,
+      "appid": 4904840,
+      "canonical_name": "颜色方块逃脱",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 921,
+      "appid": 4905950,
+      "canonical_name": "无尽扫雷模拟器",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 922,
+      "appid": 4906860,
+      "canonical_name": "世界杯 无名小国的夺冠之路",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 923,
+      "appid": 4910300,
+      "canonical_name": "勇者和他的朋友",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 924,
+      "appid": 4911030,
+      "canonical_name": "硬汉猫猫",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 925,
+      "appid": 4911200,
+      "canonical_name": "夏至未来",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 926,
+      "appid": 4911220,
+      "canonical_name": "南派盗墓传奇",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 927,
+      "appid": 4914550,
+      "canonical_name": "城堡旁刷新出大量野怪",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 928,
+      "appid": 4914830,
+      "canonical_name": "玩具店大整理！",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 929,
+      "appid": 4915120,
+      "canonical_name": "疯狂！迪尔与芒克的大冒险",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 930,
+      "appid": 4915190,
+      "canonical_name": "兽的国：猫",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 931,
+      "appid": 4915470,
+      "canonical_name": "烽烟四起",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 932,
+      "appid": 4915810,
+      "canonical_name": "佐拉塔的覆灭",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 933,
+      "appid": 4916300,
+      "canonical_name": "我是校长",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 934,
+      "appid": 4917020,
+      "canonical_name": "猫猫跑酷",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 935,
+      "appid": 4919260,
+      "canonical_name": "浩游超超超变",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 936,
+      "appid": 4920140,
+      "canonical_name": "天宫乱斗",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 937,
+      "appid": 4924130,
+      "canonical_name": "铁门之下",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 938,
+      "appid": 4925040,
+      "canonical_name": "齿轮冲突：英雄集结",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 939,
+      "appid": 4927750,
+      "canonical_name": "守护之心",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 940,
+      "appid": 4929320,
+      "canonical_name": "纳鲁尔战纪",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 941,
+      "appid": 4929930,
+      "canonical_name": "沙雕足球小游戏：盘带大师",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 942,
+      "appid": 4932400,
+      "canonical_name": "遇见数独",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 943,
+      "appid": 4932480,
+      "canonical_name": "Wartorn 危城抉择：乌克兰战争视觉小说",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 944,
+      "appid": 4932620,
+      "canonical_name": "挂机魔王",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 945,
+      "appid": 4934080,
+      "canonical_name": "方块骑士Square Knight",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 946,
+      "appid": 4934370,
+      "canonical_name": "我有一堆录像带",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 947,
+      "appid": 4937570,
+      "canonical_name": "猎国沉默专属",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 948,
+      "appid": 4938200,
+      "canonical_name": "Snowed Under | 雪葬",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 949,
+      "appid": 4939630,
+      "canonical_name": "幻想序章: Genesis",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 950,
+      "appid": 4940470,
+      "canonical_name": "修仙·卦象录",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 951,
+      "appid": 4942230,
+      "canonical_name": "Huiyu 谁是卧底",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 952,
+      "appid": 4942900,
+      "canonical_name": "River Devil/河牌恶魔",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 953,
+      "appid": 4943130,
+      "canonical_name": "未了情书",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 954,
+      "appid": 4944020,
+      "canonical_name": "挂机英雄传",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 955,
+      "appid": 4944570,
+      "canonical_name": "小猫咪 BiuBiuBiu~",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 956,
+      "appid": 4947380,
+      "canonical_name": "风信来客",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 957,
+      "appid": 4948670,
+      "canonical_name": "怪物浪潮",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 958,
+      "appid": 4951050,
+      "canonical_name": "纸牌游戏",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 959,
+      "appid": 4951350,
+      "canonical_name": "捉鸡",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 960,
+      "appid": 4951370,
+      "canonical_name": "夯犇绿色传奇",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 961,
+      "appid": 4955550,
+      "canonical_name": "小试牛刀",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 962,
+      "appid": 4955650,
+      "canonical_name": "无限数字工厂",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 963,
+      "appid": 4955990,
+      "canonical_name": "卡拉马佐夫兄弟",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 964,
+      "appid": 4956830,
+      "canonical_name": "咕噜咕噜",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 965,
+      "appid": 4957110,
+      "canonical_name": "群侠传：幸存者",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 966,
+      "appid": 4958320,
+      "canonical_name": "生计与沉冤",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 967,
+      "appid": 4958720,
+      "canonical_name": "Cosmo in Tarot: Tarot Study Simulator塔罗宇宙自学模拟器",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 968,
+      "appid": 4958760,
+      "canonical_name": "戴影弹弓",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 969,
+      "appid": 4960800,
+      "canonical_name": "一笔勾销",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 970,
+      "appid": 4962010,
+      "canonical_name": "一起收拾大商场",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 971,
+      "appid": 4965900,
+      "canonical_name": "王冠统帅",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 972,
+      "appid": 4967180,
+      "canonical_name": "蛋蛋博弈论",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 973,
+      "appid": 4971240,
+      "canonical_name": "沉没要塞的守夜人",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 974,
+      "appid": 4972160,
+      "canonical_name": "莫待无花空折枝：做题家的 Git 重启日志",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 975,
+      "appid": 4972200,
+      "canonical_name": "哪里漏电？",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 976,
+      "appid": 4972270,
+      "canonical_name": "修仙模拟器",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 977,
+      "appid": 4976460,
+      "canonical_name": "Huiyu 卧底画家",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 978,
+      "appid": 4976750,
+      "canonical_name": "噜噜爪爪",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 979,
+      "appid": 4977680,
+      "canonical_name": "末日战姬：废土觉醒",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 980,
+      "appid": 4982020,
+      "canonical_name": "成语消消乐",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 981,
+      "appid": 4986120,
+      "canonical_name": "像素单词农场",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 982,
+      "appid": 4986290,
+      "canonical_name": "山海镇妖·阴阳录",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 983,
+      "appid": 4986930,
+      "canonical_name": "女魔王大人假扮勇者",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 984,
+      "appid": 4989590,
+      "canonical_name": "小狗不上班",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 985,
+      "appid": 4990390,
+      "canonical_name": "渡资：摆渡人的账本",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 986,
+      "appid": 4995920,
+      "canonical_name": "放开那个喉结罩",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 987,
+      "appid": 4998370,
+      "canonical_name": "神魔孵化",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 988,
+      "appid": 4998500,
+      "canonical_name": "落命病棟 The Falling Hospital",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 989,
+      "appid": 5000470,
+      "canonical_name": "肉鸽砖块",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 990,
+      "appid": 5009320,
+      "canonical_name": "小浪舟",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 991,
+      "appid": 5012340,
+      "canonical_name": "天雨粟",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 992,
+      "appid": 5013950,
+      "canonical_name": "神临",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 993,
+      "appid": 5014260,
+      "canonical_name": "那是人类器官吗？",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 994,
+      "appid": 5016220,
+      "canonical_name": "像素机场大亨 3D",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 995,
+      "appid": 5018940,
+      "canonical_name": "尘崩",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 996,
+      "appid": 5019060,
+      "canonical_name": "21点",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 997,
+      "appid": 5022780,
+      "canonical_name": "万界牌：轮回湮灭",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 998,
+      "appid": 5031550,
+      "canonical_name": "Damage象棋",
+      "cohort": "latest"
+    },
+    {
+      "class_index": 999,
+      "appid": 5048740,
+      "canonical_name": "西西弗斯放置（Sisyphus Idle）",
+      "cohort": "latest"
+    }
+  ]
+}

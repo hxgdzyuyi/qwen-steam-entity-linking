@@ -10,7 +10,7 @@ from typing import Any, Mapping
 
 REGISTRY_PATH = Path(__file__).with_name("huggingface_repositories.json")
 REQUIRED_EXPERIMENTS = {"poc_a", "poc_b"}
-ALLOWED_STATUSES = {"active", "planned", "retired"}
+ALLOWED_STATUSES = {"active", "planned", "ready", "retired"}
 REPO_ID_PATTERN = re.compile(
     r"^[A-Za-z0-9](?:[A-Za-z0-9._-]{0,94}[A-Za-z0-9])?/"
     r"[A-Za-z0-9](?:[A-Za-z0-9._-]{0,94}[A-Za-z0-9])?$"
