@@ -57,7 +57,7 @@ git status --short
 
 `git status --short` 建议没有输出。训练期间不要执行 `git pull` 或手工修改生成的数据、class map 和配置。
 
-若要从 Hugging Face 私有仓库加载或发布模型，请在创建 Pod 时通过 RunPod Secret 注入 `HF_TOKEN`。PoC B Notebook 不会把 Token 写入文件。
+若要从 Hugging Face 私有仓库加载或发布模型，可以在创建 Pod 时通过 RunPod Secret 注入 `HF_TOKEN`，也可以使用训练 Notebook 的隐藏输入单元注入。Token 只进入当前 Kernel 的环境变量，不会写入 Notebook。
 
 ## 3. 复制并打开两个 Notebook
 
@@ -74,7 +74,7 @@ cp poc_b/notebooks/runpod_model_testing.ipynb /workspace/poc_b_model_testing.ipy
 
 ## 4. 使用训练 Notebook
 
-首次训练按顺序逐格执行，不要直接使用 `Run All`。每个长任务完成并检查输出后，再继续下一格。
+首次训练按顺序逐格执行，不要直接使用 `Run All`。每个长任务完成并检查输出后，再继续下一格。若 Pod 已通过 Secret 注入 `HF_TOKEN`，隐藏输入单元可直接回车；公开基础模型训练通常也不需要 Token。
 
 ### 4.1 依赖、固定数据与代码检查
 
@@ -140,7 +140,7 @@ hxgdzyuyi/qwen3-8b-steam-entity-linking-poc-b
 
 先执行 dry-run 单元并核对指标、目标仓库和待上传文件。确认无误后：
 
-1. 确保 Pod 环境中已有 write 权限的 `HF_TOKEN`。
+1. 确保已通过隐藏输入单元或 RunPod Secret 注入具有 write 权限的 `HF_TOKEN`。
 2. 把 Notebook 顶部的 `PUBLISH_PUBLIC = False` 改为 `True`，重新执行顶部配置单元。
 3. 只执行最后一个发布单元。
 

@@ -83,6 +83,9 @@ def _require_cuda(torch: Any) -> Any:
         raise TrainingToolError("Evaluation requires exactly one visible CUDA GPU")
     if not torch.cuda.is_bf16_supported():
         raise TrainingToolError("Evaluation GPU must support BF16")
+    # Match training-time CUDA math so exact prediction fingerprints are stable.
+    torch.backends.cuda.matmul.allow_tf32 = True
+    torch.backends.cudnn.allow_tf32 = True
     return torch.device("cuda")
 
 

@@ -96,6 +96,45 @@ print('ok')
 
 
 class PocBClassifierTest(unittest.TestCase):
+    def test_evaluation_enables_training_time_tf32(self) -> None:
+        result = run_b_python(
+            r"""
+from types import SimpleNamespace
+from evaluate import _require_cuda
+
+class FakeCuda:
+    @staticmethod
+    def is_available():
+        return True
+
+    @staticmethod
+    def device_count():
+        return 1
+
+    @staticmethod
+    def is_bf16_supported():
+        return True
+
+class FakeTorch:
+    cuda = FakeCuda()
+    backends = SimpleNamespace(
+        cuda=SimpleNamespace(matmul=SimpleNamespace(allow_tf32=False)),
+        cudnn=SimpleNamespace(allow_tf32=False),
+    )
+
+    @staticmethod
+    def device(name):
+        return name
+
+device = _require_cuda(FakeTorch)
+assert device == 'cuda'
+assert FakeTorch.backends.cuda.matmul.allow_tf32 is True
+assert FakeTorch.backends.cudnn.allow_tf32 is True
+print('ok')
+"""
+        )
+        self.assertEqual(result.stdout.strip(), "ok")
+
     def test_fake_backbone_tiny_end_to_end_smoke(self) -> None:
         result = run_b_python(
             r"""

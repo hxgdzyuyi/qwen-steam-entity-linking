@@ -481,6 +481,9 @@ class TrainingToolsTest(unittest.TestCase):
         self.assertIn("POC_DIR = PROJECT_DIR / 'poc_a'", code)
         self.assertNotIn("sys.executable, 'scripts/", code)
         self.assertIn("hf_transfer>=0.1.9,<1", code)
+        self.assertIn("RESET_REMOTE_REPOSITORY = False", code)
+        self.assertIn("required_confirmation = f'DELETE {HF_REPO_ID}'", code)
+        self.assertIn("api.delete_repo(", code)
         self.assertIn("PUBLISH_PUBLIC = False", code)
         self.assertIn(
             "HF_REPO_ID = 'hxgdzyuyi/qwen3-8b-steam-entity-linking'", code
