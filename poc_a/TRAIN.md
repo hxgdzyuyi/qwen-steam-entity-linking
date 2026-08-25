@@ -1,371 +1,195 @@
-# 云端训练与 Hugging Face 发布指南
+# PoC A 云端训练、调试与发布
 
-本文档说明如何在云端完成当前项目的训练、断点恢复、评测，以及将最终 LoRA 发布到 Hugging Face。
+PoC A 的云端操作以 Jupyter Notebook 为主：
 
-项目当前默认使用：
+| 用途 | Notebook |
+| --- | --- |
+| 环境准备、smoke、完整训练、断点恢复、正式评测、发布 | [`notebooks/runpod_training.ipynb`](notebooks/runpod_training.ipynb) |
+| 加载本地或 Hugging Face 模型、交互预测、别名调试 | [`notebooks/runpod_model_testing.ipynb`](notebooks/runpod_model_testing.ipynb) |
+
+Notebook 是云端执行入口，实际训练、评测和发布契约仍由 `scripts/` 中的 Python 程序实现。正常操作不需要在 Terminal 中手写训练命令；命令行只用于克隆仓库、固定 Git 版本和必要的故障排查。
+
+当前默认配置：
 
 - 基础模型：`Qwen/Qwen3-8B-Base`
-- 训练数据：1000 个 canonical 游戏实体 × 4 种提示，共 4000 行
-- 别名评测数据：184 个冻结输入 × 4 种提示，共 736 行
-- 训练方式：BF16 LoRA，`r=64`、`alpha=128`
-- 完整训练：10 epochs
-- 里程碑 checkpoint：第 2、4、6、8、10 个 epoch
-- 成功门槛：canonical 实体约束 top-1 至少 99%，alias 实体约束 top-1 至少 25%
+- 训练数据：1000 个 canonical 游戏实体 × 4 种 prompt，共 4000 行
+- 训练方式：BF16 LoRA，`r=64`、`alpha=128`，完整训练 10 epochs
+- 里程碑 checkpoint：epoch 2、4、6、8、10
+- 验收门槛：canonical 实体约束 Top-1 ≥ 99%，alias 实体约束 Top-1 ≥ 25%
 
-## 一、在本机准备并推送代码
+## 1. 本机准备代码
 
-云端应当使用一个固定且已经推送到 GitHub 的 Git commit。先在本机进入项目：
-
-```bash
-cd /Users/qingyang/mine-work/qwen-steam-entity-linking
-```
-
-运行本地测试：
+云端训练应固定到一个已推送的 Git commit。本机在仓库根目录执行：
 
 ```bash
 python3 -m unittest discover -s tests -v
 python3 -m py_compile common/scripts/*.py poc_a/scripts/*.py tests/*.py
-```
-
-检查 Git 状态：
-
-```bash
 git status
-```
-
-如果存在准备带到云端的修改，应先有选择地提交这些修改。确认工作区干净后推送：
-
-```bash
 git push origin main
 git rev-parse HEAD
 ```
 
-记录 `git rev-parse HEAD` 输出的完整 commit SHA，后续云端使用该 SHA。不要只依赖分支最新状态，以免训练期间代码发生变化。
+记录最后输出的完整 commit SHA。训练数据已经生成并提交，云端通常不需要重新运行 `sync_steam_dataset.py` 或 `build_training_data.py`；重新生成数据可能改变数据哈希。
 
-训练数据已经生成并提交，通常不需要在云端重新运行：
+## 2. 创建云实例并固定代码版本
 
-```text
-common/scripts/sync_steam_dataset.py
-poc_a/scripts/build_training_data.py
-```
+目标环境：
 
-重新生成数据会改变数据哈希，并可能使 Git 工作区变脏。
-
-## 二、申请云机器
-
-训练配置会强制检查运行环境。目标配置为：
-
-- GPU：1× H100 SXM 80GB
-- GPU 显存：至少 70GiB
+- RunPod 镜像：`runpod/pytorch:1.0.2-cu1281-torch280-ubuntu2404`
+- GPU：1× H100 SXM 80GB，显存至少 70GiB
 - 系统内存：至少 100GiB
 - CPU：至少 16 核
-- 工作磁盘：40GB；首次下载基础模型前至少剩余 30GiB
-- PyTorch：2.8.x
-- CUDA：12.8.x
-- RunPod 镜像：`runpod/pytorch:1.0.2-cu1281-torch280-ubuntu2404`
+- 工作磁盘：40GB；首次下载模型前至少剩余 30GiB
+- PyTorch 2.8.x、CUDA 12.8.x
 
-模型缓存和训练结果都应放在 `/workspace`。如果使用其他云平台，也必须满足上述硬件和软件版本检查。
-
-## 三、在云端克隆并固定版本
-
-通过云平台 Terminal 或 SSH 执行：
+模型缓存和训练结果都放在 `/workspace`。实例启动后，只需在 Terminal 中完成仓库准备：
 
 ```bash
 cd /workspace
-
 git clone https://github.com/hxgdzyuyi/qwen-steam-entity-linking.git
 cd qwen-steam-entity-linking
 
-TRAIN_COMMIT=替换为本机记录的完整commit_SHA
+TRAIN_COMMIT=替换为完整commit_SHA
 git checkout "$TRAIN_COMMIT"
-
 git rev-parse HEAD
 git status --short
 ```
 
-建议 `git status --short` 没有输出。训练脚本会把训练 commit 和工作区状态写入运行清单；如果工作区不干净，只发出 warning，不会阻断云端任务。
+`git status --short` 建议没有输出。训练期间不要执行 `git pull`，也不要修改配置或数据；运行清单会记录 commit、工作区状态和数据哈希。
 
-训练开始后仍建议不要执行 `git pull` 或修改配置和数据。断点恢复时，配置和数据必须与原始运行一致；Git commit 不一致只发出 warning。
+## 3. 复制并打开两个 Notebook
 
-## 四、推荐方式：通过 Jupyter Notebook 训练
-
-先把 Notebook 复制到仓库外，避免 Jupyter 写入执行计数和输出后弄脏 Git：
+Jupyter 会保存执行计数和输出。先把 Notebook 复制到仓库外，避免污染 Git 工作区：
 
 ```bash
-cp poc_a/notebooks/runpod_training.ipynb /workspace/runpod_training.ipynb
+cp poc_a/notebooks/runpod_training.ipynb /workspace/poc_a_training.ipynb
+cp poc_a/notebooks/runpod_model_testing.ipynb /workspace/poc_a_model_testing.ipynb
 ```
 
-通过云平台提供的 Jupyter 页面打开：
+在 RunPod 的 Jupyter 页面中打开 `/workspace/poc_a_training.ipynb`。Notebook 会自动定位 `/workspace/qwen-steam-entity-linking`，并把 Hugging Face 缓存设置为 `/workspace/.cache/huggingface`。
+
+不要直接对仓库内的 Notebook 执行并保存。需要保留云端调试记录时，下载 `/workspace` 下的副本即可。
+
+## 4. 使用训练 Notebook
+
+首次训练按顺序逐格执行，不要直接使用 `Run All`。每个长任务完成并检查输出后，再继续下一格。
+
+### 4.1 环境与依赖
+
+第 1 组单元会检查 GPU、`/workspace` 磁盘和 Git 状态，并安装 `requirements-cloud.txt` 与 `hf_transfer`。训练脚本还会强制校验 GPU、显存、内存、CPU、磁盘、PyTorch 和 CUDA 版本。
+
+公开基础模型通常不需要 Hugging Face Token。后续需要发布时，在隐藏输入单元中输入具有 write 权限的 `HF_TOKEN`；Token 只进入当前 Kernel 的环境变量，不会写回 Notebook。
+
+### 4.2 Smoke 训练
+
+执行“运行 32 条冒烟训练”单元。默认输出目录为：
 
 ```text
-/workspace/runpod_training.ipynb
+poc_a/outputs/runpod-smoke
 ```
 
-从上到下逐格执行。Notebook 会依次完成：
+Smoke 最多运行 100 epochs；连续两个 epoch 达到 100% canonical next-token 准确率后自动停止。它用于验证基础模型下载、tokenizer 扩展、LoRA 和新增实体 token 的完整链路。
 
-1. 定位 `/workspace/qwen-steam-entity-linking` 项目。
-2. 检查 GPU、磁盘和 Git 状态。
-3. 安装云端依赖。
-4. 可选地通过隐藏输入注入 `HF_TOKEN`。
-5. 运行 32 条样本的冒烟训练。
-6. 运行完整 4000 行数据训练。
-7. 在中断后从最新可恢复 checkpoint 继续。
-8. 评测五个里程碑 checkpoint。
-9. dry-run 并人工发布到 Hugging Face。
+若该目录已经有真实产物，脚本不会覆盖。要重新实验，请先保留原目录，并在 Notebook 顶部把 `SMOKE_RUN_DIR` 改成新的空目录。
 
-基础模型是公开模型，下载时通常不需要 Hugging Face Token。发布时必须使用具有写权限的 Token。
+### 4.3 完整训练
 
-## 五、命令行方式：准备环境
-
-如果不使用 Notebook，在项目目录执行：
-
-```bash
-cd /workspace/qwen-steam-entity-linking
-
-export HF_HOME=/workspace/.cache/huggingface
-
-python3 -m pip install \
-  --no-cache-dir \
-  -r poc_a/requirements-cloud.txt
-
-nvidia-smi
-df -h /workspace
-git status --short
-```
-
-不要把 Hugging Face Token 直接写入命令、Notebook 明文或配置文件。发布时应通过云平台 Secret 注入名为 `HF_TOKEN` 的环境变量，或者使用 Notebook 中的隐藏输入单元。
-
-## 六、运行冒烟训练
-
-先用固定的 32 条样本验证模型下载、tokenizer 扩展、LoRA 和新增实体 token 是否能够正常学习：
-
-```bash
-python poc_a/scripts/train.py \
-  --config poc_a/configs/qwen3_8b_lora.yaml \
-  --mode smoke \
-  --run-dir poc_a/outputs/smoke
-```
-
-冒烟训练最多运行 100 epochs；连续两个 epoch 达到 100% 实体约束 top-1 后会自动停止并保存 checkpoint。
-
-首次运行会把基础模型下载到：
-
-```text
-/workspace/.cache/huggingface
-```
-
-完整训练会复用这份缓存。运行目录必须不存在或为空；如果已有需要保留的失败产物，应换一个新的 `--run-dir`，不要覆盖旧结果。
-
-## 七、运行完整训练
-
-冒烟训练成功后执行：
-
-```bash
-python poc_a/scripts/train.py \
-  --config poc_a/configs/qwen3_8b_lora.yaml \
-  --mode full \
-  --run-dir poc_a/outputs/full
-```
-
-完整训练会：
-
-- 运行 10 epochs。
-- 在第 2、4、6、8、10 个 epoch 保存 LoRA 和新增 token 行。
-- 每行只监督一个 completion 实体 token，并只在 1000 个实体候选上计算分类 loss；不训练 EOS。
-- 只让最新 checkpoint 保留 optimizer、scheduler 和 RNG 状态，以控制磁盘占用。
-- 将 TensorBoard 日志写入运行目录下的 `tensorboard/`。
-
-Notebook 默认使用的完整训练目录是：
+Smoke 成功后执行“运行完整 4000 行训练”单元。默认输出目录为：
 
 ```text
 poc_a/outputs/runpod-full
 ```
 
-命令行示例默认使用：
+训练会在 epoch 2、4、6、8、10 保存 LoRA 和新增 token 行。为控制磁盘占用，只有最新 checkpoint 保留 optimizer、scheduler 和 RNG 状态；较早 checkpoint 仍可用于评测和发布。
+
+不要重复执行已经成功启动过的完整训练单元。需要开始另一组实验时，先在 Notebook 顶部修改 `FULL_RUN_DIR`，使用新的空目录。
+
+### 4.4 中断恢复
+
+如果完整训练中断：
+
+1. 不要重新执行“完整训练”单元。
+2. 打开其后的恢复单元，把 `RESUME_FULL_TRAINING = False` 改为 `True`。
+3. 执行该单元；它会自动选择仍含 optimizer 和 scheduler 状态的最新 checkpoint。
+
+如果中断前尚未产生可恢复 checkpoint，则不能复用已有真实产物的非空目录。修改 `FULL_RUN_DIR` 指向新的空目录，再重新开始完整训练。
+
+### 4.5 正式评测
+
+完整训练结束后执行“评测五个里程碑并选择发布版本”及其指标展示单元。评测产物写入 `FULL_RUN_DIR`：
+
+- `metrics.json`：完整指标、最佳 checkpoint、验收结果和预测指纹
+- `checkpoint_comparison.csv`：五个里程碑的横向比较
+- `evaluation_failures.csv`：错误输入、目标和预测
+- `run_manifest.json`：Git、模型、数据、依赖和运行状态
+
+必须确认输出中的 `acceptance_passed = True`。选择规则是在 canonical 实体约束 Top-1 达到 99% 的 checkpoint 中优先选择 alias Top-1 最高者；最终 alias Top-1 还必须达到 25%。
+
+### 4.6 人工发布
+
+训练和评测不会自动写入 Hugging Face。Notebook 固定目标仓库为：
 
 ```text
-poc_a/outputs/full
+hxgdzyuyi/qwen3-8b-steam-entity-linking
 ```
 
-后续所有命令必须选择实际使用的同一个目录。
+先执行 dry-run 单元并核对指标、目标仓库和待上传文件。确认无误后：
 
-## 八、完整训练中断后的恢复
+1. 确保当前 Kernel 已注入有 write 权限的 `HF_TOKEN`。
+2. 把最后一个单元中的 `PUBLISH_PUBLIC = False` 改为 `True`。
+3. 只执行最后一个发布单元。
 
-先查看已有 checkpoint：
+发布器会先创建 private staging，重新评测选中的 checkpoint，上传并核对远端文件，再下载回读和复评；所有检查通过后才切换为 public。它不会上传基础模型权重、optimizer、Trainer 状态或原始训练数据。发布成功后会生成 `publish_receipt.json`。
 
-```bash
-ls -d poc_a/outputs/full/checkpoints/checkpoint-* | sort -V
-```
+## 5. 使用模型测试 Notebook 调试
 
-只使用编号最大的、仍包含 optimizer 和 scheduler 状态的 checkpoint。示例：
+训练产生第一个完整 checkpoint 后即可打开 `/workspace/poc_a_model_testing.ipynb`。测试 Notebook 与训练流程分离，适合反复修改输入和观察结果，不会改写训练产物。
 
-```bash
-python poc_a/scripts/train.py \
-  --config poc_a/configs/qwen3_8b_lora.yaml \
-  --mode full \
-  --resume-from poc_a/outputs/full/checkpoints/checkpoint-替换为最大编号
-```
+### 5.1 测试本地训练结果
 
-使用 `--resume-from` 时不需要再传 `--run-dir`，脚本会从 checkpoint 路径推导原始运行目录。
-
-如果中断时还没有产生可恢复 checkpoint，则不能复用这个非空运行目录，应使用新的空目录重新开始完整训练。
-
-## 九、评测全部 checkpoint
-
-命令行训练目录：
-
-```bash
-python poc_a/scripts/evaluate.py \
-  --run-dir poc_a/outputs/full \
-  --all-milestones
-```
-
-如果使用 Notebook，则将目录替换为：
-
-```bash
-python poc_a/scripts/evaluate.py \
-  --run-dir poc_a/outputs/runpod-full \
-  --all-milestones
-```
-
-评测会生成：
-
-- `metrics.json`：完整词表 top-1、实体约束 top-1/5/10、平均实体 rank、分组指标、最佳 checkpoint 和预测指纹。
-- `checkpoint_comparison.csv`：五个 checkpoint 横向比较。
-- `evaluation_failures.csv`：错误输入、目标和预测。
-- `run_manifest.json`：Git、模型、数据、依赖和运行状态。
-
-必须确认：
-
-```text
-acceptance_passed = true
-```
-
-脚本会在 canonical 实体约束 top-1 达到 99% 的 checkpoint 中，选择 alias 实体约束 top-1 最高的版本；若相同，则依次使用 canonical 和更早 epoch 打破平局。最终 alias 还必须达到 25%，`acceptance_passed` 才会为真。
-
-## 十、发布到 Hugging Face 前的要求
-
-发布必须在仍有一张支持 BF16 的 CUDA GPU 的机器上完成。发布脚本会在上传前重新评测一次，上传后再下载并重新评测一次，因此不要在训练刚结束时立即关闭 H100。
-
-发布前必须满足：
-
-- 已完成五个里程碑 checkpoint 的评测。
-- `metrics.json` 中 `acceptance_passed` 为 `true`。
-- 五个 checkpoint 都仍然存在。
-- 建议当前 Git commit 与训练时一致且工作区干净；不一致时仅发出 warning。
-- 当前数据文件哈希与训练时一致。
-- 运行目录所在磁盘至少还有 8GiB 可用空间。
-- 已准备具有写权限的 Hugging Face Token。
-- 最终仓库可以公开；当前发布脚本只支持最终公开发布。
-
-PoC A 的默认 Model Repository 已由 `common/huggingface_repositories.json` 固定为 `hxgdzyuyi/qwen3-8b-steam-entity-linking`。发布脚本会读取并校验该配置；只有 fork 到其他 namespace 时才需要使用 `--repo-id` 覆盖。
-
-## 十一、推荐方式：通过 Notebook 发布
-
-在 `/workspace/runpod_training.ipynb` 中：
-
-1. 执行指标展示单元，确认 `acceptance_passed = True`。
-2. 通过隐藏输入单元注入具有写权限的 `HF_TOKEN`。
-3. 执行 dry-run 单元，确认显示的目标是 `hxgdzyuyi/qwen3-8b-steam-entity-linking`，并检查指标和待上传文件。
-4. 确认无误后设置：
+默认配置为：
 
 ```python
-PUBLISH_PUBLIC = True
+LOCAL_RUN_DIR = POC_DIR / 'outputs/runpod-full'
+CHECKPOINT_EPOCH = None
+HF_ADAPTER_ID = ''
 ```
 
-5. 执行最后一个发布单元。
+`CHECKPOINT_EPOCH = None` 时，Notebook 优先读取 `metrics.json` 选中的最佳 checkpoint；尚未正式评测时会明确提示并回退到最新 epoch。要比较特定里程碑，可把它改为 `2`、`4`、`6`、`8` 或 `10`。
 
-## 十二、命令行方式：dry-run 与正式发布
+### 5.2 测试 Hugging Face 模型
 
-首先设置实际运行目录。Notebook 训练示例：
+把 `HF_ADAPTER_ID` 改为 `user-or-org/model` 后，Notebook 会忽略本地运行目录和 epoch。公开仓库通常无需 Token；私有 adapter 通过隐藏输入单元注入 `HF_TOKEN`。
+
+### 5.3 推荐调试顺序
+
+从上到下执行加载单元，然后按需反复运行：
+
+1. 修改 `QUERIES`，测试单条或批量别名、中文名和自然语言描述。
+2. 修改 `CUSTOM_CASES`，用 `<GAME_APPID>` expected 标签查看 exact match、实体 Top-1 和 Top-5 候选。
+3. 保持 `RUN_FROZEN_ALIAS_EVAL = True`，快速复核 736 行冻结 alias 数据；该步骤不写评测文件。
+4. 只有需要重新生成正式验收产物时，才设置 `RUN_OFFICIAL_EVALUATION = True`。正式评测只支持本地运行目录，并会重新评测全部里程碑。
+
+测试使用与训练一致的 prompt 和实体约束解码。若切换 checkpoint、运行目录或 Hugging Face adapter，建议重启 Kernel 后从顶部重新执行，避免旧模型仍占用显存。
+
+## 6. 常见问题与保留产物
+
+- 某个准备单元失败：修复原因后只重跑该单元，不要重跑已经完成的训练单元。
+- 输出目录非空：不要删除或覆盖尚未备份的结果；修改 Notebook 顶部的运行目录。
+- Git 或数据哈希不一致：切回训练所用 commit，再打开测试 Notebook。
+- 显存不足：重启不再使用的 Notebook Kernel，确保同一时刻只加载一个 8B 模型。
+- Pod 将要销毁：先确认发布成功，或把整个 `poc_a/outputs/runpod-full/` 下载/复制到持久化存储。
+
+至少保留五个 checkpoint、`metrics.json`、`checkpoint_comparison.csv`、`evaluation_failures.csv`、`run_manifest.json`，以及发布后的 `publish_receipt.json`。不要只保留最终 LoRA。
+
+## 7. CLI 仅作排障备用
+
+Notebook 输出的每条命令都可直接复制到 Terminal。必要时，核心入口为：
 
 ```bash
-cd /workspace/qwen-steam-entity-linking
-
-RUN_DIR=poc_a/outputs/runpod-full
+python3 poc_a/scripts/train.py --help
+python3 poc_a/scripts/evaluate.py --help
+python3 poc_a/scripts/publish_hf.py --help
 ```
 
-如果是命令行训练，则改为：
-
-```bash
-RUN_DIR=poc_a/outputs/full
-```
-
-先执行 dry-run：
-
-```bash
-python poc_a/scripts/publish_hf.py \
-  --run-dir "$RUN_DIR" \
-  --public \
-  --dry-run
-```
-
-`--public` 在 dry-run 中也是必需的显式确认，但 dry-run 不会创建或修改 Hugging Face 仓库，也不要求 `HF_TOKEN`。它仍会重新加载并评测选中的 checkpoint。
-
-确认 dry-run 成功后，通过云平台 Secret 注入 `HF_TOKEN`，然后正式发布：
-
-```bash
-python poc_a/scripts/publish_hf.py \
-  --run-dir "$RUN_DIR" \
-  --public
-```
-
-发布脚本会执行以下安全流程：
-
-1. 检查运行状态、指标、Git、数据哈希、磁盘和五个 checkpoint。
-2. 重新评测选中的最佳 checkpoint，并与原始完整指标和预测指纹比较。
-3. 将最佳 LoRA 放在仓库根目录。
-4. 将五个里程碑 LoRA 放在 `adapters/epoch-*`。
-5. 上传 tokenizer、special tokens、训练配置、运行清单、指标、对比表和自动生成的模型卡。
-6. 不上传基础模型权重、optimizer、Trainer 状态或原始训练数据。
-7. 对新仓库先以 private 状态创建并上传。
-8. 精确检查远端文件集合，重新下载并复核 adapter-only 内容。
-9. 使用下载后的内容再次评测。
-10. 所有检查通过后才将仓库切换为 public。
-
-如果目标仓库中存在本次发布列表之外的额外文件，脚本会拒绝发布，不会删除或静默覆盖这些文件。因此推荐每次首次发布使用一个新的空仓库名。
-
-## 十三、确认发布结果
-
-发布成功后，命令行会输出 Hugging Face 地址，并在运行目录生成：
-
-```text
-publish_receipt.json
-```
-
-查看发布凭据：
-
-```bash
-cat "$RUN_DIR/publish_receipt.json"
-```
-
-其中包含：
-
-- Hugging Face repo ID 和公开 URL。
-- 上传后的 revision。
-- 被选中的 epoch。
-- 发布时间。
-
-同时，`run_manifest.json` 的状态会更新为 `published`。
-
-## 十四、关闭云机器前
-
-确认至少完成以下一种操作后，再停止或销毁云机器：
-
-- Hugging Face 发布成功，并已检查公开仓库。
-- 将完整运行目录下载到本地。
-- 将运行目录复制到明确的持久化磁盘或对象存储。
-
-至少保留：
-
-```text
-poc_a/outputs/full/
-```
-
-或 Notebook 对应的：
-
-```text
-poc_a/outputs/runpod-full/
-```
-
-不要只保留最终 LoRA；`metrics.json`、`run_manifest.json`、五个里程碑 checkpoint 和 `publish_receipt.json` 对复现、排错与重新发布都很重要。
+手工执行时必须继续使用 Notebook 中相同的 config、run directory 和 Git commit，避免产生无法恢复或无法复现的混合运行。
