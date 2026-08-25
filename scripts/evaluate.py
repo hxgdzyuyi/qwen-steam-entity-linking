@@ -6,6 +6,8 @@ from __future__ import annotations
 import argparse
 import csv
 import gc
+import hashlib
+import json
 import os
 import re
 import sys
@@ -27,6 +29,9 @@ from training_common import (
     validate_data,
     validate_entity_tokens,
 )
+
+
+METRICS_SCHEMA_VERSION = 2
 
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
@@ -101,6 +106,18 @@ def _breakdown(
     for row in records:
         grouped[str(row[key])].append(row)
     return {name: _metric_summary(rows) for name, rows in sorted(grouped.items())}
+
+
+def prediction_sha256(records: Sequence[Mapping[str, Any]]) -> str:
+    """Fingerprint the complete ordered prediction records for regression checks."""
+
+    payload = json.dumps(
+        list(records),
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    return hashlib.sha256(payload).hexdigest()
 
 
 def _predict_rows(
@@ -268,6 +285,9 @@ def evaluate_adapter(
         "canonical_by_cohort": _breakdown(canonical_records, "cohort"),
         "alias_by_type": _breakdown(alias_records, "type"),
         "alias_by_prompt_style": _breakdown(alias_records, "prompt_style"),
+        "prediction_sha256": prediction_sha256(
+            canonical_records + alias_records
+        ),
     }
     failures = [
         {"epoch": epoch, **record}
@@ -384,7 +404,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     threshold = float(config_value(config, "evaluation.canonical_threshold"))
     selected = select_best_checkpoint(checkpoint_metrics, threshold)
     report = {
-        "schema_version": 1,
+        "schema_version": METRICS_SCHEMA_VERSION,
         "evaluated_at": utc_now(),
         "canonical_threshold": threshold,
         "checkpoints": checkpoint_metrics,

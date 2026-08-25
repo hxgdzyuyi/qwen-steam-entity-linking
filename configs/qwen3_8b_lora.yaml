@@ -10,6 +10,7 @@ runtime:
   minimum_system_memory_gib: 100
   minimum_cpu_count: 16
   minimum_free_disk_gib: 30
+  minimum_cached_free_disk_gib: 10
   minimum_publish_free_disk_gib: 8
   expected_torch_major_minor: "2.8"
   expected_cuda_major_minor: "12.8"

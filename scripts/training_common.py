@@ -81,6 +81,7 @@ def _validate_config(config: Mapping[str, Any]) -> None:
         ("runtime.minimum_system_memory_gib", (int, float)),
         ("runtime.minimum_cpu_count", int),
         ("runtime.minimum_free_disk_gib", (int, float)),
+        ("runtime.minimum_cached_free_disk_gib", (int, float)),
         ("runtime.minimum_publish_free_disk_gib", (int, float)),
         ("runtime.expected_torch_major_minor", str),
         ("runtime.expected_cuda_major_minor", str),
@@ -150,6 +151,7 @@ def _validate_config(config: Mapping[str, Any]) -> None:
         "runtime.minimum_gpu_memory_gib",
         "runtime.minimum_system_memory_gib",
         "runtime.minimum_free_disk_gib",
+        "runtime.minimum_cached_free_disk_gib",
         "runtime.minimum_publish_free_disk_gib",
     ):
         if float(config_value(config, dotted_key)) <= 0:

@@ -70,6 +70,7 @@ def _cloud_imports() -> dict[str, Any]:
             TrainingArguments,
             set_seed,
         )
+        from transformers.utils import cached_file
     except ImportError as error:
         raise TrainingToolError(
             "Cloud training dependencies are missing; install requirements-cloud.txt "
@@ -87,6 +88,7 @@ def _cloud_imports() -> dict[str, Any]:
         "TrainerCallback": TrainerCallback,
         "TrainingArguments": TrainingArguments,
         "set_seed": set_seed,
+        "cached_file": cached_file,
     }
 
 
@@ -123,7 +125,9 @@ def _system_memory_gib() -> float:
 
 
 def validate_runtime_snapshot(
-    snapshot: Mapping[str, Any], config: Mapping[str, Any]
+    snapshot: Mapping[str, Any],
+    config: Mapping[str, Any],
+    minimum_free_disk_gib: float | None = None,
 ) -> None:
     expected_name = str(config_value(config, "runtime.expected_gpu_name"))
     if expected_name.casefold() not in str(snapshot["name"]).casefold():
@@ -134,7 +138,6 @@ def validate_runtime_snapshot(
         ("gpu_memory_gib", "runtime.minimum_gpu_memory_gib"),
         ("system_memory_gib", "runtime.minimum_system_memory_gib"),
         ("cpu_count", "runtime.minimum_cpu_count"),
-        ("free_disk_gib", "runtime.minimum_free_disk_gib"),
     )
     for snapshot_key, config_key in minimums:
         required = float(config_value(config, config_key))
@@ -143,6 +146,17 @@ def validate_runtime_snapshot(
             raise TrainingToolError(
                 f"Runtime {snapshot_key} requires at least {required:g}, found {actual:.1f}"
             )
+    required_disk = (
+        float(config_value(config, "runtime.minimum_free_disk_gib"))
+        if minimum_free_disk_gib is None
+        else float(minimum_free_disk_gib)
+    )
+    actual_disk = float(snapshot["free_disk_gib"])
+    if actual_disk < required_disk:
+        raise TrainingToolError(
+            f"Runtime free_disk_gib requires at least {required_disk:g}, "
+            f"found {actual_disk:.1f}"
+        )
     versions = (
         ("torch_version", "runtime.expected_torch_major_minor"),
         ("cuda_version", "runtime.expected_cuda_major_minor"),
@@ -157,7 +171,10 @@ def validate_runtime_snapshot(
 
 
 def _require_target_runtime(
-    torch: Any, config: Mapping[str, Any], run_dir: Path
+    torch: Any,
+    config: Mapping[str, Any],
+    run_dir: Path,
+    minimum_free_disk_gib: float,
 ) -> dict[str, Any]:
     if not torch.cuda.is_available():
         raise TrainingToolError("Cloud training requires a CUDA GPU")
@@ -182,9 +199,77 @@ def _require_target_runtime(
         "system_memory_gib": _system_memory_gib(),
         "cpu_count": os.cpu_count() or 0,
         "free_disk_gib": shutil.disk_usage(_existing_ancestor(run_dir)).free / GIB,
+        "minimum_free_disk_gib_applied": minimum_free_disk_gib,
     }
-    validate_runtime_snapshot(snapshot, config)
+    validate_runtime_snapshot(snapshot, config, minimum_free_disk_gib)
     return snapshot
+
+
+def _cached_model_file(
+    cached_file: Any, model_id: str, revision: str, filename: str
+) -> Path | None:
+    try:
+        value = cached_file(
+            model_id,
+            filename,
+            revision=revision,
+            token=os.environ.get("HF_TOKEN"),
+            local_files_only=True,
+            _raise_exceptions_for_gated_repo=False,
+            _raise_exceptions_for_missing_entries=False,
+            _raise_exceptions_for_connection_errors=False,
+        )
+    except (OSError, ValueError):
+        return None
+    if not value:
+        return None
+    path = Path(value)
+    return path if path.is_file() else None
+
+
+def _model_weights_are_cached(
+    cached_file: Any, model_id: str, revision: str
+) -> bool:
+    """Return true only when every weight shard for the pinned revision is local."""
+
+    for index_name in (
+        "model.safetensors.index.json",
+        "pytorch_model.bin.index.json",
+    ):
+        index_path = _cached_model_file(cached_file, model_id, revision, index_name)
+        if index_path is None:
+            continue
+        try:
+            index = read_json(index_path)
+        except TrainingToolError:
+            return False
+        weight_map = index.get("weight_map") if isinstance(index, dict) else None
+        if not isinstance(weight_map, dict) or not weight_map:
+            return False
+        if any(not isinstance(filename, str) for filename in weight_map.values()):
+            return False
+        shards = {
+            filename for filename in weight_map.values() if isinstance(filename, str)
+        }
+        return bool(shards) and all(
+            _cached_model_file(cached_file, model_id, revision, shard) is not None
+            for shard in shards
+        )
+
+    return any(
+        _cached_model_file(cached_file, model_id, revision, filename) is not None
+        for filename in ("model.safetensors", "pytorch_model.bin")
+    )
+
+
+def _run_directory_has_artifacts(run_dir: Path) -> bool:
+    if run_dir.is_symlink():
+        return True
+    if not run_dir.exists():
+        return False
+    if not run_dir.is_dir():
+        return True
+    return any(path.is_file() or path.is_symlink() for path in run_dir.rglob("*"))
 
 
 def _checkpoint_state_files(checkpoint: Path) -> list[Path]:
@@ -320,21 +405,35 @@ def main(argv: Sequence[str] | None = None) -> int:
                 "Resume checkpoint must be inside the selected run directory"
             ) from error
         _require_resumable_checkpoint(resume_from)
-    if run_dir.exists() and any(run_dir.iterdir()) and resume_from is None:
+    if _run_directory_has_artifacts(run_dir) and resume_from is None:
         raise TrainingToolError(
             f"Refusing to overwrite non-empty run directory: {run_dir}"
         )
-    run_dir.mkdir(parents=True, exist_ok=True)
     checkpoints_dir = run_dir / "checkpoints"
-    checkpoints_dir.mkdir(exist_ok=True)
 
     imports = _cloud_imports()
     torch = imports["torch"]
-    runtime = _require_target_runtime(torch, config, run_dir)
     set_seed = imports["set_seed"]
     set_seed(int(config_value(config, "training.seed")))
 
+    model_id = str(config_value(config, "model.id"))
     revision = _resolve_model_revision(config, imports["HfApi"])
+    model_weights_cached = _model_weights_are_cached(
+        imports["cached_file"], model_id, revision
+    )
+    disk_policy = "cached-model" if model_weights_cached else "initial-download"
+    disk_config_key = (
+        "runtime.minimum_cached_free_disk_gib"
+        if model_weights_cached
+        else "runtime.minimum_free_disk_gib"
+    )
+    minimum_free_disk_gib = float(config_value(config, disk_config_key))
+    runtime = _require_target_runtime(
+        torch, config, run_dir, minimum_free_disk_gib
+    )
+    runtime["model_weights_cached_before_start"] = model_weights_cached
+    runtime["disk_policy"] = disk_policy
+
     manifest_path = run_dir / "run_manifest.json"
     current_git = git_info(bool(config_value(config, "training.require_clean_git")))
     current_hashes = data_hashes(config)
@@ -368,6 +467,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
         manifest["resumed_at"] = utc_now()
         manifest["resume_from"] = str(resume_from.relative_to(run_dir))
+        manifest.setdefault("resume_runtime_checks", []).append(runtime)
     else:
         manifest = {
             "schema_version": 1,
@@ -392,12 +492,6 @@ def main(argv: Sequence[str] | None = None) -> int:
             "seed": config_value(config, "training.seed"),
             "data_seed": config_value(config, "training.data_seed"),
         }
-    atomic_write_json(manifest_path, manifest)
-    if not resume_from:
-        shutil.copy2(config_path, run_dir / "training_config.yaml")
-        atomic_write_json(resolved_config_path, config)
-
-    model_id = str(config_value(config, "model.id"))
     trust_remote_code = bool(config_value(config, "model.trust_remote_code"))
     tokenizer = imports["AutoTokenizer"].from_pretrained(
         model_id,
@@ -585,6 +679,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         processing_class=tokenizer,
         callbacks=[callback],
     )
+
+    run_dir.mkdir(parents=True, exist_ok=True)
+    checkpoints_dir.mkdir(exist_ok=True)
+    if not resume_from:
+        shutil.copy2(config_path, run_dir / "training_config.yaml")
+        atomic_write_json(resolved_config_path, config)
 
     manifest["status"] = "training"
     manifest.setdefault("started_at", utc_now())

@@ -172,7 +172,9 @@ nvidia-smi
 df -h /workspace
 ```
 
-基础模型固定为 `Qwen/Qwen3-8B-Base`。脚本会在下载模型前检查 H100、至少 70GiB VRAM、100GiB RAM、16 vCPU、30GiB 可用磁盘，以及 PyTorch 2.8 / CUDA 12.8。随后解析并记录模型仓库的完整 commit SHA；如云平台需要 Hugging Face 凭据，只能通过 Secret 注入 `HF_TOKEN`，不要将 token 写进文件或命令历史。
+基础模型固定为 `Qwen/Qwen3-8B-Base`。脚本会解析并记录模型仓库的完整 commit SHA，并在加载模型前检查 H100、至少 70GiB VRAM、100GiB RAM、16 vCPU，以及 PyTorch 2.8 / CUDA 12.8。若该 SHA 的全部权重尚未缓存，要求至少 30GiB 可用磁盘；若索引中的全部权重分片已存在于 `HF_HOME`（例如先完成 smoke，再执行 full 或断点恢复），工作空间阈值降为 10GiB。所采用的阈值、缓存判定和磁盘策略都会写入运行清单，因此 40GB 的共享模型缓存与输出盘可以连续完成该流程。如云平台需要 Hugging Face 凭据，只能通过 Secret 注入 `HF_TOKEN`，不要将 token 写进文件或命令历史。
+
+新运行会在运行环境、数据、Git 状态、tokenizer、基础模型和 PEFT 配置全部通过后才创建输出目录。此前阶段失败时可以直接用同一个 `--run-dir` 重试；已有真实产物的目录仍会被拒绝覆盖。
 
 ### 推荐：使用 Jupyter Notebook 入口
 
@@ -234,7 +236,7 @@ python scripts/evaluate.py \
 
 评测输出：
 
-* `outputs/full/metrics.json`：每个 epoch 的 canonical、alias、热门/最新分组及 alias 类型/提示风格指标。
+* `outputs/full/metrics.json`：每个 epoch 的 canonical、alias、热门/最新分组及 alias 类型/提示风格指标，以及完整有序预测记录的 SHA-256 指纹。
 * `outputs/full/checkpoint_comparison.csv`：checkpoint 横向对比。
 * `outputs/full/evaluation_failures.csv`：未命中的输入、目标和预测。
 * `outputs/full/run_manifest.json`：Git SHA、基础模型 SHA、数据哈希、依赖、GPU 和运行状态。
@@ -261,7 +263,9 @@ python scripts/publish_hf.py \
   --public
 ```
 
-发布脚本会先重新加载选中的 checkpoint 并复核完整指标，再展示目标仓库和文件列表。公开仓库根目录放置选中的 LoRA，并在 `adapters/epoch-*` 保存五个里程碑 LoRA；optimizer、Trainer 状态、基础模型权重和原始数据不会上传。上传完成后脚本会从 Hugging Face 重新下载并再次运行评测，确认结果一致。
+发布脚本会先重新加载选中的 checkpoint，并逐项复核汇总指标、全部分组指标和完整有序预测指纹，再展示目标仓库和文件列表。公开仓库根目录放置选中的 LoRA，并在 `adapters/epoch-*` 保存五个里程碑 LoRA；optimizer、Trainer 状态、基础模型权重和原始数据不会上传。
+
+目标仓库可以是新仓库，也可以是文件集合与本次发布兼容的已有仓库；若远端存在本次 staging 列表和 Hugging Face 管理的 `.gitattributes` 之外的文件，脚本会拒绝发布，不会静默保留或删除旧内容。新仓库先以 private 状态创建；上传后会精确核对远端文件集合、重新下载并复核 adapter-only 内容及完整评测结果，全部通过后才切换为 public，并再次确认公开状态。
 
 
 ## 本地验证

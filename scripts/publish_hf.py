@@ -11,7 +11,7 @@ import tempfile
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
-from evaluate import evaluate_adapter
+from evaluate import METRICS_SCHEMA_VERSION, evaluate_adapter
 from training_common import (
     TrainingToolError,
     atomic_write_json,
@@ -38,6 +38,16 @@ PUBLISHABLE_CHECKPOINT_FILES = {
     "tokenizer_config.json",
     "vocab.json",
 }
+REGRESSION_METRIC_FIELDS = (
+    "epoch",
+    "canonical",
+    "alias",
+    "canonical_by_cohort",
+    "alias_by_type",
+    "alias_by_prompt_style",
+    "prediction_sha256",
+)
+HUB_MANAGED_REMOTE_FILES = {".gitattributes"}
 GIB = 1024**3
 
 
@@ -66,6 +76,29 @@ def checkpoint_publish_files(checkpoint: Path) -> list[Path]:
         for path in checkpoint.iterdir()
         if path.is_file() and path.name in PUBLISHABLE_CHECKPOINT_FILES
     )
+
+
+def _assert_adapter_tensor_keys(keys: Sequence[str]) -> None:
+    if not any("lora_" in key for key in keys):
+        raise TrainingToolError("Adapter artifact contains no LoRA tensors")
+    if not any("embed_tokens" in key and "trainable_tokens" in key for key in keys):
+        raise TrainingToolError("Adapter artifact omits trainable embed_tokens rows")
+    if not any("lm_head" in key and "trainable_tokens" in key for key in keys):
+        raise TrainingToolError("Adapter artifact omits trainable lm_head rows")
+    if any("modules_to_save" in key for key in keys):
+        raise TrainingToolError(
+            "Full modules_to_save tensors are forbidden in public LoRA"
+        )
+    unexpected_tensors = sorted(
+        key
+        for key in keys
+        if "lora_" not in key and "trainable_tokens_delta" not in key
+    )
+    if unexpected_tensors:
+        raise TrainingToolError(
+            "Adapter artifact contains tensors outside LoRA and selected token rows: "
+            f"{unexpected_tensors}"
+        )
 
 
 def _assert_adapter_only(checkpoint: Path) -> None:
@@ -106,16 +139,7 @@ def _assert_adapter_only(checkpoint: Path) -> None:
         checkpoint / "adapter_model.safetensors", framework="pt", device="cpu"
     ) as handle:
         keys = list(handle.keys())
-    if not any("lora_" in key for key in keys):
-        raise TrainingToolError("Adapter artifact contains no LoRA tensors")
-    if not any("embed_tokens" in key and "trainable_tokens" in key for key in keys):
-        raise TrainingToolError("Adapter artifact omits trainable embed_tokens rows")
-    if not any("lm_head" in key and "trainable_tokens" in key for key in keys):
-        raise TrainingToolError("Adapter artifact omits trainable lm_head rows")
-    if any("modules_to_save" in key for key in keys):
-        raise TrainingToolError(
-            "Full modules_to_save tensors are forbidden in public LoRA"
-        )
+    _assert_adapter_tensor_keys(keys)
 
 
 def _copy_checkpoint(checkpoint: Path, destination: Path) -> None:
@@ -141,13 +165,16 @@ def _selected_metric(metrics: Mapping[str, Any]) -> Mapping[str, Any]:
 def _assert_metrics_match(
     expected: Mapping[str, Any], actual: Mapping[str, Any]
 ) -> None:
-    for dataset in ("canonical", "alias"):
-        for metric in ("next_token_accuracy", "generation_accuracy"):
-            if float(expected[dataset][metric]) != float(actual[dataset][metric]):
-                raise TrainingToolError(
-                    f"Regression mismatch for {dataset}.{metric}: "
-                    f"expected {expected[dataset][metric]}, got {actual[dataset][metric]}"
-                )
+    for field in REGRESSION_METRIC_FIELDS:
+        if field not in expected or field not in actual:
+            raise TrainingToolError(
+                f"Regression metric is missing required field: {field}"
+            )
+        if expected[field] != actual[field]:
+            raise TrainingToolError(
+                f"Regression mismatch for {field}: expected {expected[field]!r}, "
+                f"got {actual[field]!r}"
+            )
 
 
 def _model_card(
@@ -266,6 +293,39 @@ def _public_file_list(staging: Path) -> list[str]:
     )
 
 
+def _assert_remote_file_set(
+    remote_files: Sequence[str],
+    staged_files: Sequence[str],
+    *,
+    require_complete: bool,
+) -> None:
+    remote = set(remote_files)
+    staged = set(staged_files)
+    unexpected = sorted(remote - staged - HUB_MANAGED_REMOTE_FILES)
+    if unexpected:
+        raise TrainingToolError(
+            "Destination repository contains unexpected files; refusing to expose "
+            f"or preserve stale content: {unexpected}"
+        )
+    if require_complete:
+        missing = sorted(staged - remote)
+        if missing:
+            raise TrainingToolError(
+                f"Uploaded repository is missing staged files: {missing}"
+            )
+
+
+def _make_repository_public(api: Any, repo_id: str) -> None:
+    info = api.model_info(repo_id=repo_id)
+    if getattr(info, "private", None) is True:
+        api.update_repo_settings(repo_id=repo_id, private=False)
+        info = api.model_info(repo_id=repo_id)
+    if getattr(info, "private", None) is not False:
+        raise TrainingToolError(
+            "Hugging Face did not confirm that the destination repository is public"
+        )
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     args = parse_args(argv)
     if not args.public:
@@ -287,6 +347,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         raise TrainingToolError("Run must be evaluated before publication")
     if not metrics.get("acceptance_passed"):
         raise TrainingToolError("Canonical acceptance threshold was not reached")
+    if metrics.get("schema_version") != METRICS_SCHEMA_VERSION:
+        raise TrainingToolError(
+            "Metrics schema is outdated; rerun scripts/evaluate.py before publication"
+        )
     token = os.environ.get("HF_TOKEN")
     if not args.dry_run and not token:
         raise TrainingToolError("HF_TOKEN must be injected as a cloud secret")
@@ -351,12 +415,20 @@ def main(argv: Sequence[str] | None = None) -> int:
                 "huggingface-hub is required for publication"
             ) from error
         api = HfApi(token=token)
+        # A new repository stays private until its complete staged contents have been
+        # uploaded and read back. For an existing repository, create_repo does not
+        # change visibility.
         api.create_repo(
             repo_id=args.repo_id,
             repo_type="model",
-            private=False,
+            private=True,
             exist_ok=True,
         )
+        remote_before = api.list_repo_files(
+            repo_id=args.repo_id,
+            repo_type="model",
+        )
+        _assert_remote_file_set(remote_before, files, require_complete=False)
         commit = api.upload_folder(
             repo_id=args.repo_id,
             repo_type="model",
@@ -366,6 +438,12 @@ def main(argv: Sequence[str] | None = None) -> int:
             ),
         )
         revision = getattr(commit, "oid", None) or "main"
+        remote_after = api.list_repo_files(
+            repo_id=args.repo_id,
+            repo_type="model",
+            revision=revision,
+        )
+        _assert_remote_file_set(remote_after, files, require_complete=True)
         download_dir = Path(temp) / "downloaded"
         downloaded = Path(
             snapshot_download(
@@ -377,10 +455,13 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
         )
         _assert_adapter_only(downloaded)
+        for epoch in expected_epochs:
+            _assert_adapter_only(downloaded / "adapters" / f"epoch-{epoch}")
         readback, _ = evaluate_adapter(
             downloaded, selected_epoch, config, manifest, bundle
         )
         _assert_metrics_match(selected, readback)
+        _make_repository_public(api, args.repo_id)
 
     receipt = {
         "published_at": utc_now(),
